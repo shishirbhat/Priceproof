@@ -1,0 +1,28 @@
+{
+  "_PLACEHOLDER": true,
+  "_INSTRUCTIONS": "Replace this ENTIRE file with the real JSON array returned by your Bright Data Scraper Studio test run. Do not merge with it — overwrite it.",
+  "_WARNING": "The shape below is an illustrative guess, NOT real collector output. The actual field names produced by your collector WILL differ. Nothing should be built against these names.",
+  "_HOW_TO_GET_THE_REAL_THING": [
+    "Option A: In Scraper Studio, open your collector, run it against the three demo product URLs, then copy the results from the output/preview pane (or use the download button).",
+    "Option B: Clone https://github.com/brightdata/bright-data-scraper-studio-python-project, set BRIGHT_DATA_API_TOKEN and BRIGHT_DATA_COLLECTOR_ID in .env, run `python index.py`, and copy the generated scraper_studio_results_<timestamp>.json file over this one."
+  ],
+  "_WHAT_THE_REAL_FILE_LOOKS_LIKE": "A JSON array at the top level, one object per input URL. Not an object like this one.",
+
+  "example_shape_do_not_trust_these_names": [
+    {
+      "url": "https://ecommerce-shop-brd.vercel.app/product/echo-portable-speaker",
+      "title": "<product title>",
+      "brand": "<brand>",
+      "sku": "<sku or model number>",
+      "gtin": "<gtin / ean / upc, if the page exposes one>",
+      "price": "<current selling price, as a number>",
+      "original_price": "<struck-through / list / MRP price, as a number, or null>",
+      "currency": "<currency code>",
+      "discount_percent": "<discount percentage, if displayed>",
+      "in_stock": "<true or false>",
+      "scarcity_text": "<e.g. 'Only 3 left', if shown>",
+      "seller": "<seller or store name>",
+      "image_url": "<main product image url>"
+    }
+  ]
+}
