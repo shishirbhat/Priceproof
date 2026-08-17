@@ -22,3 +22,8 @@ venv/
 .DS_Store
 .vscode/
 .idea/
+
+# Frontend / build tooling
+.vercel/
+.turbo/
+coverage/
