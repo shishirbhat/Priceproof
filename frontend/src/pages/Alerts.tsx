@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { QueryState } from "@/components/domain/QueryState";
+import { PageHeader } from "@/components/domain/PageHeader";
+import { FadeIn } from "@/components/domain/FadeIn";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,21 +48,19 @@ export function Alerts() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Alerts</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          In-app delivery. Rule evaluation runs against the append-only snapshot history, same as
-          every other feature.
-        </p>
-      </div>
+      <PageHeader
+        title="Alerts"
+        description="In-app delivery. Rule evaluation runs against the append-only snapshot history, same as every other feature."
+      />
 
+      <FadeIn>
       <Card className="gap-3 p-5">
-        <h2 className="text-sm font-medium">New alert rule</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight">New alert rule</h2>
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-xs text-muted-foreground">
             Product
             <select
-              className="h-9 rounded-md border border-input bg-transparent px-2 text-sm"
+              className="h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-sm transition-colors hover:bg-white/[0.05] focus:border-white/20 focus:outline-none"
               value={storeProductId}
               onChange={(e) => setStoreProductId(e.target.value)}
             >
@@ -75,7 +75,7 @@ export function Alerts() {
           <label className="flex flex-col gap-1 text-xs text-muted-foreground">
             Rule
             <select
-              className="h-9 rounded-md border border-input bg-transparent px-2 text-sm"
+              className="h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-sm transition-colors hover:bg-white/[0.05] focus:border-white/20 focus:outline-none"
               value={ruleType}
               onChange={(e) => setRuleType(e.target.value)}
             >
@@ -107,9 +107,11 @@ export function Alerts() {
           </Button>
         </div>
       </Card>
+      </FadeIn>
 
+      <FadeIn delay={0.05}>
       <Card className="gap-3 p-5">
-        <h2 className="text-sm font-medium">Active rules</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight">Active rules</h2>
         <QueryState
           isLoading={alerts.isLoading}
           error={alerts.error}
@@ -119,11 +121,14 @@ export function Alerts() {
           emptyDescription="Create one above — it'll evaluate against every new snapshot."
         >
           {(rows) => (
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-white/[0.05]">
               {rows
                 .filter((a) => a.is_active)
                 .map((a) => (
-                  <li key={a.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                  <li
+                    key={a.id}
+                    className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 text-sm transition-colors hover:bg-white/[0.03]"
+                  >
                     <div>
                       <span className="font-medium">{a.title}</span>{" "}
                       <span className="text-muted-foreground">
@@ -145,6 +150,7 @@ export function Alerts() {
           )}
         </QueryState>
       </Card>
+      </FadeIn>
     </div>
   );
 }

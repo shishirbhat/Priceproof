@@ -138,11 +138,14 @@
     --chart-scale-05: oklch(0.75 0.15 235);
     --chart-scale-pattern-color: oklch(0.11 0 0);
 
-    --severity-violation: oklch(0.62 0.21 25);
+    /* Validated status palette (dataviz skill reference palette) — tested
+       for dark-surface contrast and distinctness from the categorical chart
+       slots, not eyeballed. */
+    --severity-violation: #e0524f;      /* critical, lightened from #d03b3b for AA on card bg */
     --severity-violation-foreground: oklch(0.98 0 0);
-    --severity-genuine: oklch(0.68 0.16 150);
+    --severity-genuine: #23c552;        /* good, lightened from #0ca30c for dark-surface legibility */
     --severity-genuine-foreground: oklch(0.1 0.03 150);
-    --severity-drift: oklch(0.78 0.15 80);
+    --severity-drift: #fab219;          /* warning */
     --severity-drift-foreground: oklch(0.15 0.03 80);
 }
 
@@ -206,10 +209,57 @@
   html {
     @apply font-sans;
     }
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
+  }
 }
 
 /* Figures get tabular numerals everywhere by default — a price ticking up
    or down should never reflow its neighbors. */
 .font-mono, [data-numeric] {
   font-variant-numeric: tabular-nums;
+}
+
+/* Depth: a flat #000 background reads as an unfinished template. Two soft
+   radial glows (anchored top-left / bottom-right, far below saturation
+   that would compete with the severity colors) plus a hairline-fine grain
+   texture give the page plane the depth a premium dark UI needs, at a cost
+   of one fixed background-image — no runtime work. */
+body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(1200px 700px at 12% -15%, oklch(0.72 0.14 235 / 0.22), transparent 60%),
+    radial-gradient(1000px 600px at 105% 5%, oklch(0.68 0.18 320 / 0.14), transparent 55%),
+    radial-gradient(900px 600px at 45% 115%, oklch(0.72 0.13 165 / 0.10), transparent 60%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Layered shadow tokens — a single flat box-shadow reads cheap. Real depth
+   is a tight contact shadow plus a soft ambient one. */
+.shadow-elevate {
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.4),
+    0 8px 24px -8px oklch(0 0 0 / 0.5),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.04);
+}
+.shadow-elevate-lg {
+  box-shadow:
+    0 2px 4px oklch(0 0 0 / 0.4),
+    0 16px 40px -12px oklch(0 0 0 / 0.6),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.05);
 }

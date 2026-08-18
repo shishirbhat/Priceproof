@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import { QueryState, ListRowSkeleton } from "@/components/domain/QueryState";
 import { SeededBadge } from "@/components/domain/SeededBadge";
+import { PageHeader } from "@/components/domain/PageHeader";
+import { FadeIn } from "@/components/domain/FadeIn";
 import { Card } from "@/components/ui/card";
 
 function formatCurrency(v: string | number) {
@@ -14,13 +16,10 @@ export function MapViolations() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">MAP Violations</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Products currently priced below their brand-set Minimum Advertised Price floor, ranked by
-          how far below floor they are.
-        </p>
-      </div>
+      <PageHeader
+        title="MAP Violations"
+        description="Products currently priced below their brand-set Minimum Advertised Price floor, ranked by how far below floor they are."
+      />
 
       <QueryState
         isLoading={violations.isLoading}
@@ -33,36 +32,45 @@ export function MapViolations() {
       >
         {(rows) => (
           <div className="space-y-3">
-            {rows.map((r) => (
-              <Card key={r.id} className="flex-row items-center justify-between gap-4 p-4">
-                <div className="flex items-center gap-3">
-                  {r.image_url && (
-                    <img src={r.image_url} alt="" className="h-10 w-10 rounded-md border border-border object-cover" />
-                  )}
-                  <div>
-                    <Link to={`/products/${r.product_id}`} className="text-sm font-medium hover:underline">
-                      {r.title}
-                    </Link>
-                    <div className="text-xs text-muted-foreground">
-                      {r.store_name}
-                      {r.is_seeded && <SeededBadge isSeeded className="ml-2" />}
+            {rows.map((r, i) => (
+              <FadeIn key={r.id} delay={i * 0.05}>
+                <Card className="flex-row items-center justify-between gap-4 p-4">
+                  <div className="flex items-center gap-3">
+                    {r.image_url && (
+                      <img
+                        src={r.image_url}
+                        alt=""
+                        className="h-11 w-11 rounded-lg border border-white/[0.08] object-cover"
+                      />
+                    )}
+                    <div>
+                      <Link
+                        to={`/products/${r.product_id}`}
+                        className="text-sm font-medium transition-colors hover:text-foreground/80"
+                      >
+                        {r.title}
+                      </Link>
+                      <div className="text-xs text-muted-foreground">
+                        {r.store_name}
+                        {r.is_seeded && <SeededBadge isSeeded className="ml-2" />}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-6 text-right">
-                  <div>
-                    <div className="text-xs text-muted-foreground">Current</div>
-                    <div className="font-mono text-sm tabular-nums">{formatCurrency(r.current_price)}</div>
+                  <div className="flex items-center gap-6 text-right">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Current</div>
+                      <div className="font-mono text-sm tabular-nums">{formatCurrency(r.current_price)}</div>
+                    </div>
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Floor</div>
+                      <div className="font-mono text-sm tabular-nums">{formatCurrency(r.floor_price)}</div>
+                    </div>
+                    <span className="rounded-full border border-severity-violation/25 bg-severity-violation/10 px-2.5 py-1 text-xs font-medium text-severity-violation shadow-[0_0_12px_-4px] shadow-severity-violation/40">
+                      {r.pct_below_floor}% below
+                    </span>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Floor</div>
-                    <div className="font-mono text-sm tabular-nums">{formatCurrency(r.floor_price)}</div>
-                  </div>
-                  <span className="rounded-full border border-severity-violation/30 bg-severity-violation/15 px-2.5 py-1 text-xs font-medium text-severity-violation">
-                    {r.pct_below_floor}% below
-                  </span>
-                </div>
-              </Card>
+                </Card>
+              </FadeIn>
             ))}
           </div>
         )}

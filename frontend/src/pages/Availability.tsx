@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import { QueryState, ListRowSkeleton } from "@/components/domain/QueryState";
 import { SeededBadge } from "@/components/domain/SeededBadge";
+import { PageHeader } from "@/components/domain/PageHeader";
+import { FadeIn } from "@/components/domain/FadeIn";
 import { Card } from "@/components/ui/card";
 import { PackageCheck, PackageX } from "lucide-react";
 
@@ -30,17 +32,14 @@ export function Availability() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Availability &amp; Stockouts</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Live stockout/restock feed and availability rate by store and category. Restock gaps are
-          measured to the ingest cadence — daily for seeded history, tighter once live collection runs
-          more frequently.
-        </p>
-      </div>
+      <PageHeader
+        title="Availability & Stockouts"
+        description="Live stockout/restock feed and availability rate by store and category. Restock gaps are measured to the ingest cadence — daily for seeded history, tighter once live collection runs more frequently."
+      />
 
+      <FadeIn>
       <Card className="gap-3 p-5">
-        <h2 className="text-sm font-medium">Availability rate by store &amp; category</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight">Availability rate by store &amp; category</h2>
         <QueryState
           isLoading={rate.isLoading}
           error={rate.error}
@@ -68,10 +67,11 @@ export function Availability() {
           )}
         </QueryState>
       </Card>
+      </FadeIn>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="gap-3 p-5">
-          <h2 className="text-sm font-medium">Live stockout/restock feed</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight">Live stockout/restock feed</h2>
           <QueryState
             isLoading={events.isLoading}
             error={events.error}
@@ -81,7 +81,7 @@ export function Availability() {
             skeleton={<ListRowSkeleton rows={6} />}
           >
             {(rows) => (
-              <ul className="divide-y divide-border">
+              <ul className="divide-y divide-white/[0.05]">
                 {rows.slice(0, 15).map((e) => (
                   <li key={e.id} className="flex items-center justify-between gap-3 py-2 text-sm">
                     <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export function Availability() {
                       ) : (
                         <PackageX className="h-4 w-4 shrink-0 text-severity-violation" />
                       )}
-                      <Link to={`/products/${e.product_id}`} className="hover:underline">
+                      <Link to={`/products/${e.product_id}`} className="transition-colors hover:text-foreground/80">
                         {e.title}
                       </Link>
                       {e.is_seeded && <SeededBadge isSeeded />}
@@ -106,14 +106,14 @@ export function Availability() {
         </Card>
 
         <Card className="gap-3 p-5">
-          <h2 className="text-sm font-medium">Time to restock</h2>
+          <h2 className="text-[13px] font-semibold tracking-tight">Time to restock</h2>
           {restocks.length === 0 ? (
             <p className="text-xs text-muted-foreground">No restock events recorded yet.</p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-white/[0.05]">
               {restocks.slice(0, 15).map((e) => (
                 <li key={e.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                  <Link to={`/products/${e.product_id}`} className="hover:underline">
+                  <Link to={`/products/${e.product_id}`} className="transition-colors hover:text-foreground/80">
                     {e.title}
                   </Link>
                   <span className="font-mono text-xs tabular-nums text-muted-foreground">

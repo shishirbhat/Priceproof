@@ -3,9 +3,11 @@ import { Sidebar } from "./Sidebar";
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-svh bg-background text-foreground">
+    <div className="flex min-h-svh text-foreground">
       <Sidebar />
-      <main className="min-w-0 flex-1 overflow-x-hidden px-8 py-6">{children}</main>
+      <main className="min-w-0 flex-1 overflow-x-hidden px-10 py-8">
+        <div className="mx-auto max-w-[1400px]">{children}</div>
+      </main>
     </div>
   );
 }

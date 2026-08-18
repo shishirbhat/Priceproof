@@ -2,8 +2,12 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { QueryState, TableSkeleton } from "@/components/domain/QueryState";
+import { PageHeader } from "@/components/domain/PageHeader";
+import { FadeIn } from "@/components/domain/FadeIn";
+import { StatTile } from "@/components/domain/StatTile";
 import { Card } from "@/components/ui/card";
 import { Gauge } from "@/components/charts/gauge";
+import { Layers, ListTree } from "lucide-react";
 
 // Bright Data free tier ceiling stated for this hackathon: ~5K page loads.
 const PAGE_LOAD_BUDGET = 5000;
@@ -15,10 +19,10 @@ function formatDuration(seconds: number | null) {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  ready: "bg-severity-genuine/15 text-severity-genuine border-severity-genuine/30",
-  building: "bg-severity-drift/15 text-severity-drift border-severity-drift/30",
+  ready: "bg-severity-genuine/10 text-severity-genuine border-severity-genuine/25",
+  building: "bg-severity-drift/10 text-severity-drift border-severity-drift/25",
   pending: "bg-muted text-muted-foreground border-border",
-  failed: "bg-severity-violation/15 text-severity-violation border-severity-violation/30",
+  failed: "bg-severity-violation/10 text-severity-violation border-severity-violation/25",
 };
 
 export function ScraperHealth() {
@@ -44,49 +48,43 @@ export function ScraperHealth() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Scraper Health</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Every Bright Data Scraper Studio run, its field coverage over time, and the credit/page-load
-          budget — the evidence that the platform is doing real work, including recovering when a
-          target site changes under it.
-        </p>
-      </div>
+      <PageHeader
+        title="Scraper Health"
+        description="Every Bright Data Scraper Studio run, its field coverage over time, and the credit/page-load budget — the evidence that the platform is doing real work, including recovering when a target site changes under it."
+      />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="items-center gap-2 p-5">
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Page-load budget
-          </span>
-          <Gauge
-            orientation="arc"
-            value={Math.min(100, (totalPageLoads / PAGE_LOAD_BUDGET) * 100)}
-            centerValue={totalPageLoads}
-            defaultLabel={`of ${PAGE_LOAD_BUDGET.toLocaleString()} loads`}
-            width={180}
-            height={120}
-          />
-        </Card>
-        <Card className="justify-center gap-1 p-5">
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Collections run
-          </span>
-          <span className="font-mono text-3xl font-semibold tabular-nums">
-            {collections.data?.length ?? "—"}
-          </span>
-        </Card>
-        <Card className="justify-center gap-1 p-5">
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Fields tracked
-          </span>
-          <span className="font-mono text-3xl font-semibold tabular-nums">
-            {latestCoverageByField.length || "—"}
-          </span>
-        </Card>
+        <FadeIn>
+          <Card className="items-center gap-2 p-5">
+            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Page-load budget
+            </span>
+            <Gauge
+              orientation="arc"
+              value={Math.min(100, (totalPageLoads / PAGE_LOAD_BUDGET) * 100)}
+              centerValue={totalPageLoads}
+              defaultLabel={`of ${PAGE_LOAD_BUDGET.toLocaleString()} loads`}
+              width={180}
+              height={120}
+            />
+          </Card>
+        </FadeIn>
+        <StatTile
+          label="Collections run"
+          value={collections.data?.length ?? "—"}
+          icon={<Layers className="h-3.5 w-3.5" />}
+          delay={0.05}
+        />
+        <StatTile
+          label="Fields tracked"
+          value={latestCoverageByField.length || "—"}
+          icon={<ListTree className="h-3.5 w-3.5" />}
+          delay={0.1}
+        />
       </div>
 
       <Card className="gap-3 p-5">
-        <h2 className="text-sm font-medium">Field coverage — most recent run</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight">Field coverage — most recent run</h2>
         <QueryState
           isLoading={coverage.isLoading}
           error={coverage.error}
@@ -122,7 +120,7 @@ export function ScraperHealth() {
       </Card>
 
       <Card className="gap-3 p-5">
-        <h2 className="text-sm font-medium">Collection runs</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight">Collection runs</h2>
         <QueryState
           isLoading={collections.isLoading}
           error={collections.error}
@@ -146,7 +144,7 @@ export function ScraperHealth() {
               </thead>
               <tbody className="font-mono">
                 {rows.map((c) => (
-                  <tr key={c.id} className="border-t border-border">
+                  <tr key={c.id} className="border-t border-white/[0.05] transition-colors hover:bg-white/[0.02]">
                     <td className="py-1.5 pr-4">{c.store_name}</td>
                     <td className="py-1.5 pr-4 text-muted-foreground">
                       {new Date(c.triggered_at).toLocaleString()}

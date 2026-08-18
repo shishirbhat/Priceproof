@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import { QueryState, TableSkeleton } from "@/components/domain/QueryState";
+import { PageHeader } from "@/components/domain/PageHeader";
+import { FadeIn } from "@/components/domain/FadeIn";
 import { Card } from "@/components/ui/card";
 
 function formatCurrency(v: string | number) {
@@ -35,19 +37,21 @@ export function CompetitiveLandscape() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Competitive Landscape</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Matched products across every tracked store, sorted by the widest current price spread.
-          {stores.length <= 1 && (
-            <span className="text-severity-drift">
-              {" "}
-              Only one store is currently tracked ({stores[0] ?? "none"}) — spreads will populate once a
-              second store is added in Catalog Management.
-            </span>
-          )}
-        </p>
-      </div>
+      <PageHeader
+        title="Competitive Landscape"
+        description={
+          <>
+            Matched products across every tracked store, sorted by the widest current price spread.
+            {stores.length <= 1 && (
+              <span className="text-severity-drift">
+                {" "}
+                Only one store is currently tracked ({stores[0] ?? "none"}) — spreads will populate once a
+                second store is added in Catalog Management.
+              </span>
+            )}
+          </>
+        }
+      />
 
       <QueryState
         isLoading={products.isLoading}
@@ -58,9 +62,10 @@ export function CompetitiveLandscape() {
         skeleton={<TableSkeleton rows={6} cols={3} />}
       >
         {(rows) => (
+          <FadeIn>
           <Card className="gap-0 overflow-x-auto p-0">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-border text-xs text-muted-foreground">
+              <thead className="border-b border-white/[0.06] text-xs text-muted-foreground">
                 <tr>
                   <th className="p-3 font-medium">Product</th>
                   {stores.map((s) => (
@@ -76,9 +81,15 @@ export function CompetitiveLandscape() {
                   const prices = stores.map((s) => r.cells.get(s));
                   const min = Math.min(...prices.filter(Boolean).map((c) => Number(c!.current_price)));
                   return (
-                    <tr key={r.productId} className="border-b border-border last:border-0">
+                    <tr
+                      key={r.productId}
+                      className="border-b border-white/[0.05] transition-colors last:border-0 hover:bg-white/[0.02]"
+                    >
                       <td className="p-3">
-                        <Link to={`/products/${r.productId}`} className="font-medium hover:underline">
+                        <Link
+                          to={`/products/${r.productId}`}
+                          className="font-medium transition-colors hover:text-foreground/80"
+                        >
                           {r.title}
                         </Link>
                       </td>
@@ -109,6 +120,7 @@ export function CompetitiveLandscape() {
               </tbody>
             </table>
           </Card>
+          </FadeIn>
         )}
       </QueryState>
     </div>

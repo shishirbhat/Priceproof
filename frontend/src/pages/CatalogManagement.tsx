@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { QueryState } from "@/components/domain/QueryState";
+import { PageHeader } from "@/components/domain/PageHeader";
+import { FadeIn } from "@/components/domain/FadeIn";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
@@ -23,23 +25,20 @@ export function CatalogManagement() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Catalog Management</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Stores and tracked products driving the pipeline. Every scrape goes through Bright Data
-          Scraper Studio — this page shows the collector each store is wired to and lets you fire a
-          manual collection.
-        </p>
-      </div>
+      <PageHeader
+        title="Catalog Management"
+        description="Stores and tracked products driving the pipeline. Every scrape goes through Bright Data Scraper Studio — this page shows the collector each store is wired to and lets you fire a manual collection."
+      />
 
       {triggerError && (
-        <div className="rounded-lg border border-severity-violation/30 bg-severity-violation/10 px-3 py-2 text-xs text-severity-violation">
+        <div className="rounded-lg border border-severity-violation/25 bg-severity-violation/10 px-3 py-2 text-xs text-severity-violation">
           {triggerError} — check BRIGHT_DATA_API_TOKEN is set in backend/.env.
         </div>
       )}
 
+      <FadeIn>
       <Card className="gap-3 p-5">
-        <h2 className="text-sm font-medium">Stores</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight">Stores</h2>
         <QueryState
           isLoading={stores.isLoading}
           error={stores.error}
@@ -49,7 +48,7 @@ export function CatalogManagement() {
         >
           {(rows) => (
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-border text-xs text-muted-foreground">
+              <thead className="border-b border-white/[0.06] text-xs text-muted-foreground">
                 <tr>
                   <th className="py-2 pr-4 font-medium">Store</th>
                   <th className="py-2 pr-4 font-medium">Collector ID</th>
@@ -60,7 +59,7 @@ export function CatalogManagement() {
               </thead>
               <tbody>
                 {rows.map((s) => (
-                  <tr key={s.id} className="border-b border-border last:border-0">
+                  <tr key={s.id} className="border-b border-white/[0.05] transition-colors last:border-0 hover:bg-white/[0.02]">
                     <td className="py-2 pr-4">
                       <div className="font-medium">{s.name}</div>
                       <a
@@ -95,9 +94,11 @@ export function CatalogManagement() {
           )}
         </QueryState>
       </Card>
+      </FadeIn>
 
+      <FadeIn delay={0.05}>
       <Card className="gap-3 p-5">
-        <h2 className="text-sm font-medium">Tracked products</h2>
+        <h2 className="text-[13px] font-semibold tracking-tight">Tracked products</h2>
         <QueryState
           isLoading={products.isLoading}
           error={products.error}
@@ -117,7 +118,7 @@ export function CatalogManagement() {
               </thead>
               <tbody>
                 {rows.map((p) => (
-                  <tr key={p.store_product_id} className="border-t border-border">
+                  <tr key={p.store_product_id} className="border-t border-white/[0.05] transition-colors hover:bg-white/[0.02]">
                     <td className="py-1.5 pr-4">{p.title}</td>
                     <td className="py-1.5 pr-4 text-muted-foreground">{p.store_name}</td>
                     <td className="py-1.5 pr-4 text-muted-foreground">{p.region_code || "—"}</td>
@@ -135,6 +136,7 @@ export function CatalogManagement() {
           )}
         </QueryState>
       </Card>
+      </FadeIn>
     </div>
   );
 }
