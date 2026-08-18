@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 
-const SECTIONS = ["hero", "proof", "stats", "features", "how", "cta"];
+const SECTIONS = ["hero", "showcase", "proof", "stats", "features", "how", "cta"];
 
 export function ScrollDots() {
   const [active, setActive] = useState(0);

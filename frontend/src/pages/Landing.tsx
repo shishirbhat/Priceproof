@@ -174,6 +174,42 @@ export function Landing() {
         </motion.div>
       </section>
 
+      {/* PRODUCT SHOWCASE — a real, live iframe of the dashboard, not a screenshot */}
+      <section id="showcase" className="px-6 py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 40, rotateX: 4 }}
+          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-5xl [perspective:1600px]"
+        >
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-elevate-lg">
+            <div className="flex items-center gap-2 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
+              <div className="flex gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-severity-violation/50" />
+                <span className="h-2.5 w-2.5 rounded-full bg-severity-drift/50" />
+                <span className="h-2.5 w-2.5 rounded-full bg-severity-genuine/50" />
+              </div>
+              <div className="mx-auto flex items-center gap-1.5 rounded-md bg-white/[0.04] px-3 py-1 font-mono text-[11px] text-muted-foreground">
+                priceproof.app
+              </div>
+            </div>
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-background">
+              <iframe
+                src="/"
+                title="PriceProof live dashboard"
+                className="h-[125%] w-[125%] origin-top-left scale-[0.8] border-0"
+                loading="lazy"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+            </div>
+          </div>
+          <p className="mt-4 text-center font-mono text-[11px] tracking-wider text-muted-foreground">
+            THIS IS THE REAL DASHBOARD, LIVE — NOT A MOCKUP
+          </p>
+        </motion.div>
+      </section>
+
       {/* PROOF STATEMENT */}
       <section id="proof" className="px-6 py-40">
         <div className="mx-auto max-w-4xl">
