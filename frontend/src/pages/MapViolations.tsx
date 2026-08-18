@@ -17,6 +17,7 @@ export function MapViolations() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="// 05 MAP VIOLATIONS"
         title="MAP Violations"
         description="Products currently priced below their brand-set Minimum Advertised Price floor, ranked by how far below floor they are."
       />

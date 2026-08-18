@@ -38,6 +38,7 @@ export function CompetitiveLandscape() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="// 03 COMPETITIVE LANDSCAPE"
         title="Competitive Landscape"
         description={
           <>

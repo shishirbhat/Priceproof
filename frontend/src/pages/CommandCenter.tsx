@@ -32,6 +32,7 @@ export function CommandCenter() {
   return (
     <div className="space-y-8">
       <PageHeader
+        eyebrow="// 01 COMMAND CENTER"
         title="Command Center"
         description="Live read on price integrity, availability, and compliance across every tracked store."
       />

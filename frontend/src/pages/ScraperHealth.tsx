@@ -5,6 +5,7 @@ import { QueryState, TableSkeleton } from "@/components/domain/QueryState";
 import { PageHeader } from "@/components/domain/PageHeader";
 import { FadeIn } from "@/components/domain/FadeIn";
 import { StatTile } from "@/components/domain/StatTile";
+import { AnimatedBar } from "@/components/domain/AnimatedBar";
 import { Card } from "@/components/ui/card";
 import { Gauge } from "@/components/charts/gauge";
 import { Layers, ListTree } from "lucide-react";
@@ -49,6 +50,7 @@ export function ScraperHealth() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="// 07 SCRAPER HEALTH"
         title="Scraper Health"
         description="Every Bright Data Scraper Studio run, its field coverage over time, and the credit/page-load budget — the evidence that the platform is doing real work, including recovering when a target site changes under it."
       />
@@ -96,18 +98,17 @@ export function ScraperHealth() {
         >
           {(rows) => (
             <ul className="space-y-2">
-              {rows.map((r) => {
+              {rows.map((r, i) => {
                 const pct = r.total_count > 0 ? Math.round((r.present_count / r.total_count) * 100) : 0;
                 const degraded = pct < 100;
                 return (
                   <li key={r.field_name} className="flex items-center gap-3">
                     <span className="w-40 shrink-0 truncate font-mono text-xs">{r.field_name}</span>
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={degraded ? "h-full bg-severity-drift" : "h-full bg-severity-genuine"}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
+                    <AnimatedBar
+                      pct={pct}
+                      delay={i * 40}
+                      className={degraded ? "bg-severity-drift" : "bg-severity-genuine"}
+                    />
                     <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-muted-foreground">
                       {r.present_count}/{r.total_count}
                     </span>

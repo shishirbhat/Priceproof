@@ -8,14 +8,13 @@ import { PageHeader } from "@/components/domain/PageHeader";
 import { FadeIn } from "@/components/domain/FadeIn";
 import { QueryState, ChartSkeleton, ListRowSkeleton } from "@/components/domain/QueryState";
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
+import { AnimatedNumber } from "@/components/domain/AnimatedNumber";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight, ShieldCheck, ShieldX, ShieldQuestion } from "lucide-react";
 
-function formatCurrency(v: string | number) {
-  return `$${Number(v).toFixed(2)}`;
-}
+const currencyFmt = (n: number) => `$${n.toFixed(2)}`;
 
 const FILTERS: Array<{ key: IntegrityVerdict | "ALL"; label: string }> = [
   { key: "ALL", label: "All" },
@@ -98,7 +97,7 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
               Selling price
             </div>
             <div className="mt-1 text-2xl font-semibold tracking-tight">
-              {formatCurrency(row.current_price)}
+              <AnimatedNumber value={Number(row.current_price)} format={currencyFmt} />
             </div>
           </div>
           <div className="px-4 py-3">
@@ -106,7 +105,7 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
               Claimed "was" price
             </div>
             <div className="mt-1 text-2xl font-semibold tracking-tight text-severity-violation">
-              {formatCurrency(row.list_price)}
+              <AnimatedNumber value={Number(row.list_price)} format={currencyFmt} />
             </div>
           </div>
           <div className="px-4 py-3">
@@ -114,7 +113,11 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
               True 30-day low
             </div>
             <div className="mt-1 text-2xl font-semibold tracking-tight">
-              {row.true_30d_low != null ? formatCurrency(row.true_30d_low) : "—"}
+              {row.true_30d_low != null ? (
+                <AnimatedNumber value={Number(row.true_30d_low)} format={currencyFmt} />
+              ) : (
+                "—"
+              )}
             </div>
           </div>
         </div>
@@ -158,6 +161,7 @@ export function PriceIntegrity() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="// 02 PRICE INTEGRITY"
         title="Price Integrity"
         description="Every advertised discount, checked against the true lowest price charged in the 30 days before the claim — the EU Omnibus / UK CMA / India CCPA standard. A verdict is only ever given with enough history to back it; otherwise it says so honestly."
       />

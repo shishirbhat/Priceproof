@@ -49,6 +49,7 @@ export function Alerts() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="// 06 ALERTS"
         title="Alerts"
         description="In-app delivery. Rule evaluation runs against the append-only snapshot history, same as every other feature."
       />

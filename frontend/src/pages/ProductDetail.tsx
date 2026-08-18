@@ -63,12 +63,13 @@ export function ProductDetail() {
                 <img
                   src={product.image_url}
                   alt=""
-                  className="h-16 w-16 rounded-xl border border-white/[0.08] object-cover shadow-elevate"
+                  className="h-20 w-20 rounded-xl border border-white/[0.08] object-cover shadow-elevate"
                 />
               )}
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">{product.title}</h1>
-                <div className="mt-1.5 flex gap-2 text-xs text-muted-foreground">
+                <div className="mb-1 font-mono text-[11px] tracking-widest text-brand">// PRODUCT DETAIL</div>
+                <h1 className="text-[2.25rem] font-bold leading-[1.05] tracking-tighter">{product.title}</h1>
+                <div className="mt-2 flex gap-2 text-xs text-muted-foreground">
                   {product.category && <span className="capitalize">{product.category}</span>}
                   {store_products.map((sp) => (
                     <span key={sp.id}>· {sp.store_name}</span>

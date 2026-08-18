@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { AnimatedNumber } from "./AnimatedNumber";
 
 interface StatTileProps {
   label: string;
@@ -66,7 +67,7 @@ export function StatTile({
         )}
       </div>
       <span className={cn("text-[2.25rem] leading-none font-semibold tracking-tight", TONE_TEXT[tone])}>
-        {value}
+        {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
       </span>
       {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
       {/* subtle top-edge sheen, like light catching a bevel */}

@@ -6,6 +6,7 @@ import { SeededBadge } from "@/components/domain/SeededBadge";
 import { PageHeader } from "@/components/domain/PageHeader";
 import { FadeIn } from "@/components/domain/FadeIn";
 import { Card } from "@/components/ui/card";
+import { AnimatedBar } from "@/components/domain/AnimatedBar";
 import { PackageCheck, PackageX } from "lucide-react";
 
 function formatDate(iso: string) {
@@ -33,6 +34,7 @@ export function Availability() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="// 04 AVAILABILITY"
         title="Availability & Stockouts"
         description="Live stockout/restock feed and availability rate by store and category. Restock gaps are measured to the ingest cadence — daily for seeded history, tighter once live collection runs more frequently."
       />
@@ -55,9 +57,7 @@ export function Availability() {
                   <span className="w-40 shrink-0 truncate text-xs">
                     {r.store_name} <span className="text-muted-foreground capitalize">· {r.category}</span>
                   </span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full bg-severity-genuine" style={{ width: `${r.availability_pct}%` }} />
-                  </div>
+                  <AnimatedBar pct={Number(r.availability_pct)} delay={i * 60} className="bg-severity-genuine" />
                   <span className="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-muted-foreground">
                     {r.availability_pct}%
                   </span>

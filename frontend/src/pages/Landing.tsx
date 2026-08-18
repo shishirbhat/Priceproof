@@ -6,6 +6,7 @@ import { ScrollReveal } from "@/components/landing/ScrollReveal";
 import { StatBlock } from "@/components/landing/StatBlock";
 import { ScrollDots } from "@/components/landing/ScrollDots";
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
+import { MagneticButton } from "@/components/domain/MagneticButton";
 
 const FEATURES = [
   {
@@ -72,12 +73,14 @@ function Nav() {
           <a href="#features" className="transition-colors hover:text-foreground">Features</a>
           <a href="#how" className="transition-colors hover:text-foreground">How it works</a>
         </nav>
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-brand to-brand/85 px-4 py-1.5 text-[13px] font-medium text-brand-foreground shadow-[0_1px_1px_oklch(1_0_0/0.3)_inset,0_4px_14px_-4px] shadow-brand/50 transition-transform hover:scale-105"
-        >
-          Enter dashboard <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+        <MagneticButton strength={0.4}>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-brand to-brand/85 px-4 py-1.5 text-[13px] font-medium text-brand-foreground shadow-[0_1px_1px_oklch(1_0_0/0.3)_inset,0_4px_14px_-4px] shadow-brand/50"
+          >
+            Enter dashboard <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </MagneticButton>
       </div>
     </motion.header>
   );
@@ -139,18 +142,22 @@ export function Landing() {
             transition={{ delay: 0.68, duration: 0.5 }}
             className="mt-9 flex items-center gap-4"
           >
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-brand to-brand/85 px-6 py-3 text-sm font-medium text-brand-foreground shadow-[0_1px_1px_oklch(1_0_0/0.3)_inset,0_8px_24px_-6px] shadow-brand/50 transition-transform hover:scale-105"
-            >
-              Enter dashboard <ArrowRight className="h-4 w-4" />
-            </Link>
-            <a
-              href="#how"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-medium transition-colors hover:bg-white/[0.04]"
-            >
-              See it catch one
-            </a>
+            <MagneticButton>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-brand to-brand/85 px-6 py-3 text-sm font-medium text-brand-foreground shadow-[0_1px_1px_oklch(1_0_0/0.3)_inset,0_8px_24px_-6px] shadow-brand/50"
+              >
+                Enter dashboard <ArrowRight className="h-4 w-4" />
+              </Link>
+            </MagneticButton>
+            <MagneticButton strength={0.25}>
+              <a
+                href="#how"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-medium transition-colors hover:bg-white/[0.04]"
+              >
+                See it catch one
+              </a>
+            </MagneticButton>
           </motion.div>
         </div>
 
@@ -288,12 +295,14 @@ export function Landing() {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="mt-10"
           >
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-medium text-white transition-transform hover:scale-105"
-            >
-              Enter dashboard <ArrowRight className="h-4 w-4" />
-            </Link>
+            <MagneticButton>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-medium text-white"
+              >
+                Enter dashboard <ArrowRight className="h-4 w-4" />
+              </Link>
+            </MagneticButton>
           </motion.div>
         </div>
       </section>

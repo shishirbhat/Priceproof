@@ -26,6 +26,7 @@ export function CatalogManagement() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="// 08 CATALOG"
         title="Catalog Management"
         description="Stores and tracked products driving the pipeline. Every scrape goes through Bright Data Scraper Studio — this page shows the collector each store is wired to and lets you fire a manual collection."
       />
