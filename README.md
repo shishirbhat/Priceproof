@@ -88,6 +88,10 @@ commit history for details.
 - No live Bright Data collection has run yet (needs
   `BRIGHT_DATA_API_TOKEN`) — Scraper Health is correctly empty, not
   broken.
-- Alert rules can be created but nothing evaluates them against new
-  snapshots yet (no cron/scheduler wired up) — `fired_count` will stay 0
-  until that's built.
+- Alert rules evaluate immediately on creation and again after every
+  ingest (seed or live collection) — `price_below`/`map_breach` fire on
+  every snapshot the condition holds (an honest append-only record, not
+  just the first breach), `back_in_stock` fires on the restock edge.
+  There's no standing scheduler independent of ingest — a rule only
+  re-checks when new data arrives, which is correct for this app (nothing
+  changes between scrapes) but worth knowing.

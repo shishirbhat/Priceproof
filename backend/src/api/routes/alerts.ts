@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { pool } from "../../db/client.js";
 import { ah } from "../async-handler.js";
+import { evaluateAlerts } from "../../worker/alert-evaluation.js";
 
 export const alertsRouter = Router();
 
@@ -35,6 +36,8 @@ alertsRouter.post(
        values ($1, $2, $3, $4) returning *`,
       [user_id ?? "demo-user", store_product_id, rule_type, threshold ?? null],
     );
+    // Reflect current state immediately rather than waiting for the next ingest.
+    await evaluateAlerts(pool);
     res.status(201).json(rows[0]);
   }),
 );

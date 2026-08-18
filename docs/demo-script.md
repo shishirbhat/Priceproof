@@ -68,10 +68,10 @@ with what Scraper Studio actually does, not just hitting an endpoint.
 - **Competitive Landscape** — honestly labeled as single-store right
   now; the matrix structure is built for N stores, just needs a second
   one wired in.
-- **Alerts** — create one live if there's time (product dropdown → rule
-  → threshold → Create). Note rule evaluation against new snapshots
-  isn't wired to a scheduler yet — say that up front, don't let a judge
-  find the gap.
+- **Alerts** — create one live (product dropdown → rule → threshold →
+  Create). Pick a product that's already breaching (e.g. Everyday Cotton
+  Tee + MAP breach) — it evaluates immediately on creation, so
+  "fired 1×" appears right after clicking Create, not after a wait.
 
 ## 5. Close (15s)
 

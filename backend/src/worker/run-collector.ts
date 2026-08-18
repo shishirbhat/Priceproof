@@ -3,6 +3,7 @@ import { pool } from "../db/client.js";
 import { triggerCollection, pollDataset, type TriggerInput } from "./brightdata-client.js";
 import { ingestRow } from "./ingest.js";
 import { recordFieldCoverage } from "./schema-drift.js";
+import { evaluateAlerts } from "./alert-evaluation.js";
 
 /**
  * Runs one collection for one store: trigger -> poll -> ingest -> record
@@ -75,7 +76,10 @@ export async function runCollectionForStore(storeId: number): Promise<void> {
       throw err;
     }
 
-    console.log(`store ${storeId}: ingested ${rows.length} rows from collection ${collectionId}`);
+    const fired = await evaluateAlerts(pool);
+    console.log(
+      `store ${storeId}: ingested ${rows.length} rows from collection ${collectionId}, ${fired} alert(s) fired`,
+    );
   } finally {
     client.release();
   }
