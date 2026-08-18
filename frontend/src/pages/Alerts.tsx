@@ -141,7 +141,12 @@ export function Alerts() {
                       <span className="font-mono text-xs text-muted-foreground">
                         fired {a.fired_count}×
                       </span>
-                      <Button size="sm" variant="ghost" onClick={() => remove.mutate(a.id)}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        aria-label={`Delete alert for ${a.title}`}
+                        onClick={() => remove.mutate(a.id)}
+                      >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
