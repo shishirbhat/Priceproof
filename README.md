@@ -60,6 +60,24 @@ npm run dev   # starts the UI on :5173, proxies /api to :3001
 
 Dashboard is at `/`, marketing landing page is at `/welcome`.
 
+## Deploying (frontend to Vercel, backend elsewhere)
+
+`frontend/` is a static Vite build — fine for Vercel. `backend/` is a
+long-running Express server with a Postgres pool and a background worker;
+it is **not** a Vercel serverless-shaped app, so it needs its own host
+(Render/Railway/Fly.io/a VPS — anything that runs `npm start` in
+`backend/` continuously). Two things had to be true before a static
+deploy would actually work, both already in place:
+
+- `frontend/vercel.json` — a catch-all rewrite to `index.html`. Without
+  it, a hard refresh or a direct link to any route other than `/` 404s on
+  Vercel (Vite's dev server fakes this locally, a plain static host
+  doesn't).
+- `frontend/src/lib/api.ts` reads `VITE_API_URL` and falls back to the
+  relative `/api` path used in dev. Set `VITE_API_URL` to wherever the
+  backend actually ends up hosted (e.g. `https://priceproof-api.onrender.com`)
+  as a Vercel project env var — unset, nothing changes locally.
+
 ## Design
 
 Dark-first, enterprise-data-terminal direction (Bloomberg/Linear, not a

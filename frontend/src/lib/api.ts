@@ -1,4 +1,8 @@
-const BASE = "/api";
+// In dev, "/api" is proxied to localhost:3001 by vite.config.ts. In a static
+// production deploy (e.g. Vercel) there's no dev proxy, so the backend's
+// real URL must be supplied via VITE_API_URL — falls back to the relative
+// path so nothing changes for local dev if it's unset.
+const BASE = `${import.meta.env.VITE_API_URL ?? ""}/api`;
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);
