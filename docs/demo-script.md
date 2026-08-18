@@ -1,8 +1,20 @@
 # Demo script
 
-~4-5 minutes. Never live-scrape during the demo — everything below runs
-against the seeded database. If you want to prove the pipeline is real,
-do that *before* the demo starts (`npm run collect`), not during it.
+~5-6 minutes with the landing page opener, ~4-5 without. Never live-scrape
+during the demo — everything below runs against the seeded database. If
+you want to prove the pipeline is real, do that *before* the demo starts
+(`npm run collect`), not during it.
+
+## 0. Landing page opener (45s, optional but strong)
+
+Open `/welcome` fresh (not a client-side nav — a real page load, so the
+preloader actually plays). Let the "N%" counter run, don't skip it — it's
+a 1.5s "arrival" moment, not dead air. Scroll through hero → the live
+dashboard showcase (point out it's a real `iframe` of the actual app, not
+a screenshot — "this can't go stale because it *is* the app") → the
+inflated-discount chart demo in "how it works" (same chart component the
+dashboard renders, canned data). End on the color-inverted CTA, click
+"Enter dashboard."
 
 ## 1. Command Center (30s)
 

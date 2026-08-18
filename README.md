@@ -58,6 +58,27 @@ npm install
 npm run dev   # starts the UI on :5173, proxies /api to :3001
 ```
 
+Dashboard is at `/`, marketing landing page is at `/welcome`.
+
+## Design
+
+Dark-first, enterprise-data-terminal direction (Bloomberg/Linear, not a
+consumer app) — see `frontend/src/index.css` for the token system
+(background depth via layered radial glow + grain, a validated status
+palette for severity states, one signature brand accent reserved for
+identity moments and kept out of data views on purpose).
+
+The landing page (`frontend/src/pages/Landing.tsx`,
+`frontend/src/components/landing/`) was built by directly studying four
+references — Prime Security's bold numbered lists and color-inverted CTA,
+Porsche Motorsport's glass nav, Aaron J. Cunningham's particle-field hero
+and magnetic cursor, and a branded percentage-counter preloader — then
+reassembled around PriceProof's own content and brand color rather than
+copied wholesale. Its "how it works" section renders the real
+`PriceHistoryChart` component (not a mockup) against a canned dataset, and
+the product-showcase section is a live `iframe` of the actual running
+dashboard, so neither can go stale.
+
 ## Self-healing scraper cron
 
 `.github/workflows/scrape-cron.yml` runs the real collection every 6 hours
@@ -93,20 +114,25 @@ and reports drift without it, it just can't self-fix).
 5. [x] Scraper Health
 6. [x] Competitive Landscape + Availability
 7. [x] MAP + Alerts
-8. [ ] Polish, empty states, demo script — empty/loading/error states are done (see `QueryState`); demo script and final visual pass remain
+8. [x] Polish, empty states, demo script — full visual design pass (dark-terminal tokens, motion.dev + anime.js throughout, mobile-responsive), landing page, self-healing CI, demo script
 
 If time runs short, cut from the bottom — never cut 4 or 5.
 
-## Verified end-to-end (2026-08-18)
+## Verified end-to-end (2026-08-19)
 
-All 9 pages checked with Playwright against the live seeded database and
-API — real data renders correctly, zero browser console errors, and both
-write paths (alert creation, manual collection trigger) work. Two real
-bugs were caught this way (not by typecheck) and fixed: a price-integrity
-window function that included the sale's own discounted days in its
-30-day lookback, and a restock-duration calculation that only measured
-the gap to the previous snapshot instead of the full stockout streak. See
-commit history for details.
+All 9 dashboard pages plus the landing page checked with Playwright
+against the live seeded database and API — real data renders correctly,
+zero browser console errors across every route and nav interaction, and
+both write paths (alert creation, manual collection trigger) work. Also
+checked at a 390×844 mobile viewport, which caught a real bug: the
+sidebar had no responsive handling at all and clipped every page below
+the `lg` breakpoint — now a proper off-canvas drawer.
+
+Other real bugs caught this way (not by typecheck) and fixed: a
+price-integrity window function that included the sale's own discounted
+days in its 30-day lookback, and a restock-duration calculation that only
+measured the gap to the previous snapshot instead of the full stockout
+streak. See commit history for details.
 
 **Known gaps, honestly:**
 - Only one store (`Alto & Oak`) is connected — Competitive Landscape's
