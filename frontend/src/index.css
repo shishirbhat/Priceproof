@@ -78,6 +78,9 @@
     --color-severity-genuine-foreground: var(--severity-genuine-foreground);
     --color-severity-drift: var(--severity-drift);
     --color-severity-drift-foreground: var(--severity-drift-foreground);
+    --color-brand: var(--brand);
+    --color-brand-foreground: var(--brand-foreground);
+    --color-brand-dim: var(--brand-dim);
 }
 
 /* Enterprise data terminal, dark-first by design — this app has no light
@@ -147,6 +150,13 @@
     --severity-genuine-foreground: oklch(0.1 0.03 150);
     --severity-drift: #fab219;          /* warning */
     --severity-drift-foreground: oklch(0.15 0.03 80);
+
+    /* Signature brand accent — reserved for identity moments (logo, landing
+       page, nav active state), never for generic dashboard actions, so it
+       doesn't compete with the severity colors' meaning inside data views. */
+    --brand: oklch(0.72 0.19 235);
+    --brand-foreground: oklch(0.08 0 0);
+    --brand-dim: oklch(0.72 0.19 235 / 0.15);
 }
 
 .dark {

@@ -28,9 +28,13 @@ export function Sidebar() {
   return (
     <aside className="relative flex h-svh w-60 shrink-0 flex-col border-r border-white/[0.06] bg-sidebar/80 text-sidebar-foreground backdrop-blur-xl">
       <div className="flex items-center gap-2.5 px-4 py-5">
-        <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 text-sidebar-primary-foreground shadow-[0_2px_10px_-2px_oklch(0.93_0_0/0.3)]">
+        <motion.div
+          whileHover={{ scale: 1.06, rotate: -4 }}
+          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+          className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand/70 text-brand-foreground shadow-[0_2px_14px_-2px] shadow-brand/50"
+        >
           <Boxes className="h-4 w-4" />
-        </div>
+        </motion.div>
         <div>
           <div className="text-sm font-semibold tracking-tight text-sidebar-foreground">
             PriceProof
@@ -69,11 +73,13 @@ export function Sidebar() {
                   <motion.div
                     layoutId="sidebar-active-bar"
                     transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                    className="absolute -left-2.5 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-foreground shadow-[0_0_8px_1px] shadow-foreground/40"
+                    className="absolute -left-2.5 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-brand shadow-[0_0_8px_1px] shadow-brand/60"
                   />
                 )}
-                <Icon className="relative h-4 w-4 shrink-0" />
-                <span className="relative truncate">{label}</span>
+                <motion.span whileHover={{ x: 2 }} transition={{ type: "spring", stiffness: 400, damping: 20 }} className="relative flex items-center gap-2.5">
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{label}</span>
+                </motion.span>
               </>
             )}
           </NavLink>
