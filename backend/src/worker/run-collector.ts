@@ -10,7 +10,7 @@ import { recordFieldCoverage } from "./schema-drift.js";
  * for however long Bright Data takes to build the dataset (up to ~5 min).
  * Intended to run from a scheduled job (cron / n8n) or manually via `npm run collect`.
  */
-async function runCollectionForStore(storeId: number): Promise<void> {
+export async function runCollectionForStore(storeId: number): Promise<void> {
   const client = await pool.connect();
   try {
     const storeRes = await client.query<{
@@ -89,7 +89,13 @@ async function main() {
   await pool.end();
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Only auto-run when executed directly (`npm run collect`) — importing this
+// module from the API server must NOT trigger every store's collection as a
+// side effect of the import.
+const isMainModule = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

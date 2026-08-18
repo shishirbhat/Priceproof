@@ -21,7 +21,7 @@ mapViolationsRouter.get("/", ah(async (_req, res) => {
       from below_floor order by store_product_id, scraped_at desc
     )
     select
-      l.*, p.title, p.image_url, st.name as store_name,
+      l.*, p.id as product_id, p.title, p.image_url, st.name as store_name,
       round(100.0 * (l.floor_price - l.current_price) / l.floor_price, 1) as pct_below_floor
     from latest l
     join store_products sp on sp.id = l.store_product_id

@@ -7,6 +7,8 @@ import { priceIntegrityRouter } from "./routes/price-integrity.js";
 import { availabilityRouter } from "./routes/availability.js";
 import { mapViolationsRouter } from "./routes/map-violations.js";
 import { scraperHealthRouter } from "./routes/scraper-health.js";
+import { catalogRouter } from "./routes/catalog.js";
+import { alertsRouter } from "./routes/alerts.js";
 
 const app = express();
 app.use(cors());
@@ -19,6 +21,8 @@ app.use("/api/price-integrity", priceIntegrityRouter);
 app.use("/api/availability", availabilityRouter);
 app.use("/api/map-violations", mapViolationsRouter);
 app.use("/api/scraper-health", scraperHealthRouter);
+app.use("/api/catalog", catalogRouter);
+app.use("/api/alerts", alertsRouter);
 
 // Centralized error handler so a query failure returns JSON, not an HTML
 // stack trace, and doesn't crash the process — every route above is async
