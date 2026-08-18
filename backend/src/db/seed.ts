@@ -200,11 +200,13 @@ const PRODUCTS: SeedProduct[] = [
     basePrice: 26.87,
     imageUrl: null,
     scenario:
-      "Stockout/restock: out of stock for a 7-day stretch in the middle of the " +
-      "window, then restocks, feeding the availability/time-to-restock feature.",
+      "Stockout/restock: a resolved 7-day stockout mid-window feeds the " +
+      "time-to-restock stat, then a second stockout starts 3 days ago and is " +
+      "still ongoing today, so the live feed / active-stockouts KPI has a " +
+      "current case to show, not just historical ones.",
     days: (base) =>
       Array.from({ length: DAYS }, (_, i) => {
-        const outOfStock = i >= 40 && i < 47;
+        const outOfStock = (i >= 40 && i < 47) || i >= DAYS - 3;
         return {
           dayIndex: i,
           currentPrice: round2(noise(base, 0.03)),
@@ -221,11 +223,12 @@ const PRODUCTS: SeedProduct[] = [
     basePrice: 28.17,
     imageUrl: null,
     scenario:
-      "MAP violation: floor is set at 0.9x base; price dips to 0.75x for an " +
-      "8-day stretch before recovering, feeding the MAP Violations page.",
+      "MAP violation: floor is set at 0.9x base; price dips to 0.75x starting " +
+      "9 days ago and is still below floor today, so it shows as an active, " +
+      "growing-duration violation rather than a resolved one.",
     days: (base) =>
       Array.from({ length: DAYS }, (_, i) => {
-        const belowMap = i >= 45 && i < 53;
+        const belowMap = i >= DAYS - 9;
         return {
           dayIndex: i,
           currentPrice: round2(belowMap ? base * 0.75 : noise(base, 0.02)),
