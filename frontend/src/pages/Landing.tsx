@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowRight, Boxes, ArrowDown } from "lucide-react";
@@ -5,6 +6,8 @@ import { ParticleField } from "@/components/landing/ParticleField";
 import { ScrollReveal } from "@/components/landing/ScrollReveal";
 import { StatBlock } from "@/components/landing/StatBlock";
 import { ScrollDots } from "@/components/landing/ScrollDots";
+import { Preloader } from "@/components/landing/Preloader";
+import { CustomCursor } from "@/components/landing/CustomCursor";
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
 import { MagneticButton } from "@/components/domain/MagneticButton";
 
@@ -87,8 +90,12 @@ function Nav() {
 }
 
 export function Landing() {
+  const [loading, setLoading] = useState(true);
+
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+      {loading && <Preloader onDone={() => setLoading(false)} />}
+      <CustomCursor />
       <Nav />
       <ScrollDots />
 
