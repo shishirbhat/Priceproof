@@ -22,12 +22,13 @@ patterns.
 ## Repo layout
 
 ```
-db/schema.sql          Postgres schema (Supabase). Append-only snapshots table.
-backend/src/worker/     Bright Data trigger/poll client + ingestion worker
-backend/src/db/         migration runner, seed script (planted demo history)
-backend/src/api/        HTTP API for the frontend (not yet built)
-frontend/               React + Tailwind UI (not yet built)
-samples/                real collector output + field provenance notes
+db/schema.sql               Postgres schema (Supabase). Append-only snapshots table.
+backend/src/worker/          Bright Data trigger/poll client, ingestion worker, drift detection
+backend/src/db/               migration runner, seed script (planted demo history)
+backend/src/api/               HTTP API for the frontend
+frontend/                       React + Tailwind dashboard + landing page
+.github/workflows/               scheduled scrape + self-healing CI (see below)
+samples/                          real collector output + field provenance notes
 ```
 
 ## Data model
@@ -56,6 +57,32 @@ cd ../frontend
 npm install
 npm run dev   # starts the UI on :5173, proxies /api to :3001
 ```
+
+## Self-healing scraper cron
+
+`.github/workflows/scrape-cron.yml` runs the real collection every 6 hours
+via GitHub Actions, independent of anyone's laptop being on. On every run it
+also compares field coverage against the previous run (`npm run
+detect-drift`) — if a field that was reliably present has mostly or
+entirely vanished, the target site's shape has likely changed under the
+scraper.
+
+When that happens, a second job hands the drift report and the current
+field-mapping code (`backend/src/worker/ingest.ts`) to
+[`anthropics/claude-code-action`](https://github.com/anthropics/claude-code-action)
+running non-interactively in CI. It reads the new raw JSON shape, patches
+the mapping if the change is identifiable, and commits directly — no PR,
+no human in the loop, by design for this hackathon. A third job then
+re-runs the full collection against the healed code and re-checks drift;
+if the fix didn't actually work, that job fails loudly rather than
+reporting a false green. The Actions tab is the evidence: a run history of
+real scrapes, and — if the target ever changes — a visible detect → heal →
+re-verify cycle instead of a silent break.
+
+Requires three repo secrets (Settings → Secrets and variables → Actions):
+`DATABASE_URL`, `BRIGHT_DATA_API_TOKEN` (same values as `backend/.env`),
+and `ANTHROPIC_API_KEY` (only needed for the heal job; the cron still runs
+and reports drift without it, it just can't self-fix).
 
 ## Build order
 

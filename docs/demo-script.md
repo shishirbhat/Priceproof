@@ -57,6 +57,19 @@ patterns and the honeypot decoys found while investigating the target
 site (see `samples/README.md`) — that's concrete evidence of engaging
 with what Scraper Studio actually does, not just hitting an endpoint.
 
+**Then pull up the GitHub Actions tab.** `.github/workflows/scrape-cron.yml`
+runs the real collection on a schedule, independent of anyone's laptop —
+that's the "wall of green checks" proving the pipeline runs unattended.
+Explain the second layer on top of it: every run compares field coverage
+against the previous one, and if a field that was reliably present
+collapses, a Claude Code agent step reads the drift report and the raw
+payload, patches `ingest.ts`'s field mapping, commits directly, and a
+third job re-runs the collection to *prove* the fix worked before calling
+it green — a broken heal fails loudly instead of hiding. This is Bright
+Data's own self-healing (proxies, selectors, CAPTCHA) plus a second,
+independent healing layer on our side of the integration: what happens
+when *our* mapping code goes stale, not just their scraper.
+
 ## 4. Quick tour (60s)
 
 - **Availability & Stockouts** — live feed, and the corrected

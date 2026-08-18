@@ -7,6 +7,7 @@
     "migrate": "tsx src/db/migrate.ts",
     "seed": "tsx src/db/seed.ts",
     "collect": "tsx src/worker/run-collector.ts",
+    "detect-drift": "tsx src/worker/detect-drift.ts",
     "dev": "tsx watch src/api/server.ts",
     "start": "tsx src/api/server.ts",
     "typecheck": "tsc --noEmit"

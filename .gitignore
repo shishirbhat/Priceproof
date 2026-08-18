@@ -5,6 +5,7 @@
 
 # Scraper Studio run output
 scraper_studio_results_*.json
+drift-report.json
 
 # Node
 node_modules/

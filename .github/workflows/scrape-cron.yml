@@ -1,0 +1,147 @@
+name: Scraper Cron
+
+# Runs the real Bright Data collection on a schedule. If the target site's
+# shape has drifted enough to break our field mapping, an agentic healing
+# job patches the mapping and the pipeline re-runs to prove the fix works —
+# a broken heal shows up as a genuinely failed run, not a hidden green check.
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours — adjust to taste vs. free-tier page-load budget
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      degraded: ${{ steps.drift.outputs.degraded }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Apply schema (idempotent, safe to re-run)
+        working-directory: backend
+        run: npm run migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Trigger + poll Bright Data Scraper Studio, ingest
+        working-directory: backend
+        run: npm run collect
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BRIGHT_DATA_API_TOKEN: ${{ secrets.BRIGHT_DATA_API_TOKEN }}
+
+      - name: Detect field-coverage drift vs. the previous run
+        id: drift
+        working-directory: backend
+        run: npm run detect-drift
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: drift-report
+          path: backend/drift-report.json
+          retention-days: 14
+
+  heal:
+    needs: collect
+    if: needs.collect.outputs.degraded == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: drift-report
+          path: backend/
+
+      - name: Heal ingestion mapping with Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Field-coverage drift was just detected in PriceProof's scraper ingestion.
+            backend/drift-report.json lists exactly which fields degraded (present in
+            most rows on the previous run, now mostly or entirely missing) and includes
+            a sample raw JSON row from the most recent collector run.
+
+            The field-mapping code lives in backend/src/worker/ingest.ts, in the
+            extract() function — it maps raw collector JSON keys (e.g. product_title,
+            current_price) to our schema. If the sample raw JSON uses different key
+            names than extract() currently reads, the target site (or the Bright Data
+            collector's output shape) has changed and extract() needs updating.
+
+            Read drift-report.json and backend/src/worker/ingest.ts. If the
+            renamed/moved field is identifiable from the sample, patch extract() to
+            read the new key — keep fields optional/nullable per the file's existing
+            pattern for known gaps. Do not touch unrelated code. If the sample doesn't
+            make the new key name obvious, do not guess a mapping — instead leave a
+            comment in the function noting what drifted and why it needs a human, and
+            say so plainly in the commit message.
+
+            Commit directly to this branch with a clear message describing what
+            drifted and what you changed.
+          claude_args: |
+            --max-turns 12
+            --model claude-sonnet-5
+
+  verify-heal:
+    needs: heal
+    if: always() && needs.heal.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Re-run collection against the healed mapping
+        working-directory: backend
+        run: npm run collect
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BRIGHT_DATA_API_TOKEN: ${{ secrets.BRIGHT_DATA_API_TOKEN }}
+
+      - name: Confirm the fix actually resolved the drift
+        working-directory: backend
+        run: |
+          npm run detect-drift
+          if grep -q '"degraded": true' drift-report.json; then
+            echo "::error::Healing commit did not resolve the field-coverage drift — still degraded after re-run. Needs a human."
+            exit 1
+          fi
+          echo "Drift resolved — field coverage back to baseline."
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
