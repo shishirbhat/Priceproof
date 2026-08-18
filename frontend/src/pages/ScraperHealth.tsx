@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { QueryState } from "@/components/domain/QueryState";
+import { QueryState, TableSkeleton } from "@/components/domain/QueryState";
 import { Card } from "@/components/ui/card";
 import { Gauge } from "@/components/charts/gauge";
 
@@ -94,6 +94,7 @@ export function ScraperHealth() {
           isEmpty={(d) => d.length === 0}
           emptyTitle="No collections have run yet"
           emptyDescription='Trigger one with `npm run collect` in backend/ once BRIGHT_DATA_API_TOKEN is set — this page fills in from real Scraper Studio output.'
+          skeleton={<TableSkeleton rows={5} cols={3} />}
         >
           {(rows) => (
             <ul className="space-y-2">
@@ -129,6 +130,7 @@ export function ScraperHealth() {
           isEmpty={(d) => d.length === 0}
           emptyTitle="No collections have run yet"
           emptyDescription="Every trigger/poll cycle against Bright Data Scraper Studio will appear here with status, duration, and page loads used."
+          skeleton={<TableSkeleton rows={5} cols={6} />}
         >
           {(rows) => (
             <table className="w-full text-left text-xs">

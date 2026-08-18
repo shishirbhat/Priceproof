@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
-import { QueryState } from "@/components/domain/QueryState";
+import { QueryState, ListRowSkeleton } from "@/components/domain/QueryState";
 import { SeededBadge } from "@/components/domain/SeededBadge";
 import { Card } from "@/components/ui/card";
 
@@ -29,6 +29,7 @@ export function MapViolations() {
         isEmpty={(d) => d.length === 0}
         emptyTitle="No open MAP violations"
         emptyDescription="Every tracked product with a MAP policy is currently priced at or above its floor."
+        skeleton={<ListRowSkeleton rows={4} />}
       >
         {(rows) => (
           <div className="space-y-3">

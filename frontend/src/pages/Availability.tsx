@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
-import { QueryState } from "@/components/domain/QueryState";
+import { QueryState, ListRowSkeleton } from "@/components/domain/QueryState";
 import { SeededBadge } from "@/components/domain/SeededBadge";
 import { Card } from "@/components/ui/card";
 import { PackageCheck, PackageX } from "lucide-react";
@@ -47,6 +47,7 @@ export function Availability() {
           data={rate.data}
           isEmpty={(d) => d.length === 0}
           emptyTitle="No data yet"
+          skeleton={<ListRowSkeleton rows={3} />}
         >
           {(rows) => (
             <div className="space-y-2">
@@ -77,6 +78,7 @@ export function Availability() {
             data={events.data}
             isEmpty={(d) => d.length === 0}
             emptyTitle="No availability events yet"
+            skeleton={<ListRowSkeleton rows={6} />}
           >
             {(rows) => (
               <ul className="divide-y divide-border">

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api, type IntegrityRow, type IntegrityVerdict } from "@/lib/api";
 import { SeverityBadge } from "@/components/domain/SeverityBadge";
 import { SeededBadge } from "@/components/domain/SeededBadge";
-import { QueryState } from "@/components/domain/QueryState";
+import { QueryState, ChartSkeleton, ListRowSkeleton } from "@/components/domain/QueryState";
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -98,7 +98,12 @@ function IntegrityDetail({ row }: { row: IntegrityRow }) {
         </p>
       )}
 
-      <QueryState isLoading={history.isLoading} error={history.error} data={history.data} loadingLabel="Loading history">
+      <QueryState
+        isLoading={history.isLoading}
+        error={history.error}
+        data={history.data}
+        skeleton={<ChartSkeleton />}
+      >
         {() =>
           chartData.length > 1 ? (
             <PriceHistoryChart data={chartData} />
@@ -159,7 +164,7 @@ export function PriceIntegrity() {
         data={filtered}
         isEmpty={(d) => d.length === 0}
         emptyTitle="No claims match this filter"
-        loadingLabel="Computing verdicts"
+        skeleton={<ListRowSkeleton rows={4} />}
       >
         {(rows) => (
           <div className="space-y-4">

@@ -49,18 +49,45 @@ cp .env.example .env   # fill in DATABASE_URL (Supabase) and BRIGHT_DATA_API_TOK
 npm install
 npm run migrate         # applies db/schema.sql (idempotent, safe to re-run)
 npm run seed             # generates ~60 days of demo history with planted violations
+npm run dev               # starts the API on :3001
 npm run collect           # one real Bright Data trigger/poll/ingest cycle
+
+cd ../frontend
+npm install
+npm run dev   # starts the UI on :5173, proxies /api to :3001
 ```
 
 ## Build order
 
 1. [x] Schema + migrations + seed script with planted violations
 2. [x] Bright Data client (trigger/poll/store) + ingestion worker
-3. [ ] Command Center + Product Detail
-4. [ ] Price Integrity (hero feature)
-5. [ ] Scraper Health
-6. [ ] Competitive Landscape + Availability
-7. [ ] MAP + Alerts
-8. [ ] Polish, empty states, demo script
+3. [x] Command Center + Product Detail
+4. [x] Price Integrity (hero feature)
+5. [x] Scraper Health
+6. [x] Competitive Landscape + Availability
+7. [x] MAP + Alerts
+8. [ ] Polish, empty states, demo script — empty/loading/error states are done (see `QueryState`); demo script and final visual pass remain
 
 If time runs short, cut from the bottom — never cut 4 or 5.
+
+## Verified end-to-end (2026-08-18)
+
+All 9 pages checked with Playwright against the live seeded database and
+API — real data renders correctly, zero browser console errors, and both
+write paths (alert creation, manual collection trigger) work. Two real
+bugs were caught this way (not by typecheck) and fixed: a price-integrity
+window function that included the sale's own discounted days in its
+30-day lookback, and a restock-duration calculation that only measured
+the gap to the previous snapshot instead of the full stockout streak. See
+commit history for details.
+
+**Known gaps, honestly:**
+- Only one store (`Alto & Oak`) is connected — Competitive Landscape's
+  cross-store spread has nothing to compare against yet. The UI says so
+  explicitly rather than hiding it.
+- No live Bright Data collection has run yet (needs
+  `BRIGHT_DATA_API_TOKEN`) — Scraper Health is correctly empty, not
+  broken.
+- Alert rules can be created but nothing evaluates them against new
+  snapshots yet (no cron/scheduler wired up) — `fired_count` will stay 0
+  until that's built.

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
-import { QueryState } from "@/components/domain/QueryState";
+import { QueryState, TableSkeleton } from "@/components/domain/QueryState";
 import { Card } from "@/components/ui/card";
 
 function formatCurrency(v: string | number) {
@@ -55,6 +55,7 @@ export function CompetitiveLandscape() {
         data={matrix}
         isEmpty={(d) => d.length === 0}
         emptyTitle="No products tracked yet"
+        skeleton={<TableSkeleton rows={6} cols={3} />}
       >
         {(rows) => (
           <Card className="gap-0 overflow-x-auto p-0">

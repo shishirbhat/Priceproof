@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import { StatTile } from "@/components/domain/StatTile";
 import { SeverityBadge } from "@/components/domain/SeverityBadge";
 import { SeededBadge } from "@/components/domain/SeededBadge";
-import { QueryState } from "@/components/domain/QueryState";
+import { QueryState, ListRowSkeleton, TileGridSkeleton } from "@/components/domain/QueryState";
 import { Card } from "@/components/ui/card";
 
 function formatCurrency(v: string | number) {
@@ -39,7 +39,7 @@ export function CommandCenter() {
         isLoading={kpis.isLoading}
         error={kpis.error}
         data={kpis.data}
-        loadingLabel="Loading KPIs"
+        skeleton={<TileGridSkeleton />}
       >
         {(data) => (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
@@ -80,6 +80,7 @@ export function CommandCenter() {
             isEmpty={(d) => d.length === 0}
             emptyTitle="No active discount claims"
             emptyDescription="Nothing in the catalog is currently advertising a markdown."
+            skeleton={<ListRowSkeleton rows={5} />}
           >
             {(rows) => (
               <ul className="divide-y divide-border">
@@ -120,6 +121,7 @@ export function CommandCenter() {
             isEmpty={(d) => d.length === 0}
             emptyTitle="No open MAP violations"
             emptyDescription="Every tracked product is currently priced at or above its MAP floor."
+            skeleton={<ListRowSkeleton rows={5} />}
           >
             {(rows) => (
               <ul className="divide-y divide-border">
@@ -151,6 +153,7 @@ export function CommandCenter() {
           data={availability.data}
           isEmpty={(d) => d.length === 0}
           emptyTitle="No availability events yet"
+          skeleton={<ListRowSkeleton rows={8} />}
         >
           {(rows) => (
             <ul className="divide-y divide-border">
