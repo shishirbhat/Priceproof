@@ -230,11 +230,21 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Depth: a flat #000 background reads as an unfinished template. Two soft
-   radial glows (anchored top-left / bottom-right, far below saturation
-   that would compete with the severity colors) plus a hairline-fine grain
-   texture give the page plane the depth a premium dark UI needs, at a cost
-   of one fixed background-image — no runtime work. */
+/* Depth: a flat #000 background reads as an unfinished template. Three soft
+   radial glows (far below saturation that would compete with the severity
+   colors) plus a hairline-fine grain texture give the page plane the depth
+   a premium dark UI needs. A slow 40s drift on their position keeps the
+   page from feeling static without being distracting — CSS-only, no
+   per-frame JS cost. */
+@keyframes ambient-drift {
+  0%, 100% {
+    background-position: 12% -15%, 105% 5%, 45% 115%;
+  }
+  50% {
+    background-position: 18% -8%, 98% 12%, 52% 108%;
+  }
+}
+
 body {
   background-color: var(--background);
   background-image:
@@ -242,6 +252,13 @@ body {
     radial-gradient(1000px 600px at 105% 5%, oklch(0.68 0.18 320 / 0.14), transparent 55%),
     radial-gradient(900px 600px at 45% 115%, oklch(0.72 0.13 165 / 0.10), transparent 60%);
   background-attachment: fixed;
+  animation: ambient-drift 40s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
 }
 
 body::before {
