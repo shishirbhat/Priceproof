@@ -1,0 +1,14 @@
+[
+  {
+    "product_title": "Echo Portable Speaker",
+    "current_price": 396.54,
+    "currency_code": "USD",
+    "in_stock": true,
+    "stock_scarcity_text": "Recently restocked, going fast. · Reordered by 31% of buyers.",
+    "canonical_url": "https://ecommerce-shop-brd.vercel.app/product/echo-portable-speaker",
+    "main_image_url": "https://loremflickr.com/800/800/speaker,bluetooth?lock=0041&v=131",
+    "input": {
+      "url": "https://ecommerce-shop-brd.vercel.app/product/echo-portable-speaker"
+    }
+  }
+]

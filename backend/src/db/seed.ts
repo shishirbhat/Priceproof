@@ -2,18 +2,30 @@ import "dotenv/config";
 import { pool } from "./client.js";
 
 /**
- * Generates ~60 days of demo history for the one confirmed real store
- * (ecommerce-shop-brd.vercel.app / "Alto & Oak") so the Price Integrity, MAP,
- * and Availability features have something to show without waiting three
- * weeks for organic history. Every row this script writes is is_seeded =
- * true — the UI must always label seeded rows, never present them as real
- * scraped data. Live collection (npm run collect) writes real rows on top of
- * this and is what the demo's "pipeline is real" claim rests on.
+ * Generates ~60 days of demo history across two portals so Market Value,
+ * Market Activity (days-on-market), and Cross-Portal Matches have something
+ * to show without waiting weeks for organic history. Every row this script
+ * writes is is_seeded = true — the UI must always label seeded rows, never
+ * present them as real scraped data. Live collection (npm run collect)
+ * writes real rows on top of this and is what the demo's "pipeline is real"
+ * claim rests on.
  *
- * Each product below is a deliberately designed scenario, not random filler
- * — see the comment above each generator. This keeps the demo explainable:
- * every flagged case has a stated reason, and two products are left clean on
- * purpose so the system isn't seen to flag everything.
+ * portals.collector_id here is a placeholder ("c_pending_...") until the
+ * real Scraper Studio collector exists — swap it for the real id once
+ * npm run collect has an actual collector to point at, same as the shop
+ * collector was originally a placeholder before its first real run.
+ *
+ * Each listing below is a deliberately designed scenario, not random filler:
+ *   - A 7-listing "Maruti Swift" segment plus a 2-listing "Hyundai Creta"
+ *     segment exercise market-value scoring's two verdict paths — a real
+ *     comparable-set median (with one planted good deal, one planted
+ *     overpriced) vs. INSUFFICIENT_COMPARABLES when a segment is too thin
+ *     to trust.
+ *   - Four listings (aging-then-sold, fast-sale, aging-active, fresh-with-cut)
+ *     exercise delisting-based days-on-market and price-cut tracking.
+ *   - One planted cross-portal duplicate (the same physical car, two
+ *     portals, two prices) exercises fuzzy matching.
+ *   - Two clean CarWale listings exist purely so a second portal isn't empty.
  *
  * Deterministic PRNG (not Math.random()) so re-running this script produces
  * the same demo data every time.
@@ -28,361 +40,384 @@ function mulberry32(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-const rand = mulberry32(20260817);
+const rand = mulberry32(20260819);
 const noise = (base: number, pct: number) => base * (1 + (rand() * 2 - 1) * pct);
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 const DAYS = 60;
-const STORE = {
-  name: "Alto & Oak",
-  country: "US",
-  base_url: "https://ecommerce-shop-brd.vercel.app",
-  collector_id: "c_msw8ijcf1akr6p8vch",
-};
 
-interface DaySnapshot {
-  dayIndex: number; // 0 = oldest, DAYS-1 = most recent
+const PORTALS = {
+  cars24: {
+    name: "Cars24",
+    country: "IN",
+    base_url: "https://www.cars24.com/buy-used-car/",
+    collector_id: "c_pending_cars24",
+  },
+  carwale: {
+    name: "CarWale",
+    country: "IN",
+    base_url: "https://www.carwale.com/used/cars-in-delhi/",
+    collector_id: "c_pending_carwale",
+  },
+} as const;
+type PortalKey = keyof typeof PORTALS;
+
+interface DayPrice {
+  dayIndex: number;
   currentPrice: number;
-  listPrice: number | null;
-  inStock: boolean;
-  scarcityText: string | null;
+  originalPrice: number | null;
 }
 
-interface SeedProduct {
-  slug: string;
+interface SeedListing {
+  key: string;
+  portal: PortalKey;
   title: string;
-  category: string;
-  basePrice: number;
+  make: string;
+  model: string;
+  year: number;
+  city: string;
+  registrationPrefix: string;
+  fuelType: string;
+  transmission: string;
+  sellerType: string;
+  odometerKm: number;
   imageUrl: string | null;
   scenario: string;
-  days: (basePrice: number) => DaySnapshot[];
+  firstDay: number;
+  lastDay: number; // inclusive; lastDay === DAYS-1 means still active
+  days: () => DayPrice[];
+  duplicateOfKey?: string;
+  matchConfidence?: number;
+  needsReview?: boolean;
 }
 
-function steady(basePrice: number, pct: number): DaySnapshot[] {
-  return Array.from({ length: DAYS }, (_, i) => ({
-    dayIndex: i,
-    currentPrice: round2(noise(basePrice, pct)),
-    listPrice: null,
-    inStock: true,
-    scarcityText: null,
-  }));
+function steadyDays(firstDay: number, lastDay: number, base: number, pct: number): DayPrice[] {
+  const rows: DayPrice[] = [];
+  for (let i = firstDay; i <= lastDay; i++) {
+    rows.push({ dayIndex: i, currentPrice: round2(noise(base, pct)), originalPrice: null });
+  }
+  return rows;
 }
 
-const PRODUCTS: SeedProduct[] = [
+/** Step-cut price with the original (pre-cut) price shown for `showFor` days after each cut. */
+function cutSchedule(
+  firstDay: number,
+  lastDay: number,
+  base: number,
+  cuts: Array<{ atDay: number; newPrice: number }>,
+  showFor = 4,
+): DayPrice[] {
+  const rows: DayPrice[] = [];
+  for (let i = firstDay; i <= lastDay; i++) {
+    const applicable = [...cuts].reverse().find((c) => i >= c.atDay);
+    const price = applicable ? applicable.newPrice : base;
+    const cutJustHappened = applicable && i < applicable.atDay + showFor;
+    const priorPrice = applicable
+      ? (cuts[cuts.indexOf(applicable) - 1]?.newPrice ?? base)
+      : null;
+    rows.push({
+      dayIndex: i,
+      currentPrice: round2(noise(price, 0.005)),
+      originalPrice: cutJustHappened ? round2(priorPrice!) : null,
+    });
+  }
+  return rows;
+}
+
+const LISTINGS: SeedListing[] = [
+  // --- "Maruti Swift" market-value segment (7 comparables) ---
   {
-    slug: "echo-portable-speaker",
-    title: "Echo Portable Speaker",
-    category: "electronics",
-    basePrice: 83.11,
-    imageUrl: "https://loremflickr.com/800/800/speaker,bluetooth?lock=0041&v=131",
+    key: "swift-a", portal: "cars24", title: "2020 Maruti Swift VXI",
+    make: "Maruti", model: "Swift", year: 2020, city: "Ahmedabad", registrationPrefix: "GJ-01",
+    fuelType: "Petrol", transmission: "Manual", sellerType: "Cars24 Owned Stock",
+    odometerKm: 38200, imageUrl: "https://loremflickr.com/800/600/hatchback,silver?lock=7001",
+    scenario: "Market-value segment member, priced near the eventual median.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 520000, 0.015),
+  },
+  {
+    key: "swift-b", portal: "cars24", title: "2019 Maruti Swift ZXI",
+    make: "Maruti", model: "Swift", year: 2019, city: "Rajkot", registrationPrefix: "GJ-08",
+    fuelType: "Petrol", transmission: "Manual", sellerType: "Cars24 Owned Stock",
+    odometerKm: 45100, imageUrl: "https://loremflickr.com/800/600/hatchback,red?lock=7002",
+    scenario: "Market-value segment member.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 540000, 0.015),
+  },
+  {
+    key: "swift-c", portal: "cars24", title: "2020 Maruti Swift LXI",
+    make: "Maruti", model: "Swift", year: 2020, city: "Vadodara", registrationPrefix: "GJ-06",
+    fuelType: "Petrol", transmission: "Manual", sellerType: "Cars24 Owned Stock",
+    odometerKm: 41800, imageUrl: "https://loremflickr.com/800/600/hatchback,white?lock=7003",
+    scenario: "Market-value segment member.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 490000, 0.015),
+  },
+  {
+    key: "swift-d", portal: "cars24", title: "2021 Maruti Swift VXI AMT",
+    make: "Maruti", model: "Swift", year: 2021, city: "Surat", registrationPrefix: "GJ-05",
+    fuelType: "Petrol", transmission: "Auto", sellerType: "Cars24 Owned Stock",
+    odometerKm: 29700, imageUrl: "https://loremflickr.com/800/600/hatchback,blue?lock=7004",
+    scenario: "Market-value segment member.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 560000, 0.015),
+  },
+  {
+    key: "swift-e", portal: "cars24", title: "2019 Maruti Swift ZXI Plus",
+    make: "Maruti", model: "Swift", year: 2019, city: "Jaipur", registrationPrefix: "RJ-14",
+    fuelType: "Petrol", transmission: "Manual", sellerType: "Cars24 Owned Stock",
+    odometerKm: 47300, imageUrl: "https://loremflickr.com/800/600/hatchback,grey?lock=7005",
+    scenario: "Market-value segment member.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 530000, 0.015),
+  },
+  {
+    key: "swift-f", portal: "cars24", title: "2019 Maruti Swift LXI",
+    make: "Maruti", model: "Swift", year: 2019, city: "Lucknow", registrationPrefix: "UP-32",
+    fuelType: "Petrol", transmission: "Manual", sellerType: "Verified Direct Seller",
+    odometerKm: 68900, imageUrl: "https://loremflickr.com/800/600/hatchback,black?lock=7006",
     scenario:
-      "PLANTED VIOLATION (inflated discount): list_price jumps to 1.35x six days " +
-      "before the 'sale', while the true 30-day low stays near the steady price. " +
-      "The advertised was-price was never actually charged recently.",
-    days: (base) => {
-      const rows: DaySnapshot[] = [];
-      for (let i = 0; i < DAYS - 6; i++) {
-        rows.push({
-          dayIndex: i,
-          currentPrice: round2(noise(base, 0.03)),
-          listPrice: null,
-          inStock: true,
-          scarcityText: null,
-        });
-      }
-      for (let i = DAYS - 6; i < DAYS; i++) {
-        const t = (i - (DAYS - 6)) / 5;
-        rows.push({
-          dayIndex: i,
-          currentPrice: round2(base * (1 - 0.15 * t)),
-          listPrice: round2(base * 1.35),
-          inStock: true,
-          scarcityText: i === DAYS - 1 ? "Recently restocked, going fast." : null,
-        });
-      }
-      return rows;
-    },
+      "PLANTED GOOD_DEAL: priced ~19% below the segment median — high odometer and an " +
+      "individual seller wanting a fast sale, a genuinely underpriced comparable.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 420000, 0.015),
   },
   {
-    slug: "pulse-smartwatch",
-    title: "Pulse Smartwatch",
-    category: "electronics",
-    basePrice: 240.41,
-    imageUrl: null,
+    key: "swift-g", portal: "cars24", title: "2021 Maruti Swift ZXI AMT",
+    make: "Maruti", model: "Swift", year: 2021, city: "Chandigarh", registrationPrefix: "PB-10",
+    fuelType: "Petrol", transmission: "Auto", sellerType: "Cars24 Owned Stock",
+    odometerKm: 22100, imageUrl: "https://loremflickr.com/800/600/hatchback,orange?lock=7007",
     scenario:
-      "GENUINE discount: the advertised was-price (0.97x) closely matches the " +
-      "real recent low, and the markdown to 0.85x is an honest ~12% off.",
-    days: (base) => {
-      const rows: DaySnapshot[] = [];
-      for (let i = 0; i < DAYS - 6; i++) {
-        rows.push({
-          dayIndex: i,
-          currentPrice: round2(noise(base, 0.04)),
-          listPrice: null,
-          inStock: true,
-          scarcityText: null,
-        });
-      }
-      for (let i = DAYS - 6; i < DAYS; i++) {
-        rows.push({
-          dayIndex: i,
-          currentPrice: round2(base * 0.85),
-          listPrice: round2(base * 0.97),
-          inStock: true,
-          scarcityText: null,
-        });
-      }
-      return rows;
-    },
+      "PLANTED OVERPRICED: priced ~19% above the segment median — low odometer alone " +
+      "doesn't justify the asking price relative to six comparable Swifts.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 630000, 0.015),
   },
+
+  // --- "Hyundai Creta" — deliberately thin segment (2 comparables) ---
   {
-    slug: "foundry-cast-iron-skillet",
-    title: "Foundry Cast Iron Skillet",
-    category: "home-kitchen",
-    basePrice: 51.03,
-    imageUrl: null,
+    key: "creta-a", portal: "cars24", title: "2020 Hyundai Creta SX",
+    make: "Hyundai", model: "Creta", year: 2020, city: "Bangalore", registrationPrefix: "KA-05",
+    fuelType: "Diesel", transmission: "Manual", sellerType: "Cars24 Owned Stock",
+    odometerKm: 51200, imageUrl: "https://loremflickr.com/800/600/suv,white?lock=7008",
     scenario:
-      "PLANTED VIOLATION (inflated discount), longer 12-day runway and a bigger " +
-      "claimed 40% off, to prove the detector catches more than one pattern shape.",
-    days: (base) => {
-      const rows: DaySnapshot[] = [];
-      for (let i = 0; i < DAYS - 12; i++) {
-        rows.push({
-          dayIndex: i,
-          currentPrice: round2(noise(base, 0.03)),
-          listPrice: null,
-          inStock: true,
-          scarcityText: null,
-        });
-      }
-      for (let i = DAYS - 12; i < DAYS; i++) {
-        const t = (i - (DAYS - 12)) / 11;
-        rows.push({
-          dayIndex: i,
-          currentPrice: round2(base * (1 - 0.1 * t)),
-          listPrice: round2(base * 1.5),
-          inStock: true,
-          scarcityText: null,
-        });
-      }
-      return rows;
-    },
+      "INSUFFICIENT_COMPARABLES: only one other Creta exists in this seed, so the " +
+      "segment never reaches MIN_COMPARABLES at any widening level — the app must say " +
+      "so honestly instead of scoring against 1 other listing.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 950000, 0.015),
   },
   {
-    slug: "kiln-ceramic-mug",
-    title: "Kiln Ceramic Mug",
-    category: "home-kitchen",
-    basePrice: 19.92,
-    imageUrl: null,
+    key: "creta-b", portal: "cars24", title: "2020 Hyundai Creta SX(O)",
+    make: "Hyundai", model: "Creta", year: 2020, city: "Mysore", registrationPrefix: "KA-09",
+    fuelType: "Diesel", transmission: "Auto", sellerType: "Cars24 Owned Stock",
+    odometerKm: 39800, imageUrl: "https://loremflickr.com/800/600/suv,black?lock=7009",
+    scenario: "Same thin-segment scenario as creta-a.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 990000, 0.015),
+  },
+
+  // --- Delisting / days-on-market / price-cut scenarios ---
+  {
+    key: "nexon-aging-sold", portal: "cars24", title: "2018 Tata Nexon XZ",
+    make: "Tata", model: "Nexon", year: 2018, city: "Kolkata", registrationPrefix: "WB-02",
+    fuelType: "Diesel", transmission: "Manual", sellerType: "Cars24 Owned Stock",
+    odometerKm: 61400, imageUrl: "https://loremflickr.com/800/600/suv,red?lock=7010",
     scenario:
-      "INSUFFICIENT_HISTORY: only the last 5 days are seeded, simulating a " +
-      "just-added competitor SKU. It claims a discount today, but there isn't " +
-      "enough trailing history yet to verify it either way — the app must say " +
-      "so honestly instead of guessing.",
-    days: (base) => {
-      const rows: DaySnapshot[] = [];
-      for (let i = DAYS - 5; i < DAYS; i++) {
-        rows.push({
-          dayIndex: i,
-          currentPrice: round2(base * (i === DAYS - 1 ? 0.85 : 1)),
-          listPrice: i === DAYS - 1 ? round2(base * 1.3) : null,
-          inStock: true,
-          scarcityText: null,
-        });
-      }
-      return rows;
-    },
+      "Aging inventory that eventually sold: three price cuts over 45 days " +
+      "(680000 -> 650000 -> 620000 -> 590000) before delisting — the long-days-on-market, " +
+      "heavy-markdown case.",
+    firstDay: 0, lastDay: 47,
+    days: () => cutSchedule(0, 47, 680000, [
+      { atDay: 15, newPrice: 650000 },
+      { atDay: 30, newPrice: 620000 },
+      { atDay: 45, newPrice: 590000 },
+    ]),
   },
   {
-    slug: "dugout-baseball-cap",
-    title: "Dugout Baseball Cap",
-    category: "apparel",
-    basePrice: 26.87,
-    imageUrl: null,
+    key: "city-fast-sale", portal: "cars24", title: "2021 Honda City ZX",
+    make: "Honda", model: "City", year: 2021, city: "Indore", registrationPrefix: "MP-20",
+    fuelType: "Petrol", transmission: "Auto", sellerType: "Cars24 Owned Stock",
+    odometerKm: 24600, imageUrl: "https://loremflickr.com/800/600/sedan,silver?lock=7011",
     scenario:
-      "Stockout/restock: out of stock for a 7-day stretch in the middle of the " +
-      "window, then restocks, feeding the availability/time-to-restock feature.",
-    days: (base) =>
-      Array.from({ length: DAYS }, (_, i) => {
-        const outOfStock = i >= 40 && i < 47;
-        return {
-          dayIndex: i,
-          currentPrice: round2(noise(base, 0.03)),
-          listPrice: null,
-          inStock: !outOfStock,
-          scarcityText: outOfStock ? "Out of stock" : i === 47 ? "Recently restocked, going fast." : null,
-        };
-      }),
+      "Fast sale, no markdown needed: listed for only 3 days before delisting — the " +
+      "contrast case against nexon-aging-sold.",
+    firstDay: 54, lastDay: 56, days: () => steadyDays(54, 56, 720000, 0.01),
   },
   {
-    slug: "everyday-cotton-tee",
-    title: "Everyday Cotton Tee",
-    category: "apparel",
-    basePrice: 28.17,
-    imageUrl: null,
+    key: "duster-aging-active", portal: "cars24", title: "2019 Renault Duster RXZ",
+    make: "Renault", model: "Duster", year: 2019, city: "Chennai", registrationPrefix: "TN-09",
+    fuelType: "Diesel", transmission: "Manual", sellerType: "Verified Direct Seller",
+    odometerKm: 58700, imageUrl: "https://loremflickr.com/800/600/suv,grey?lock=7012",
     scenario:
-      "MAP violation: floor is set at 0.9x base; price dips to 0.75x for an " +
-      "8-day stretch before recovering, feeding the MAP Violations page.",
-    days: (base) =>
-      Array.from({ length: DAYS }, (_, i) => {
-        const belowMap = i >= 45 && i < 53;
-        return {
-          dayIndex: i,
-          currentPrice: round2(belowMap ? base * 0.75 : noise(base, 0.02)),
-          listPrice: null,
-          inStock: true,
-          scarcityText: null,
-        };
-      }),
+      "Still active after 52 days with no price cuts yet — the aging-inventory case " +
+      "that hasn't sold and hasn't been marked down, feeds the active-longest view.",
+    firstDay: 7, lastDay: DAYS - 1, days: () => steadyDays(7, DAYS - 1, 810000, 0.01),
   },
   {
-    slug: "pace-running-shorts",
-    title: "Pace Running Shorts",
-    category: "apparel",
-    basePrice: 43.47,
-    imageUrl: null,
-    scenario: "Clean control: volatile but honest pricing, no discount claims, no violations.",
-    days: (base) => steady(base, 0.08),
-  },
-  {
-    slug: "press-34-french-press",
-    title: "Press 34 French Press",
-    category: "home-kitchen",
-    basePrice: 49.1,
-    imageUrl: null,
-    scenario: "Clean control: a boring, stable retailer. Proves the system doesn't over-flag.",
-    days: (base) => steady(base, 0.015),
-  },
-  {
-    slug: "quiet-fleece-hoodie",
-    title: "Quiet Fleece Hoodie",
-    category: "apparel",
-    basePrice: 62.33,
-    imageUrl: null,
+    key: "xuv300-fresh-cut", portal: "cars24", title: "2022 Mahindra XUV300 W8",
+    make: "Mahindra", model: "XUV300", year: 2022, city: "Pune", registrationPrefix: "MH-14",
+    fuelType: "Petrol", transmission: "Manual", sellerType: "Cars24 Owned Stock",
+    odometerKm: 15300, imageUrl: "https://loremflickr.com/800/600/suv,blue?lock=7013",
     scenario:
-      "Combo: a brief 4-day stockout followed by a genuine modest discount, so " +
-      "one product's timeline shows both an availability event and a price event.",
-    days: (base) => {
-      const rows: DaySnapshot[] = [];
-      for (let i = 0; i < DAYS; i++) {
-        const outOfStock = i >= 50 && i < 54;
-        const onSale = i >= DAYS - 6;
-        rows.push({
-          dayIndex: i,
-          currentPrice: round2(onSale ? base * 0.88 : noise(base, 0.03)),
-          listPrice: onSale ? round2(base * 0.97) : null,
-          inStock: !outOfStock,
-          scarcityText: outOfStock ? "Out of stock" : null,
-        });
-      }
-      return rows;
-    },
+      "Freshly listed (6 days) with one early price cut already — an early markdown " +
+      "signal on a listing that hasn't been up long.",
+    firstDay: 54, lastDay: DAYS - 1,
+    days: () => cutSchedule(54, DAYS - 1, 950000, [{ atDay: 57, newPrice: 920000 }]),
+  },
+
+  // --- Planted cross-portal duplicate ---
+  {
+    key: "innova-orig", portal: "cars24", title: "2017 Toyota Innova Crysta 2.4 GX",
+    make: "Toyota", model: "Innova Crysta", year: 2017, city: "Pune", registrationPrefix: "MH-12",
+    fuelType: "Diesel", transmission: "Manual", sellerType: "Verified Direct Seller",
+    odometerKm: 72400, imageUrl: "https://loremflickr.com/800/600/mpv,white?lock=7014",
+    scenario: "Cross-portal original: individually-owned car, listed on Cars24 first.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 1250000, 0.008),
+  },
+  {
+    key: "innova-dup", portal: "carwale", title: "Toyota Innova Crysta 2.4 GX 2017",
+    make: "Toyota", model: "Innova Crysta", year: 2017, city: "Pune", registrationPrefix: "MH-12",
+    fuelType: "Diesel", transmission: "Manual", sellerType: "Individual Seller",
+    odometerKm: 72400, imageUrl: "https://loremflickr.com/800/600/mpv,white?lock=7015",
+    scenario:
+      "PLANTED cross-portal duplicate: same physical car as innova-orig (same reg " +
+      "prefix, city, mileage), cross-posted to CarWale 10 days later at a ~5.6% lower " +
+      "price. Matched fuzzy (make/model/year/reg-prefix/city), not by VIN — no India " +
+      "portal publishes a full VIN on the results grid.",
+    firstDay: 10, lastDay: DAYS - 1, days: () => steadyDays(10, DAYS - 1, 1180000, 0.008),
+    duplicateOfKey: "innova-orig", matchConfidence: 0.85, needsReview: true,
+  },
+
+  // --- Clean CarWale listings, so the second portal isn't empty ---
+  {
+    key: "seltos-clean", portal: "carwale", title: "2021 Kia Seltos HTX",
+    make: "Kia", model: "Seltos", year: 2021, city: "Delhi", registrationPrefix: "DL-01",
+    fuelType: "Petrol", transmission: "Auto", sellerType: "Dealer",
+    odometerKm: 28900, imageUrl: "https://loremflickr.com/800/600/suv,red?lock=7016",
+    scenario: "Clean control: steady pricing on the second portal, no anomalies.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 1050000, 0.015),
+  },
+  {
+    key: "rapid-clean", portal: "carwale", title: "2018 Skoda Rapid Ambition",
+    make: "Skoda", model: "Rapid", year: 2018, city: "Gurgaon", registrationPrefix: "HR-26",
+    fuelType: "Petrol", transmission: "Manual", sellerType: "Dealer",
+    odometerKm: 54200, imageUrl: "https://loremflickr.com/800/600/sedan,white?lock=7017",
+    scenario: "Clean control: proves the system doesn't over-flag everything.",
+    firstDay: 0, lastDay: DAYS - 1, days: () => steadyDays(0, DAYS - 1, 610000, 0.015),
   },
 ];
+
+async function upsertPortal(client: import("pg").PoolClient, portal: (typeof PORTALS)[PortalKey]) {
+  const res = await client.query<{ id: number }>(
+    `insert into portals (name, country, base_url, collector_id, is_active)
+     values ($1, $2, $3, $4, true)
+     on conflict (base_url) do nothing
+     returning id`,
+    [portal.name, portal.country, portal.base_url, portal.collector_id],
+  );
+  if (res.rows[0]) return res.rows[0].id;
+  const existing = await client.query<{ id: number }>(`select id from portals where base_url = $1`, [
+    portal.base_url,
+  ]);
+  return existing.rows[0].id;
+}
 
 async function seed() {
   const client = await pool.connect();
   try {
     await client.query("begin");
 
-    const storeRes = await client.query<{ id: number }>(
-      `insert into stores (name, country, base_url, collector_id, is_active)
-       values ($1, $2, $3, $4, true)
-       on conflict (base_url) do nothing
-       returning id`,
-      [STORE.name, STORE.country, STORE.base_url, STORE.collector_id],
-    );
-    let storeId = storeRes.rows[0]?.id;
-    if (!storeId) {
-      const existing = await client.query<{ id: number }>(
-        `select id from stores where base_url = $1`,
-        [STORE.base_url],
-      );
-      storeId = existing.rows[0].id;
-    }
+    const portalIds: Record<PortalKey, number> = {
+      cars24: await upsertPortal(client, PORTALS.cars24),
+      carwale: await upsertPortal(client, PORTALS.carwale),
+    };
 
-    // snapshots is intentionally append-only with no dedup constraint, so a
-    // second run would silently double every seeded row. Guard explicitly:
-    // require --force to re-seed, and clear prior seeded rows first when it's passed.
+    // listing_snapshots is append-only with no dedup constraint, so a second
+    // run would silently double every seeded row. Guard explicitly: require
+    // --force to re-seed, and clear prior seeded rows (and the listings
+    // themselves, since duplicate_of_listing_id and delisted_at are seed-time
+    // decisions, not accumulated facts) first when it's passed.
     const existing = await client.query<{ count: string }>(
-      `select count(*) from snapshots s
-       join store_products sp on sp.id = s.store_product_id
-       where sp.store_id = $1 and s.is_seeded`,
-      [storeId],
+      `select count(*) from listing_snapshots where is_seeded`,
     );
     if (Number(existing.rows[0].count) > 0) {
       if (!process.argv.includes("--force")) {
-        console.log(
-          `store "${STORE.name}" already has seeded snapshots — pass --force to clear and re-seed.`,
-        );
+        console.log(`seeded data already exists — pass --force to clear and re-seed.`);
         await client.query("rollback");
         return;
       }
-      await client.query(
-        `delete from snapshots s using store_products sp
-         where s.store_product_id = sp.id and sp.store_id = $1 and s.is_seeded`,
-        [storeId],
-      );
+      await client.query(`delete from listing_snapshots where is_seeded`);
+      await client.query(`delete from listings where is_seeded`);
     }
 
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
+    const dayToTimestamp = (dayIndex: number) => new Date(now - (DAYS - 1 - dayIndex) * dayMs);
 
-    for (const product of PRODUCTS) {
-      console.log(`seeding ${product.slug}: ${product.scenario}`);
+    const listingIdByKey = new Map<string, number>();
 
-      const canonicalKey = `t:${product.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()}`;
-      const productRes = await client.query<{ id: number }>(
-        `insert into products (canonical_key, title, brand, gtin, sku, category, image_url)
-         values ($1, $2, null, null, null, $3, $4)
-         on conflict (canonical_key) do update set category = excluded.category
+    for (const listing of LISTINGS) {
+      console.log(`seeding ${listing.key}: ${listing.scenario}`);
+
+      const externalId = `seed-${listing.key}`;
+      const days = listing.days();
+      const isActive = listing.lastDay === DAYS - 1;
+      const delistedAt = isActive ? null : dayToTimestamp(Math.min(listing.lastDay + 1, DAYS - 1));
+
+      const listingRes = await client.query<{ id: number }>(
+        `insert into listings
+           (portal_id, external_listing_id, listing_url, title, make, model, year,
+            odometer_km, fuel_type, transmission, registration_prefix, city, seller_type,
+            main_image_url, is_seeded, first_seen_at, last_seen_at, delisted_at)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, true, $15, $16, $17)
          returning id`,
-        [canonicalKey, product.title, product.category, product.imageUrl],
+        [
+          portalIds[listing.portal],
+          externalId,
+          `${PORTALS[listing.portal].base_url}${externalId}/`,
+          listing.title,
+          listing.make,
+          listing.model,
+          listing.year,
+          listing.odometerKm,
+          listing.fuelType,
+          listing.transmission,
+          listing.registrationPrefix,
+          listing.city,
+          listing.sellerType,
+          listing.imageUrl,
+          dayToTimestamp(listing.firstDay).toISOString(),
+          dayToTimestamp(listing.lastDay).toISOString(),
+          delistedAt ? delistedAt.toISOString() : null,
+        ],
       );
-      const productId = productRes.rows[0].id;
+      const listingId = listingRes.rows[0].id;
+      listingIdByKey.set(listing.key, listingId);
 
-      const spRes = await client.query<{ id: number }>(
-        `insert into store_products (store_id, product_id, product_url, region_code)
-         values ($1, $2, $3, '')
-         on conflict (store_id, product_id, region_code)
-           do update set product_url = excluded.product_url
-         returning id`,
-        [storeId, productId, `${STORE.base_url}/product/${product.slug}`],
-      );
-      const storeProductId = spRes.rows[0].id;
-
-      const snapshots = product.days(product.basePrice);
-      for (const s of snapshots) {
-        const scrapedAt = new Date(now - (DAYS - 1 - s.dayIndex) * dayMs);
+      for (const d of days) {
         await client.query(
-          `insert into snapshots
-             (store_product_id, current_price, list_price, currency, in_stock,
-              scarcity_text, raw_json, scraped_at, is_seeded)
-           values ($1, $2, $3, 'USD', $4, $5, $6, $7, true)`,
+          `insert into listing_snapshots
+             (listing_id, current_price, original_price, currency, odometer_km, raw_json, scraped_at, is_seeded)
+           values ($1, $2, $3, 'INR', $4, $5, $6, true)`,
           [
-            storeProductId,
-            s.currentPrice,
-            s.listPrice,
-            s.inStock,
-            s.scarcityText,
-            JSON.stringify({ seeded: true, scenario: product.scenario }),
-            scrapedAt.toISOString(),
+            listingId,
+            d.currentPrice,
+            d.originalPrice,
+            listing.odometerKm,
+            JSON.stringify({ seeded: true, scenario: listing.scenario }),
+            dayToTimestamp(d.dayIndex).toISOString(),
           ],
-        );
-      }
-
-      if (product.slug === "everyday-cotton-tee") {
-        await client.query(
-          `insert into map_policies (product_id, floor_price, currency)
-           values ($1, $2, 'USD')
-           on conflict (product_id) do update set floor_price = excluded.floor_price`,
-          [productId, round2(product.basePrice * 0.9)],
         );
       }
     }
 
+    // Second pass: resolve planted cross-portal duplicates now that every
+    // listing has a real id.
+    for (const listing of LISTINGS) {
+      if (!listing.duplicateOfKey) continue;
+      const dupId = listingIdByKey.get(listing.key)!;
+      const origId = listingIdByKey.get(listing.duplicateOfKey)!;
+      await client.query(
+        `update listings set duplicate_of_listing_id = $2, match_confidence = $3, needs_review = $4
+         where id = $1`,
+        [dupId, origId, listing.matchConfidence ?? null, listing.needsReview ?? false],
+      );
+    }
+
     await client.query("commit");
-    console.log(`seeded ${PRODUCTS.length} products x ${DAYS} days for store "${STORE.name}"`);
+    console.log(`seeded ${LISTINGS.length} listings across ${Object.keys(PORTALS).length} portals`);
   } catch (err) {
     await client.query("rollback");
     throw err;

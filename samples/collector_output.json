@@ -1,14 +1,62 @@
 [
   {
-    "product_title": "Echo Portable Speaker",
-    "current_price": 396.54,
-    "currency_code": "USD",
-    "in_stock": true,
-    "stock_scarcity_text": "Recently restocked, going fast. · Reordered by 31% of buyers.",
-    "canonical_url": "https://ecommerce-shop-brd.vercel.app/product/echo-portable-speaker",
-    "main_image_url": "https://loremflickr.com/800/800/speaker,bluetooth?lock=0041&v=131",
-    "input": {
-      "url": "https://ecommerce-shop-brd.vercel.app/product/echo-portable-speaker"
-    }
+    "listing_id": "21352573199",
+    "listing_url": "https://www.cars24.com/buy-used-hyundai-grand-i10-2017-cars-ahmedabad-21352573199/",
+    "title": "2017 Hyundai Grand i10 SPORTZ 1.2 KAPPA VTVT",
+    "odometer_km": 40483,
+    "fuel_type": "Petrol",
+    "transmission": "Manual",
+    "registration_prefix": "GJ-02",
+    "city": "Ahmedabad",
+    "current_price": 391000,
+    "original_price": 398000,
+    "seller_type": "Cars24 Owned Stock",
+    "main_image_url": "https://images10.cars24.com/hyundai-grand-i10-2017-front.jpg",
+    "input": { "url": "https://www.cars24.com/buy-used-car/" }
+  },
+  {
+    "listing_id": "19033400704",
+    "listing_url": "https://www.cars24.com/buy-used-maruti-wagon-r-1.0-2016-cars-rajkot-19033400704/",
+    "title": "2016 Maruti Wagon R 1.0 VXI",
+    "odometer_km": 111095,
+    "fuel_type": "Petrol",
+    "transmission": "Manual",
+    "registration_prefix": "GJ-08",
+    "city": "Rajkot",
+    "current_price": 247000,
+    "original_price": 292000,
+    "seller_type": "Cars24 Owned Stock",
+    "main_image_url": "https://images10.cars24.com/maruti-wagon-r-2016-front.jpg",
+    "input": { "url": "https://www.cars24.com/buy-used-car/" }
+  },
+  {
+    "listing_id": "17369506747",
+    "listing_url": "https://www.cars24.com/buy-used-jeep-compass-2018-cars-kolkata-17369506747/",
+    "title": "2018 Jeep Compass LIMITED (O) 1.4 PETROL AT",
+    "odometer_km": 67425,
+    "fuel_type": "Petrol",
+    "transmission": "Auto",
+    "registration_prefix": "WB-02",
+    "city": "Kolkata",
+    "current_price": 635000,
+    "original_price": 782000,
+    "seller_type": "Cars24 Owned Stock",
+    "main_image_url": "https://images10.cars24.com/jeep-compass-2018-front.jpg",
+    "input": { "url": "https://www.cars24.com/buy-used-car/" }
+  },
+  {
+    "listing_id": "17226167744",
+    "listing_url": "https://www.cars24.com/buy-used-renault-kwid-2017-cars-indore-17226167744/",
+    "title": "2017 Renault Kwid CLIMBER 1.0",
+    "odometer_km": 53870,
+    "fuel_type": "Petrol",
+    "transmission": "Manual",
+    "registration_prefix": "MP-20",
+    "city": "Indore",
+    "current_price": 278000,
+    "original_price": 283000,
+    "seller_type": "Cars24 Owned Stock",
+    "main_image_url": "https://images10.cars24.com/renault-kwid-2017-front.jpg",
+    "input": { "url": "https://www.cars24.com/buy-used-car/" }
   }
 ]
