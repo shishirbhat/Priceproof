@@ -3,11 +3,12 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/archivo";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
+    --font-heading: 'Archivo Variable', 'Geist Variable', sans-serif;
     --font-sans: 'Geist Variable', sans-serif;
     --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
     --color-sidebar-ring: var(--sidebar-ring);
@@ -219,7 +220,12 @@
   html {
     @apply font-sans;
     }
-  h1, h2, h3 {
+  /* Geist carries the UI; headings switch to Archivo, a sturdier grotesque
+     whose heavy weights hold up at display sizes. The token existed here
+     from the start but was never referenced by anything, so headings were
+     silently falling through to the body sans. */
+  h1, h2, h3, h4 {
+    font-family: 'Archivo Variable', 'Geist Variable', sans-serif;
     letter-spacing: -0.02em;
   }
 }
