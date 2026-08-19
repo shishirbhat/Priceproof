@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/domain/PageHeader";
 import { FadeIn } from "@/components/domain/FadeIn";
 import { QueryState, ChartSkeleton, ListRowSkeleton } from "@/components/domain/QueryState";
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
+import { ListingImage } from "@/components/domain/ListingImage";
 import { AnimatedNumber } from "@/components/domain/AnimatedNumber";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,33 +77,36 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
   return (
     <FadeIn delay={delay}>
       <Card className="gap-5 p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <Link
-                to={`/listings/${row.listing_id}`}
-                className="text-base font-semibold tracking-tight transition-colors hover:text-foreground/80"
-              >
-                {row.title}
-              </Link>
-              <SeverityBadge verdict={row.verdict} />
-              {row.is_seeded && <SeededBadge isSeeded />}
+        <div className="flex items-start gap-4">
+          <ListingImage src={row.main_image_url} alt={row.title} className="w-40 sm:w-44" />
+          <div className="flex min-w-0 flex-1 items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <Link
+                  to={`/listings/${row.listing_id}`}
+                  className="text-base font-semibold tracking-tight transition-colors hover:text-foreground/80"
+                >
+                  {row.title}
+                </Link>
+                <SeverityBadge verdict={row.verdict} />
+                {row.is_seeded && <SeededBadge isSeeded />}
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {row.portal_name}
+                {row.city && ` · ${row.city}`}
+                {row.odometer_km != null && ` · ${row.odometer_km.toLocaleString("en-IN")} km`}
+              </div>
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {row.portal_name}
-              {row.city && ` · ${row.city}`}
-              {row.odometer_km != null && ` · ${row.odometer_km.toLocaleString("en-IN")} km`}
-            </div>
+            <a
+              href={row.listing_url}
+              target="_blank"
+              rel="noreferrer"
+              className="group inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              View live listing
+              <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
           </div>
-          <a
-            href={row.listing_url}
-            target="_blank"
-            rel="noreferrer"
-            className="group inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            View live listing
-            <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </a>
         </div>
 
         <div className="grid grid-cols-3 divide-x divide-white/[0.06] rounded-lg border border-white/[0.06] bg-black/20">

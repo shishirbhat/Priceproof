@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { api } from "@/lib/api";
 import { QueryState } from "@/components/domain/QueryState";
 import { SeededBadge } from "@/components/domain/SeededBadge";
+import { ListingImage } from "@/components/domain/ListingImage";
 import { FadeIn } from "@/components/domain/FadeIn";
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
 import { Card } from "@/components/ui/card";
@@ -59,13 +60,11 @@ export function ListingDetail() {
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               className="flex items-start gap-4"
             >
-              {listing.main_image_url && (
-                <img
-                  src={listing.main_image_url}
-                  alt=""
-                  className="h-20 w-20 rounded-xl border border-white/[0.08] object-cover shadow-elevate"
-                />
-              )}
+              <ListingImage
+                src={listing.main_image_url}
+                alt={listing.title}
+                className="w-32 shadow-elevate"
+              />
               <div>
                 <div className="mb-1 font-mono text-[11px] tracking-widest text-brand">// LISTING DETAIL</div>
                 <h1 className="text-[2.25rem] font-bold leading-[1.05] tracking-tighter">{listing.title}</h1>
