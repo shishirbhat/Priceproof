@@ -12,24 +12,23 @@ import { Trash2 } from "lucide-react";
 const RULE_TYPES = [
   { value: "price_below", label: "Price drops below" },
   { value: "price_drop_pct", label: "Price drops more than %" },
-  { value: "back_in_stock", label: "Back in stock" },
-  { value: "map_breach", label: "MAP breach" },
-  { value: "integrity_failure", label: "Discount-integrity failure" },
+  { value: "below_market_value", label: "Priced below market by %" },
+  { value: "sold", label: "Sold / delisted" },
 ];
 
 export function Alerts() {
   const alerts = useQuery({ queryKey: ["alerts"], queryFn: api.alerts });
-  const products = useQuery({ queryKey: ["products"], queryFn: api.products });
+  const listings = useQuery({ queryKey: ["listings"], queryFn: api.listings });
   const queryClient = useQueryClient();
 
-  const [storeProductId, setStoreProductId] = useState("");
+  const [listingId, setListingId] = useState("");
   const [ruleType, setRuleType] = useState(RULE_TYPES[0].value);
   const [threshold, setThreshold] = useState("");
 
   const create = useMutation({
     mutationFn: () =>
       api.createAlert({
-        store_product_id: Number(storeProductId),
+        listing_id: Number(listingId),
         rule_type: ruleType,
         threshold: threshold ? Number(threshold) : undefined,
       }),
@@ -44,14 +43,14 @@ export function Alerts() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
   });
 
-  const needsThreshold = ruleType === "price_below" || ruleType === "price_drop_pct";
+  const needsThreshold = ruleType === "price_below" || ruleType === "price_drop_pct" || ruleType === "below_market_value";
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="// 06 ALERTS"
         title="Alerts"
-        description="In-app delivery. Rule evaluation runs against the append-only snapshot history, same as every other feature."
+        description="In-app delivery. Rule evaluation runs against the append-only listing_snapshots history, same as every other feature."
       />
 
       <FadeIn>
@@ -59,16 +58,16 @@ export function Alerts() {
         <h2 className="text-[13px] font-semibold tracking-tight">New alert rule</h2>
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-            Product
+            Listing
             <select
               className="h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-sm transition-colors hover:bg-white/[0.05] focus:border-white/20 focus:outline-none"
-              value={storeProductId}
-              onChange={(e) => setStoreProductId(e.target.value)}
+              value={listingId}
+              onChange={(e) => setListingId(e.target.value)}
             >
               <option value="">Select…</option>
-              {products.data?.map((p) => (
-                <option key={p.store_product_id} value={p.store_product_id}>
-                  {p.title} — {p.store_name}
+              {listings.data?.map((l) => (
+                <option key={l.listing_id} value={l.listing_id}>
+                  {l.title} — {l.portal_name}
                 </option>
               ))}
             </select>
@@ -95,13 +94,13 @@ export function Alerts() {
                 type="number"
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
-                placeholder={ruleType === "price_below" ? "$" : "%"}
+                placeholder={ruleType === "price_below" ? "₹" : "%"}
               />
             </label>
           )}
           <Button
             size="sm"
-            disabled={!storeProductId || create.isPending}
+            disabled={!listingId || create.isPending}
             onClick={() => create.mutate()}
           >
             Create alert
@@ -134,7 +133,7 @@ export function Alerts() {
                       <span className="font-medium">{a.title}</span>{" "}
                       <span className="text-muted-foreground">
                         · {RULE_TYPES.find((r) => r.value === a.rule_type)?.label ?? a.rule_type}
-                        {a.threshold != null ? ` ${a.threshold}` : ""} · {a.store_name}
+                        {a.threshold != null ? ` ${a.threshold}` : ""} · {a.portal_name}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">

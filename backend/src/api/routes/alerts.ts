@@ -10,13 +10,12 @@ alertsRouter.get(
   ah(async (_req, res) => {
     const { rows } = await pool.query(`
       select
-        a.*, p.title, st.name as store_name,
+        a.*, l.title, p.name as portal_name,
         (select count(*) from alert_events ae where ae.alert_id = a.id) as fired_count,
         (select max(fired_at) from alert_events ae where ae.alert_id = a.id) as last_fired_at
       from alerts a
-      join store_products sp on sp.id = a.store_product_id
-      join products p on p.id = sp.product_id
-      join stores st on st.id = sp.store_id
+      join listings l on l.id = a.listing_id
+      join portals p on p.id = l.portal_id
       order by a.created_at desc
     `);
     res.json(rows);
@@ -26,15 +25,15 @@ alertsRouter.get(
 alertsRouter.post(
   "/",
   ah(async (req, res) => {
-    const { store_product_id, rule_type, threshold, user_id } = req.body ?? {};
-    if (!store_product_id || !rule_type) {
-      res.status(400).json({ error: "store_product_id and rule_type are required" });
+    const { listing_id, rule_type, threshold, user_id } = req.body ?? {};
+    if (!listing_id || !rule_type) {
+      res.status(400).json({ error: "listing_id and rule_type are required" });
       return;
     }
     const { rows } = await pool.query(
-      `insert into alerts (user_id, store_product_id, rule_type, threshold)
+      `insert into alerts (user_id, listing_id, rule_type, threshold)
        values ($1, $2, $3, $4) returning *`,
-      [user_id ?? "demo-user", store_product_id, rule_type, threshold ?? null],
+      [user_id ?? "demo-user", listing_id, rule_type, threshold ?? null],
     );
     // Reflect current state immediately rather than waiting for the next ingest.
     await evaluateAlerts(pool);

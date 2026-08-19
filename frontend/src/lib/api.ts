@@ -13,99 +13,156 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export interface Kpis {
-  skus_tracked: number;
-  stores: number;
+  listings_tracked: number;
+  portals: number;
   price_changes_24h: number;
-  active_stockouts: number;
-  open_map_violations: number;
-  discount_integrity_failures: number;
+  newly_delisted_24h: number;
+  cross_portal_matches: number;
+  overpriced_count: number;
 }
 
-export type IntegrityVerdict = "GENUINE" | "INFLATED" | "INSUFFICIENT_HISTORY";
+export type MarketVerdict = "GOOD_DEAL" | "FAIR" | "OVERPRICED" | "INSUFFICIENT_COMPARABLES";
 
-export interface IntegrityRow {
-  snapshot_id: number;
-  store_product_id: number;
-  product_id: number;
+export interface MarketValueRow {
+  listing_id: number;
+  portal_id: number;
+  portal_name: string;
+  listing_url: string;
   title: string;
-  image_url: string | null;
-  store_name: string;
-  product_url: string;
-  scraped_at: string;
-  current_price: string;
-  list_price: string;
-  true_30d_low: string | null;
-  streak_start: string;
-  history_start: string;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  city: string | null;
+  odometer_km: number | null;
+  main_image_url: string | null;
   is_seeded: boolean;
-  verdict: IntegrityVerdict;
-  inflation_pct: number | null;
+  current_price: string;
+  segment_median: string | null;
+  segment_size: number;
+  segment_level: "make_model" | "make_year_band" | "insufficient";
+  pct_vs_median: number | null;
+  verdict: MarketVerdict;
 }
 
-export interface ProductListRow {
-  product_id: number;
+export interface ListingRow {
+  listing_id: number;
   title: string;
-  brand: string | null;
-  category: string | null;
-  image_url: string | null;
-  store_product_id: number;
-  region_code: string;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  city: string | null;
+  registration_prefix: string | null;
+  seller_type: string | null;
+  main_image_url: string | null;
+  listing_url: string;
   needs_review: boolean;
-  store_id: number;
-  store_name: string;
+  delisted_at: string | null;
+  first_seen_at: string;
+  portal_id: number;
+  portal_name: string;
   current_price: string;
-  list_price: string | null;
-  in_stock: boolean;
-  scarcity_text: string | null;
+  original_price: string | null;
+  odometer_km: number | null;
   scraped_at: string;
   is_seeded: boolean;
 }
 
-export interface Snapshot {
+export interface ListingSnapshot {
   id: number;
-  store_product_id: number;
+  listing_id: number;
   current_price: string;
-  list_price: string | null;
+  original_price: string | null;
   currency: string;
-  in_stock: boolean;
-  scarcity_text: string | null;
+  odometer_km: number | null;
   scraped_at: string;
   is_seeded: boolean;
 }
 
-export interface AvailabilityEvent {
-  id: number;
-  store_product_id: number;
-  product_id: number;
-  in_stock: boolean;
-  scarcity_text: string | null;
-  scraped_at: string;
-  is_seeded: boolean;
-  prev_in_stock: boolean;
-  prev_scraped_at: string;
+export interface ListingDetail {
+  listing: {
+    id: number;
+    portal_id: number;
+    portal_name: string;
+    portal_base_url: string;
+    external_listing_id: string;
+    listing_url: string;
+    title: string;
+    make: string | null;
+    model: string | null;
+    year: number | null;
+    odometer_km: number | null;
+    fuel_type: string | null;
+    transmission: string | null;
+    registration_prefix: string | null;
+    city: string | null;
+    seller_type: string | null;
+    main_image_url: string | null;
+    needs_review: boolean;
+    first_seen_at: string;
+    last_seen_at: string;
+    delisted_at: string | null;
+  };
+  snapshots: ListingSnapshot[];
+  duplicate_of: { id: number; title: string; listing_url: string; portal_name: string } | null;
+  duplicates: Array<{ id: number; title: string; listing_url: string; portal_name: string }>;
+}
+
+export interface DelistingEvent {
+  listing_id: number;
   title: string;
-  store_name: string;
-  gap_seconds: string;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  city: string | null;
+  portal_name: string;
+  is_seeded: boolean;
+  first_seen_at: string;
+  last_seen_at: string;
+  delisted_at: string;
+  days_on_market_seconds: string;
+  last_known_price: string | null;
 }
 
-export interface MapViolation {
-  id: number;
-  store_product_id: number;
-  product_id: number;
+export interface DaysOnMarketRow {
+  make: string;
+  sold_count: string;
+  avg_days_on_market: string;
+}
+
+export interface ActiveLongestRow {
+  listing_id: number;
+  title: string;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  city: string | null;
+  portal_name: string;
+  is_seeded: boolean;
+  first_seen_at: string;
+  days_active_seconds: string;
+}
+
+export interface CrossPortalMatchRow {
+  listing_id: number;
+  listing_title: string;
+  listing_url: string;
+  is_seeded: boolean;
+  portal_name: string;
   current_price: string;
-  scraped_at: string;
-  is_seeded: boolean;
-  floor_price: string;
-  title: string;
-  image_url: string | null;
-  store_name: string;
-  pct_below_floor: string;
+  matched_listing_id: number;
+  matched_title: string;
+  matched_listing_url: string;
+  matched_portal_name: string;
+  matched_price: string;
+  match_confidence: string | null;
+  needs_review: boolean;
+  pct_price_gap: string;
 }
 
 export interface CollectionRow {
   id: number;
-  store_id: number;
-  store_name: string;
+  portal_id: number;
+  portal_name: string;
   snapshot_id_external: string;
   triggered_at: string;
   completed_at: string | null;
@@ -122,47 +179,31 @@ export interface FieldCoverageRow {
   present_count: number;
   total_count: number;
   triggered_at: string;
-  store_id: number;
-  store_name: string;
+  portal_id: number;
+  portal_name: string;
 }
 
-export interface ProductDetail {
-  product: {
-    id: number;
-    canonical_key: string;
-    title: string;
-    brand: string | null;
-    gtin: string | null;
-    sku: string | null;
-    category: string | null;
-    image_url: string | null;
-  };
-  store_products: Array<{ id: number; store_id: number; store_name: string; product_url: string; region_code: string }>;
-  snapshots: Snapshot[];
-  availability_events: AvailabilityEvent[];
-}
-
-export interface StoreRow {
+export interface PortalRow {
   id: number;
   name: string;
   country: string | null;
   base_url: string;
   collector_id: string;
   is_active: boolean;
-  tracked_products: string;
+  tracked_listings: string;
   last_collection_at: string | null;
 }
 
 export interface AlertRow {
   id: number;
-  store_product_id: number;
+  listing_id: number;
   rule_type: string;
   threshold: string | null;
   channel: string;
   is_active: boolean;
   created_at: string;
   title: string;
-  store_name: string;
+  portal_name: string;
   fired_count: string;
   last_fired_at: string | null;
 }
@@ -179,27 +220,24 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 
 export const api = {
   kpis: () => get<Kpis>("/kpis"),
-  stores: () => get<StoreRow[]>("/catalog/stores"),
+  portals: () => get<PortalRow[]>("/catalog/portals"),
   alerts: () => get<AlertRow[]>("/alerts"),
-  createAlert: (body: { store_product_id: number; rule_type: string; threshold?: number }) =>
+  createAlert: (body: { listing_id: number; rule_type: string; threshold?: number }) =>
     post<AlertRow>("/alerts", body),
   deleteAlert: (id: number) => fetch(`${BASE}/alerts/${id}`, { method: "DELETE" }),
-  triggerCollection: (storeId: number) =>
-    fetch(`${BASE}/catalog/stores/${storeId}/collect`, { method: "POST" }).then((r) => {
+  triggerCollection: (portalId: number) =>
+    fetch(`${BASE}/catalog/portals/${portalId}/collect`, { method: "POST" }).then((r) => {
       if (!r.ok) throw new Error(`trigger failed: ${r.status}`);
       return r.json();
     }),
-  priceIntegrity: () => get<IntegrityRow[]>("/price-integrity"),
-  priceIntegrityHistory: (storeProductId: number) =>
-    get<Array<{ id: number; scraped_at: string; current_price: string; list_price: string | null; true_30d_low: string; is_seeded: boolean }>>(
-      `/price-integrity/${storeProductId}/history`,
-    ),
-  products: () => get<ProductListRow[]>("/products"),
-  product: (id: number) => get<ProductDetail>(`/products/${id}`),
-  availabilityEvents: () => get<AvailabilityEvent[]>("/availability/events"),
-  availabilityRate: () =>
-    get<Array<{ store_name: string; category: string; availability_pct: string }>>("/availability/rate"),
-  mapViolations: () => get<MapViolation[]>("/map-violations"),
+  marketValue: () => get<MarketValueRow[]>("/market-value"),
+  marketValueHistory: (listingId: number) => get<ListingSnapshot[]>(`/market-value/${listingId}/history`),
+  listings: () => get<ListingRow[]>("/listings"),
+  listing: (id: number) => get<ListingDetail>(`/listings/${id}`),
+  delistingEvents: () => get<DelistingEvent[]>("/market-activity/events"),
+  daysOnMarket: () => get<DaysOnMarketRow[]>("/market-activity/days-on-market"),
+  activeLongest: () => get<ActiveLongestRow[]>("/market-activity/active-longest"),
+  crossPortalMatches: () => get<CrossPortalMatchRow[]>("/cross-portal"),
   collections: () => get<CollectionRow[]>("/scraper-health/collections"),
   fieldCoverage: () => get<FieldCoverageRow[]>("/scraper-health/field-coverage"),
 };

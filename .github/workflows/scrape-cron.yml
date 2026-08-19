@@ -87,7 +87,7 @@ jobs:
             a sample raw JSON row from the most recent collector run.
 
             The field-mapping code lives in backend/src/worker/ingest.ts, in the
-            extract() function — it maps raw collector JSON keys (e.g. product_title,
+            extract() function — it maps raw collector JSON keys (e.g. title,
             current_price) to our schema. If the sample raw JSON uses different key
             names than extract() currently reads, the target site (or the Bright Data
             collector's output shape) has changed and extract() needs updating.

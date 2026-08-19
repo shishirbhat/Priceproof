@@ -1,10 +1,12 @@
 # PriceProof
 
-A price integrity and digital shelf monitoring platform. It builds a
-continuous time-series record of prices and stock across retailers, then
-turns that history into competitive, operational, and compliance
-intelligence — detecting fake "was" prices under the EU Omnibus Directive,
-stockouts, MAP violations, and price gaps across stores.
+A market-value and listings intelligence platform for used-car
+marketplaces. It builds a continuous time-series record of listings
+across portals, then turns that history into pricing intelligence no
+single listing page can give you: whether an asking price is actually
+fair relative to comparable cars, whether the same physical car is
+cross-posted to two portals at two different prices, and how long a
+listing sits — with real markdowns — before it sells.
 
 Built for the "Into the Scrape-Verse" hackathon (WeMakeDevs × Bright Data),
 Aug 17–23 2026.
@@ -16,15 +18,15 @@ Puppeteer, or raw HTTP scraping. The collector handles proxies,
 geo-targeting, CAPTCHA, JS rendering, and self-healing; this repo only talks
 to two REST endpoints (`dca/trigger`, `dca/dataset`). See
 [`samples/README.md`](samples/README.md) for confirmed field notes on the
-target storefront, including known selector gaps and scraper-honeypot
-patterns.
+target portals, including known gaps and why VIN/full-plate matching isn't
+the game here.
 
 ## Repo layout
 
 ```
-db/schema.sql               Postgres schema (Supabase). Append-only snapshots table.
+db/schema.sql               Postgres schema (Supabase). Append-only listing_snapshots table.
 backend/src/worker/          Bright Data trigger/poll client, ingestion worker, drift detection
-backend/src/db/               migration runner, seed script (planted demo history)
+backend/src/db/               migration runner, seed script (planted demo scenarios)
 backend/src/api/               HTTP API for the frontend
 frontend/                       React + Tailwind dashboard + landing page
 .github/workflows/               scheduled scrape + self-healing CI (see below)
@@ -33,14 +35,32 @@ samples/                          real collector output + field provenance notes
 
 ## Data model
 
-Catalog-driven: `stores` and `products` are rows, not URLs baked into
-scraper config. `store_products` links a product to a specific store +
-region. `snapshots` is append-only and is the single source of truth —
-every feature is a query over it, nothing is ever updated in place.
-`is_seeded` marks generated demo history; the UI must always label it as
-such, never present it as real scraped data. See `db/schema.sql` for the
-full schema and the sketch of derived views (price integrity, stockouts,
-competitive matrix, MAP violations).
+Catalog-driven: `portals` and `listings` are rows, not URLs baked into
+scraper config. `listing_snapshots` is append-only and is the single
+source of truth — every feature is a query over it, nothing is ever
+updated in place. `is_seeded` marks generated demo history; the UI must
+always label it as such, never present it as real scraped data.
+
+What's different from a retail SKU catalog, and why: a car is (almost
+always) sold by exactly one listing on one portal, so there's no
+exact-match fan-out of one product across many stores. What replaces it:
+
+- **Market-value scoring** instead of exact-SKU discount checking — group
+  comparable active listings (same make+model, widened to make+model-year
+  when a line is too thin) and score this listing's price against the
+  segment median. Never scores against fewer than 5 comparables —
+  `INSUFFICIENT_COMPARABLES` is a real verdict, not a fallback.
+- **Delisting-based days-on-market** instead of an in-stock flip — a
+  listing disappearing from a portal's results between two collection
+  runs is the only sold/removed signal available, so that's what's
+  tracked, bounded honestly by scrape cadence.
+- **Fuzzy cross-portal matching** (make, model, year, registration
+  prefix, city) instead of exact VIN matching — no India listings portal
+  publishes a full VIN or plate on its results grid, so this was scoped
+  around that from the start, not discovered as a limitation later.
+
+See `db/schema.sql` for the full schema and the sketch of derived views
+(market value, days-on-market, price cuts, cross-portal matches).
 
 ## Setup
 
@@ -49,7 +69,7 @@ cd backend
 cp .env.example .env   # fill in DATABASE_URL (Supabase) and BRIGHT_DATA_API_TOKEN
 npm install
 npm run migrate         # applies db/schema.sql (idempotent, safe to re-run)
-npm run seed             # generates ~60 days of demo history with planted violations
+npm run seed             # generates ~60 days of demo history with planted scenarios
 npm run dev               # starts the API on :3001
 npm run collect           # one real Bright Data trigger/poll/ingest cycle
 
@@ -87,14 +107,12 @@ palette for severity states, one signature brand accent reserved for
 identity moments and kept out of data views on purpose).
 
 The landing page (`frontend/src/pages/Landing.tsx`,
-`frontend/src/components/landing/`) was built by directly studying four
-references — Prime Security's bold numbered lists and color-inverted CTA,
-Porsche Motorsport's glass nav, Aaron J. Cunningham's particle-field hero
-and magnetic cursor, and a branded percentage-counter preloader — then
-reassembled around PriceProof's own content and brand color rather than
-copied wholesale. Its "how it works" section renders the real
-`PriceHistoryChart` component (not a mockup) against a canned dataset, and
-the product-showcase section is a live `iframe` of the actual running
+`frontend/src/components/landing/`) uses a mouse-reactive canvas
+particle-field hero, a glass nav, scroll-driven word reveal, and a
+branded percentage-counter preloader, reassembled around PriceProof's
+own content and brand color. Its "how it works" section renders the real
+`PriceHistoryChart` component (not a mockup) against a canned dataset,
+and the product-showcase section is a live `iframe` of the actual running
 dashboard, so neither can go stale.
 
 ## Self-healing scraper cron
@@ -103,7 +121,7 @@ dashboard, so neither can go stale.
 via GitHub Actions, independent of anyone's laptop being on. On every run it
 also compares field coverage against the previous run (`npm run
 detect-drift`) — if a field that was reliably present has mostly or
-entirely vanished, the target site's shape has likely changed under the
+entirely vanished, the target portal's shape has likely changed under the
 scraper.
 
 When that happens, a second job hands the drift report and the current
@@ -125,44 +143,47 @@ and reports drift without it, it just can't self-fix).
 
 ## Build order
 
-1. [x] Schema + migrations + seed script with planted violations
+1. [x] Schema + migrations + seed script with planted scenarios
 2. [x] Bright Data client (trigger/poll/store) + ingestion worker
-3. [x] Command Center + Product Detail
-4. [x] Price Integrity (hero feature)
+3. [x] Command Center + Listing Detail
+4. [x] Market Value (hero feature)
 5. [x] Scraper Health
-6. [x] Competitive Landscape + Availability
-7. [x] MAP + Alerts
+6. [x] Cross-Portal Matches + Market Activity
+7. [x] Alerts + Catalog Management
 8. [x] Polish, empty states, demo script — full visual design pass (dark-terminal tokens, motion.dev + anime.js throughout, mobile-responsive), landing page, self-healing CI, demo script
 
 If time runs short, cut from the bottom — never cut 4 or 5.
 
 ## Verified end-to-end (2026-08-19)
 
-All 9 dashboard pages plus the landing page checked with Playwright
-against the live seeded database and API — real data renders correctly,
-zero browser console errors across every route and nav interaction, and
-both write paths (alert creation, manual collection trigger) work. Also
-checked at a 390×844 mobile viewport, which caught a real bug: the
-sidebar had no responsive handling at all and clipped every page below
-the `lg` breakpoint — now a proper off-canvas drawer.
-
-Other real bugs caught this way (not by typecheck) and fixed: a
-price-integrity window function that included the sale's own discounted
-days in its 30-day lookback, and a restock-duration calculation that only
-measured the gap to the previous snapshot instead of the full stockout
-streak. See commit history for details.
+All dashboard pages plus the landing page checked with Playwright against
+the live seeded database and API — real data renders correctly, zero
+browser console errors across every route and nav interaction. Market
+value scoring verified against the actual seeded segments (7-car Swift
+segment correctly produces a Good deal at -21%, an Overpriced at +17%,
+and five Fair listings around the median; a 2-car Creta segment correctly
+returns Insufficient comparables at every widening level). Delisting/
+days-on-market verified directly against the database (Nexon: 48 days
+with 3 price cuts; Honda City: 3 days, no cuts). Cross-portal match
+verified (Innova pair, Cars24 vs CarWale, 5.8% gap, needs_review=true).
 
 **Known gaps, honestly:**
-- Only one store (`Alto & Oak`) is connected — Competitive Landscape's
-  cross-store spread has nothing to compare against yet. The UI says so
-  explicitly rather than hiding it.
-- No live Bright Data collection has run yet (needs
-  `BRIGHT_DATA_API_TOKEN`) — Scraper Health is correctly empty, not
+- Only two portals are connected (Cars24, CarWale) and neither has a real
+  Scraper Studio collector wired up yet (`collector_id` is a placeholder
+  until the first real run — see `samples/README.md`). No live Bright
+  Data collection has run yet — Scraper Health is correctly empty, not
   broken.
+- Market-value scoring only reaches a trustworthy segment for two make/
+  model groups in the seeded data (Maruti Swift, and deliberately-thin
+  Hyundai Creta) — every other seeded listing honestly returns
+  Insufficient comparables rather than a low-confidence number. This is
+  by design (the whole point of the verdict), but it means most of the
+  catalog won't show a scored verdict until portal volume grows.
 - Alert rules evaluate immediately on creation and again after every
-  ingest (seed or live collection) — `price_below`/`map_breach` fire on
-  every snapshot the condition holds (an honest append-only record, not
-  just the first breach), `back_in_stock` fires on the restock edge.
-  There's no standing scheduler independent of ingest — a rule only
-  re-checks when new data arrives, which is correct for this app (nothing
-  changes between scrapes) but worth knowing.
+  ingest (seed or live collection) — `price_below`/`price_drop_pct`/
+  `below_market_value` fire on every snapshot the condition holds (an
+  honest append-only record, not just the first breach), `sold` fires
+  once on the delisting edge. There's no standing scheduler independent
+  of ingest — a rule only re-checks when new data arrives, which is
+  correct for this app (nothing changes between scrapes) but worth
+  knowing.

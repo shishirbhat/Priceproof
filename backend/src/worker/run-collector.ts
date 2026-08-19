@@ -1,46 +1,42 @@
 import "dotenv/config";
 import { pool } from "../db/client.js";
 import { triggerCollection, pollDataset, type TriggerInput } from "./brightdata-client.js";
-import { ingestRow } from "./ingest.js";
+import { ingestRow, markDelisted } from "./ingest.js";
 import { recordFieldCoverage } from "./schema-drift.js";
 import { evaluateAlerts } from "./alert-evaluation.js";
 
 /**
- * Runs one collection for one store: trigger -> poll -> ingest -> record
- * field coverage. Never call this from an HTTP request handler — it blocks
- * for however long Bright Data takes to build the dataset (up to ~5 min).
- * Intended to run from a scheduled job (cron / n8n) or manually via `npm run collect`.
+ * Runs one collection for one portal: trigger -> poll -> ingest -> mark
+ * delistings -> record field coverage. Never call this from an HTTP request
+ * handler — it blocks for however long Bright Data takes to build the
+ * dataset (up to ~5 min). Intended to run from a scheduled job (cron) or
+ * manually via `npm run collect`.
+ *
+ * Unlike the old per-URL product trigger, a car collector targets a single
+ * search-results page (or a small handful — one per city) and gets back an
+ * array of 20-40 listings per page load, so the trigger input list here is
+ * just the portal's tracked search URLs, not one row per listing.
  */
-export async function runCollectionForStore(storeId: number): Promise<void> {
+export async function runCollectionForPortal(portalId: number): Promise<void> {
   const client = await pool.connect();
   try {
-    const storeRes = await client.query<{
-      id: number;
-      collector_id: string;
-    }>(`select id, collector_id from stores where id = $1 and is_active`, [storeId]);
-    const store = storeRes.rows[0];
-    if (!store) throw new Error(`no active store with id ${storeId}`);
-
-    const spRes = await client.query<{ product_url: string; region_code: string }>(
-      `select product_url, region_code from store_products where store_id = $1`,
-      [storeId],
+    const portalRes = await client.query<{ id: number; collector_id: string; base_url: string }>(
+      `select id, collector_id, base_url from portals where id = $1 and is_active`,
+      [portalId],
     );
-    if (spRes.rows.length === 0) {
-      console.log(`store ${storeId} has no tracked products yet, skipping`);
-      return;
-    }
+    const portal = portalRes.rows[0];
+    if (!portal) throw new Error(`no active portal with id ${portalId}`);
 
-    const inputs: TriggerInput[] = spRes.rows.map((r) => ({
-      url: r.product_url,
-      ...(r.region_code ? { zip_code: r.region_code } : {}),
-    }));
+    // A search-results collector takes the results page itself as input —
+    // one trigger input returns 20-40 listings, not one input per listing.
+    const inputs: TriggerInput[] = [{ url: portal.base_url }];
 
-    const collectionId = await triggerCollection(store.collector_id, inputs);
+    const collectionId = await triggerCollection(portal.collector_id, inputs);
 
     const collectionRes = await client.query<{ id: number }>(
-      `insert into collections (store_id, snapshot_id_external, status)
+      `insert into collections (portal_id, snapshot_id_external, status)
        values ($1, $2, 'building') returning id`,
-      [storeId, collectionId],
+      [portalId, collectionId],
     );
     const dbCollectionId = collectionRes.rows[0].id;
 
@@ -55,11 +51,14 @@ export async function runCollectionForStore(storeId: number): Promise<void> {
     }
 
     const scrapedAt = new Date();
+    const seenExternalIds: string[] = [];
     await client.query("begin");
     try {
       for (const row of rows) {
-        await ingestRow(client, storeId, row, false, scrapedAt);
+        const externalId = await ingestRow(client, portalId, row, false, scrapedAt);
+        if (externalId) seenExternalIds.push(externalId);
       }
+      const delistedCount = await markDelisted(client, portalId, seenExternalIds, scrapedAt);
       await recordFieldCoverage(client, dbCollectionId, rows);
       await client.query(
         `update collections
@@ -68,6 +67,7 @@ export async function runCollectionForStore(storeId: number): Promise<void> {
         [dbCollectionId, rows.length],
       );
       await client.query("commit");
+      console.log(`portal ${portalId}: ${delistedCount} listing(s) newly marked delisted`);
     } catch (err) {
       await client.query("rollback");
       await client.query(`update collections set status = 'failed' where id = $1`, [
@@ -78,7 +78,7 @@ export async function runCollectionForStore(storeId: number): Promise<void> {
 
     const fired = await evaluateAlerts(pool);
     console.log(
-      `store ${storeId}: ingested ${rows.length} rows from collection ${collectionId}, ${fired} alert(s) fired`,
+      `portal ${portalId}: ingested ${rows.length} listings from collection ${collectionId}, ${fired} alert(s) fired`,
     );
   } finally {
     client.release();
@@ -86,15 +86,15 @@ export async function runCollectionForStore(storeId: number): Promise<void> {
 }
 
 async function main() {
-  const storesRes = await pool.query<{ id: number }>(`select id from stores where is_active`);
-  for (const { id } of storesRes.rows) {
-    await runCollectionForStore(id);
+  const portalsRes = await pool.query<{ id: number }>(`select id from portals where is_active`);
+  for (const { id } of portalsRes.rows) {
+    await runCollectionForPortal(id);
   }
   await pool.end();
 }
 
 // Only auto-run when executed directly (`npm run collect`) — importing this
-// module from the API server must NOT trigger every store's collection as a
+// module from the API server must NOT trigger every portal's collection as a
 // side effect of the import.
 const isMainModule = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
 if (isMainModule) {

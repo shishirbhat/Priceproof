@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { api, type IntegrityRow, type IntegrityVerdict } from "@/lib/api";
+import { api, type MarketValueRow, type MarketVerdict } from "@/lib/api";
 import { SeverityBadge } from "@/components/domain/SeverityBadge";
 import { SeededBadge } from "@/components/domain/SeededBadge";
 import { PageHeader } from "@/components/domain/PageHeader";
@@ -12,42 +12,52 @@ import { AnimatedNumber } from "@/components/domain/AnimatedNumber";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowUpRight, ShieldCheck, ShieldX, ShieldQuestion } from "lucide-react";
+import { ArrowUpRight, TrendingDown, Minus, TrendingUp, HelpCircle } from "lucide-react";
 
-const currencyFmt = (n: number) => `$${n.toFixed(2)}`;
+const currencyFmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
-const FILTERS: Array<{ key: IntegrityVerdict | "ALL"; label: string }> = [
+const FILTERS: Array<{ key: MarketVerdict | "ALL"; label: string }> = [
   { key: "ALL", label: "All" },
-  { key: "INFLATED", label: "Inflated" },
-  { key: "GENUINE", label: "Genuine" },
-  { key: "INSUFFICIENT_HISTORY", label: "Insufficient history" },
+  { key: "GOOD_DEAL", label: "Good deal" },
+  { key: "FAIR", label: "Fair price" },
+  { key: "OVERPRICED", label: "Overpriced" },
+  { key: "INSUFFICIENT_COMPARABLES", label: "Insufficient comparables" },
 ];
 
-const VERDICT_NOTE: Record<IntegrityVerdict, { icon: typeof ShieldX; className: string; text: (r: IntegrityRow) => string }> = {
-  INFLATED: {
-    icon: ShieldX,
+const VERDICT_NOTE: Record<
+  MarketVerdict,
+  { icon: typeof TrendingDown; className: string; text: (r: MarketValueRow) => string }
+> = {
+  GOOD_DEAL: {
+    icon: TrendingDown,
+    className: "border-severity-genuine/25 bg-severity-genuine/[0.07] text-severity-genuine",
+    text: (r) =>
+      `Priced ${Math.abs(r.pct_vs_median!)}% below the median of ${r.segment_size} comparable ${r.make} ${r.model} listings — a genuinely underpriced comparable, not a rounding artifact.`,
+  },
+  FAIR: {
+    icon: Minus,
+    className: "border-white/[0.1] bg-white/[0.03] text-foreground",
+    text: (r) =>
+      `Within ${Math.abs(r.pct_vs_median!)}% of the median of ${r.segment_size} comparable ${r.make} ${r.model} listings — priced in line with the market.`,
+  },
+  OVERPRICED: {
+    icon: TrendingUp,
     className: "border-severity-violation/25 bg-severity-violation/[0.07] text-severity-violation",
     text: (r) =>
-      `The advertised was-price is ${r.inflation_pct}% above the true 30-day low — that price was never actually charged in the 30 days before this "sale" began.`,
+      `Priced ${r.pct_vs_median}% above the median of ${r.segment_size} comparable ${r.make} ${r.model} listings.`,
   },
-  GENUINE: {
-    icon: ShieldCheck,
-    className: "border-severity-genuine/25 bg-severity-genuine/[0.07] text-severity-genuine",
-    text: () =>
-      `The advertised was-price closely matches the real 30-day low — this discount reflects actual price history.`,
-  },
-  INSUFFICIENT_HISTORY: {
-    icon: ShieldQuestion,
+  INSUFFICIENT_COMPARABLES: {
+    icon: HelpCircle,
     className: "border-severity-drift/25 bg-severity-drift/[0.07] text-severity-drift",
     text: () =>
-      `Fewer than 30 days of price history exist before this claim — there isn't enough data to verify it honestly either way yet.`,
+      `Fewer than the required comparable listings exist for this make/model (or make/year) — there isn't enough data to score this listing against the market honestly yet.`,
   },
 };
 
-function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
+function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number }) {
   const history = useQuery({
-    queryKey: ["price-integrity-history", row.store_product_id],
-    queryFn: () => api.priceIntegrityHistory(row.store_product_id),
+    queryKey: ["market-value-history", row.listing_id],
+    queryFn: () => api.marketValueHistory(row.listing_id),
   });
 
   const chartData = useMemo(() => {
@@ -55,10 +65,10 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
     return history.data.map((s) => ({
       date: new Date(s.scraped_at),
       current: Number(s.current_price),
-      list: s.list_price != null ? Number(s.list_price) : undefined,
-      trueLow: Number(s.true_30d_low),
+      list: s.original_price != null ? Number(s.original_price) : undefined,
+      trueLow: row.segment_median != null ? Number(row.segment_median) : undefined,
     }));
-  }, [history.data]);
+  }, [history.data, row.segment_median]);
 
   const note = VERDICT_NOTE[row.verdict];
   const NoteIcon = note.icon;
@@ -70,7 +80,7 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
           <div>
             <div className="flex items-center gap-2.5">
               <Link
-                to={`/products/${row.product_id}`}
+                to={`/listings/${row.listing_id}`}
                 className="text-base font-semibold tracking-tight transition-colors hover:text-foreground/80"
               >
                 {row.title}
@@ -78,10 +88,14 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
               <SeverityBadge verdict={row.verdict} />
               {row.is_seeded && <SeededBadge isSeeded />}
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">{row.store_name}</div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {row.portal_name}
+              {row.city && ` · ${row.city}`}
+              {row.odometer_km != null && ` · ${row.odometer_km.toLocaleString("en-IN")} km`}
+            </div>
           </div>
           <a
-            href={row.product_url}
+            href={row.listing_url}
             target="_blank"
             rel="noreferrer"
             className="group inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
@@ -94,7 +108,7 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
         <div className="grid grid-cols-3 divide-x divide-white/[0.06] rounded-lg border border-white/[0.06] bg-black/20">
           <div className="px-4 py-3">
             <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Selling price
+              Asking price
             </div>
             <div className="mt-1 text-2xl font-semibold tracking-tight">
               <AnimatedNumber value={Number(row.current_price)} format={currencyFmt} />
@@ -102,23 +116,21 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
           </div>
           <div className="px-4 py-3">
             <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Claimed "was" price
-            </div>
-            <div className="mt-1 text-2xl font-semibold tracking-tight text-severity-violation">
-              <AnimatedNumber value={Number(row.list_price)} format={currencyFmt} />
-            </div>
-          </div>
-          <div className="px-4 py-3">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              True 30-day low
+              Segment median
             </div>
             <div className="mt-1 text-2xl font-semibold tracking-tight">
-              {row.true_30d_low != null ? (
-                <AnimatedNumber value={Number(row.true_30d_low)} format={currencyFmt} />
+              {row.segment_median != null ? (
+                <AnimatedNumber value={Number(row.segment_median)} format={currencyFmt} />
               ) : (
                 "—"
               )}
             </div>
+          </div>
+          <div className="px-4 py-3">
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Comparable listings
+            </div>
+            <div className="mt-1 text-2xl font-semibold tracking-tight">{row.segment_size}</div>
           </div>
         </div>
 
@@ -148,25 +160,25 @@ function IntegrityDetail({ row, delay }: { row: IntegrityRow; delay: number }) {
   );
 }
 
-export function PriceIntegrity() {
-  const [filter, setFilter] = useState<IntegrityVerdict | "ALL">("ALL");
-  const integrity = useQuery({ queryKey: ["price-integrity"], queryFn: api.priceIntegrity });
+export function MarketValue() {
+  const [filter, setFilter] = useState<MarketVerdict | "ALL">("ALL");
+  const marketValue = useQuery({ queryKey: ["market-value"], queryFn: api.marketValue });
 
   const filtered = useMemo(() => {
-    if (!integrity.data) return [];
-    if (filter === "ALL") return integrity.data;
-    return integrity.data.filter((r) => r.verdict === filter);
-  }, [integrity.data, filter]);
+    if (!marketValue.data) return [];
+    if (filter === "ALL") return marketValue.data;
+    return marketValue.data.filter((r) => r.verdict === filter);
+  }, [marketValue.data, filter]);
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="// 02 PRICE INTEGRITY"
-        title="Price Integrity"
-        description="Every advertised discount, checked against the true lowest price charged in the 30 days before the claim — the EU Omnibus / UK CMA / India CCPA standard. A verdict is only ever given with enough history to back it; otherwise it says so honestly."
+        eyebrow="// 02 MARKET VALUE"
+        title="Market Value"
+        description="Every active listing scored against the median of comparable listings — same make and model, or make and model-year when a model line is too thin. A verdict is only ever given with enough comparables to back it; otherwise it says so honestly."
       />
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <Button
             key={f.key}
@@ -176,9 +188,9 @@ export function PriceIntegrity() {
             onClick={() => setFilter(f.key)}
           >
             {f.label}
-            {integrity.data && f.key !== "ALL" && (
+            {marketValue.data && f.key !== "ALL" && (
               <span className="ml-1 opacity-70">
-                {integrity.data.filter((r) => r.verdict === f.key).length}
+                {marketValue.data.filter((r) => r.verdict === f.key).length}
               </span>
             )}
           </Button>
@@ -186,17 +198,17 @@ export function PriceIntegrity() {
       </div>
 
       <QueryState
-        isLoading={integrity.isLoading}
-        error={integrity.error}
+        isLoading={marketValue.isLoading}
+        error={marketValue.error}
         data={filtered}
         isEmpty={(d) => d.length === 0}
-        emptyTitle="No claims match this filter"
+        emptyTitle="No listings match this filter"
         skeleton={<ListRowSkeleton rows={4} />}
       >
         {(rows) => (
           <div className="space-y-4">
             {rows.map((row, i) => (
-              <IntegrityDetail key={row.snapshot_id} row={row} delay={i * 0.06} />
+              <MarketValueDetail key={row.listing_id} row={row} delay={i * 0.06} />
             ))}
           </div>
         )}

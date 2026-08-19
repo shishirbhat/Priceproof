@@ -3,11 +3,10 @@ import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import {
   LayoutGrid,
-  ShieldCheck,
-  GitCompare,
-  PackageSearch,
-  Boxes,
-  ShieldAlert,
+  Gauge,
+  GitCompareArrows,
+  Clock,
+  Car,
   Bell,
   Activity,
   Settings2,
@@ -16,10 +15,9 @@ import {
 
 const NAV = [
   { to: "/", label: "Command Center", icon: LayoutGrid, end: true },
-  { to: "/price-integrity", label: "Price Integrity", icon: ShieldCheck },
-  { to: "/competitive-landscape", label: "Competitive Landscape", icon: GitCompare },
-  { to: "/availability", label: "Availability & Stockouts", icon: PackageSearch },
-  { to: "/map-violations", label: "MAP Violations", icon: ShieldAlert },
+  { to: "/market-value", label: "Market Value", icon: Gauge },
+  { to: "/cross-portal", label: "Cross-Portal Matches", icon: GitCompareArrows },
+  { to: "/market-activity", label: "Market Activity", icon: Clock },
   { to: "/alerts", label: "Alerts", icon: Bell },
   { to: "/scraper-health", label: "Scraper Health", icon: Activity },
   { to: "/catalog", label: "Catalog Management", icon: Settings2 },
@@ -54,14 +52,14 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             transition={{ type: "spring", stiffness: 400, damping: 15 }}
             className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand/70 text-brand-foreground shadow-[0_2px_14px_-2px] shadow-brand/50"
           >
-            <Boxes className="h-4 w-4" />
+            <Car className="h-4 w-4" />
           </motion.div>
           <div className="flex-1">
             <div className="text-sm font-semibold tracking-tight text-sidebar-foreground">
               PriceProof
             </div>
             <div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/80">
-              Price Integrity Platform
+              Market Intelligence Platform
             </div>
           </div>
           <button

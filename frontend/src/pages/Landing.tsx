@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowRight, Boxes, ArrowDown } from "lucide-react";
+import { ArrowRight, Car, ArrowDown } from "lucide-react";
 import { ParticleField } from "@/components/landing/ParticleField";
 import { ScrollReveal } from "@/components/landing/ScrollReveal";
 import { StatBlock } from "@/components/landing/StatBlock";
@@ -14,43 +14,41 @@ import { MagneticButton } from "@/components/domain/MagneticButton";
 const FEATURES = [
   {
     n: "01",
-    title: "Price Integrity",
-    body: "Every advertised discount checked against the true 30-day low. EU Omnibus, UK CMA, India CCPA — the reference price the law actually requires, computed, not eyeballed.",
+    title: "Market Value",
+    body: "Every active listing scored against the median of comparable listings — same make and model, widened to make and model-year when a line is too thin. A verdict only ever comes with enough comparables to back it.",
   },
   {
     n: "02",
-    title: "MAP Violations",
-    body: "Retailers selling below the floor you set, ranked by how far below and how long they've stayed there.",
+    title: "Cross-Portal Matching",
+    body: "The same car, cross-posted by an individual seller to two portals at two prices — matched on make, model, year, registration prefix, and city, since no portal publishes a full VIN on its results grid.",
   },
   {
     n: "03",
-    title: "Stockout Tracking",
-    body: "Every restock and outage timestamped, with real time-to-restock — not a guess from the last time someone checked.",
+    title: "Days-on-Market & Price Cuts",
+    body: "A listing disappearing between two collection runs is the only sold signal a portal gives. Track that, plus every markdown before the sale, and you get sell-through data the portals themselves don't show.",
   },
   {
     n: "04",
     title: "Scraper Health",
-    body: "Field-level coverage over time, so a site that changes under the scraper shows up as a drift alert, then a recovery — not silence.",
+    body: "Field-level coverage over time, so a portal that changes under the scraper shows up as a drift alert, then a recovery — not silence.",
   },
 ];
 
 const demoData = (() => {
-  const base = 83.11;
-  const days = 30;
+  const base = 680000;
+  const days = 48;
   const out: { date: Date; current?: number; list?: number; trueLow?: number }[] = [];
-  const now = new Date("2026-08-18T00:00:00Z").getTime();
+  const now = new Date("2026-08-19T00:00:00Z").getTime();
   for (let i = 0; i < days; i++) {
     const date = new Date(now - (days - 1 - i) * 86400000);
-    if (i < days - 6) {
-      out.push({ date, current: base * (1 + Math.sin(i / 2) * 0.03), trueLow: base * 0.97 });
+    if (i < 15) {
+      out.push({ date, current: base * (1 + Math.sin(i / 2) * 0.006) });
+    } else if (i < 30) {
+      out.push({ date, current: base * 0.956, list: i < 19 ? base : undefined });
+    } else if (i < 45) {
+      out.push({ date, current: base * 0.912, list: i < 34 ? base * 0.956 : undefined });
     } else {
-      const t = (i - (days - 6)) / 5;
-      out.push({
-        date,
-        current: base * (1 - 0.15 * t),
-        list: base * 1.35,
-        trueLow: base * 0.97,
-      });
+      out.push({ date, current: base * 0.868, list: base * 0.912 });
     }
   }
   return out;
@@ -67,7 +65,7 @@ function Nav() {
       <div className="flex w-full max-w-5xl items-center justify-between rounded-full border border-white/[0.08] bg-black/40 px-4 py-2.5 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-brand to-brand/70 text-brand-foreground">
-            <Boxes className="h-3.5 w-3.5" />
+            <Car className="h-3.5 w-3.5" />
           </div>
           <span className="text-sm font-semibold tracking-tight">PriceProof</span>
         </div>
@@ -111,7 +109,7 @@ export function Landing() {
             transition={{ delay: 0.15, duration: 0.5 }}
             className="mb-6 flex items-center gap-2 font-mono text-xs tracking-wider text-muted-foreground"
           >
-            <span className="text-brand">// 01</span> PRICE INTEGRITY &amp; COMPLIANCE PLATFORM
+            <span className="text-brand">// 01</span> MARKET VALUE &amp; LISTINGS INTELLIGENCE PLATFORM
           </motion.div>
 
           <h1 className="text-[clamp(3rem,9vw,7.5rem)] font-bold leading-[0.92] tracking-tighter">
@@ -121,7 +119,7 @@ export function Landing() {
               transition={{ delay: 0.25, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="block"
             >
-              Fake discounts.
+              Every listing.
             </motion.span>
             <motion.span
               initial={{ opacity: 0, y: 30 }}
@@ -129,7 +127,7 @@ export function Landing() {
               transition={{ delay: 0.38, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="block text-muted-foreground"
             >
-              Caught on the record.
+              Priced honestly.
             </motion.span>
           </h1>
 
@@ -139,8 +137,8 @@ export function Landing() {
             transition={{ delay: 0.55, duration: 0.5 }}
             className="mt-8 max-w-lg text-[15px] leading-relaxed text-muted-foreground"
           >
-            PriceProof builds a continuous price-history record across every store you track, then proves
-            — with a verdict, not a guess — whether an advertised discount was ever real.
+            PriceProof builds a continuous listings-history record across every portal you track, then
+            scores — with a verdict, not a guess — whether an asking price is actually fair.
           </motion.p>
 
           <motion.div
@@ -162,7 +160,7 @@ export function Landing() {
                 href="#how"
                 className="inline-flex items-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-medium transition-colors hover:bg-white/[0.04]"
               >
-                See it catch one
+                See a verdict
               </a>
             </MagneticButton>
           </motion.div>
@@ -222,7 +220,7 @@ export function Landing() {
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 font-mono text-xs tracking-wider text-brand">// 02 THE PROBLEM</div>
           <ScrollReveal
-            text="Anyone can scrape a price once. A single snapshot can't tell you whether a 40% off sale is real — only accumulated history can. Retailers quietly raise the list price days before a markdown, advertise the inflated gap, and there's no record to catch it against. Until there's a record."
+            text="A single listing can't tell you if ₹4.2L for a 2019 Swift is a good deal — only a market can. Dealers price high and wait it out; individual sellers panic-sell underpriced. Every portal shows you one asking price with no reference point. Until there's a record of the whole market."
             className="text-[clamp(1.5rem,3.5vw,2.75rem)] font-medium leading-tight tracking-tight text-muted-foreground"
           />
         </div>
@@ -231,8 +229,8 @@ export function Landing() {
       {/* STATS */}
       <section id="stats" className="border-y border-white/[0.06] bg-white/[0.02] px-6 py-28">
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-16 md:grid-cols-3">
-          <StatBlock value="30" label="days of price history checked before any verdict is given" delay={0} />
-          <StatBlock value="0" label="guesses — INSUFFICIENT_HISTORY is a real answer, not a fallback" delay={0.1} />
+          <StatBlock value="5+" label="comparable listings required before any verdict is given" delay={0} />
+          <StatBlock value="0" label="guesses — INSUFFICIENT_COMPARABLES is a real answer, not a fallback" delay={0.1} />
           <StatBlock value="24/7" label="continuous tracking, not spot checks run by hand" delay={0.2} />
         </div>
       </section>
@@ -285,12 +283,13 @@ export function Landing() {
           >
             <div className="mb-4 font-mono text-xs tracking-wider text-brand">// 04 SEE IT WORK</div>
             <h2 className="mb-3 text-[clamp(2rem,4vw,3rem)] font-bold tracking-tight">
-              This is a real verdict.
+              This is a real listing's markdown.
             </h2>
             <p className="mb-10 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              Steady price for weeks, then the list price jumps 35% six days before the "sale" —
-              while the true 30-day low barely moved. This exact pattern is what PriceProof's Price
-              Integrity page flags as <span className="text-severity-violation">Inflated</span>, automatically.
+              Steady asking price for two weeks, then two price cuts over the following month as the
+              listing sat without selling — 680,000 down to 590,000, 48 days on market. This exact
+              pattern is what PriceProof's Market Activity page tracks automatically, from nothing more
+              than the listing quietly changing between collection runs.
             </p>
           </motion.div>
 
@@ -303,13 +302,10 @@ export function Landing() {
           >
             <div className="mb-4 flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-chart-1" /> Selling price
+                <span className="h-2 w-2 rounded-full bg-chart-1" /> Asking price
               </span>
               <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-severity-violation" /> Claimed "was" price
-              </span>
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-chart-2" /> True 30-day low
+                <span className="h-2 w-2 rounded-full bg-severity-violation" /> Price before cut
               </span>
             </div>
             <PriceHistoryChart data={demoData} />
@@ -329,7 +325,7 @@ export function Landing() {
           >
             Ready to see what your
             <br />
-            competitors aren't telling you?
+            listings are actually worth?
           </motion.h2>
           <motion.div
             initial={{ opacity: 0, y: 20 }}

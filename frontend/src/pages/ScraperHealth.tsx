@@ -135,7 +135,7 @@ export function ScraperHealth() {
             <table className="w-full text-left text-xs">
               <thead className="text-muted-foreground">
                 <tr>
-                  <th className="py-1.5 pr-4 font-medium">Store</th>
+                  <th className="py-1.5 pr-4 font-medium">Portal</th>
                   <th className="py-1.5 pr-4 font-medium">Triggered</th>
                   <th className="py-1.5 pr-4 font-medium">Status</th>
                   <th className="py-1.5 pr-4 font-medium">Duration</th>
@@ -146,7 +146,7 @@ export function ScraperHealth() {
               <tbody className="font-mono">
                 {rows.map((c) => (
                   <tr key={c.id} className="border-t border-white/[0.05] transition-colors hover:bg-white/[0.02]">
-                    <td className="py-1.5 pr-4">{c.store_name}</td>
+                    <td className="py-1.5 pr-4">{c.portal_name}</td>
                     <td className="py-1.5 pr-4 text-muted-foreground">
                       {new Date(c.triggered_at).toLocaleString()}
                     </td>

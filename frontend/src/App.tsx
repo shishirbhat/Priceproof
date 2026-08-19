@@ -9,18 +9,15 @@ import { LoadingState } from "@/components/domain/QueryState";
 // landing page's canvas/anime.js hero are each only downloaded once their
 // route is actually visited, instead of one monolithic bundle up front.
 const CommandCenter = lazy(() => import("@/pages/CommandCenter").then((m) => ({ default: m.CommandCenter })));
-const PriceIntegrity = lazy(() => import("@/pages/PriceIntegrity").then((m) => ({ default: m.PriceIntegrity })));
-const CompetitiveLandscape = lazy(() =>
-  import("@/pages/CompetitiveLandscape").then((m) => ({ default: m.CompetitiveLandscape })),
-);
-const Availability = lazy(() => import("@/pages/Availability").then((m) => ({ default: m.Availability })));
-const MapViolations = lazy(() => import("@/pages/MapViolations").then((m) => ({ default: m.MapViolations })));
+const MarketValue = lazy(() => import("@/pages/MarketValue").then((m) => ({ default: m.MarketValue })));
+const CrossPortal = lazy(() => import("@/pages/CrossPortal").then((m) => ({ default: m.CrossPortal })));
+const MarketActivity = lazy(() => import("@/pages/MarketActivity").then((m) => ({ default: m.MarketActivity })));
 const Alerts = lazy(() => import("@/pages/Alerts").then((m) => ({ default: m.Alerts })));
 const ScraperHealth = lazy(() => import("@/pages/ScraperHealth").then((m) => ({ default: m.ScraperHealth })));
 const CatalogManagement = lazy(() =>
   import("@/pages/CatalogManagement").then((m) => ({ default: m.CatalogManagement })),
 );
-const ProductDetail = lazy(() => import("@/pages/ProductDetail").then((m) => ({ default: m.ProductDetail })));
+const ListingDetail = lazy(() => import("@/pages/ListingDetail").then((m) => ({ default: m.ListingDetail })));
 const Landing = lazy(() => import("@/pages/Landing").then((m) => ({ default: m.Landing })));
 
 function PageFallback() {
@@ -47,14 +44,13 @@ function DashboardRoutes() {
             <Suspense fallback={<PageFallback />}>
               <Routes location={location}>
                 <Route path="/" element={<CommandCenter />} />
-                <Route path="/price-integrity" element={<PriceIntegrity />} />
-                <Route path="/competitive-landscape" element={<CompetitiveLandscape />} />
-                <Route path="/availability" element={<Availability />} />
-                <Route path="/map-violations" element={<MapViolations />} />
+                <Route path="/market-value" element={<MarketValue />} />
+                <Route path="/cross-portal" element={<CrossPortal />} />
+                <Route path="/market-activity" element={<MarketActivity />} />
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/scraper-health" element={<ScraperHealth />} />
                 <Route path="/catalog" element={<CatalogManagement />} />
-                <Route path="/products/:productId" element={<ProductDetail />} />
+                <Route path="/listings/:listingId" element={<ListingDetail />} />
               </Routes>
             </Suspense>
           </ErrorBoundary>
