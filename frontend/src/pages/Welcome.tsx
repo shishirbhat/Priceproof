@@ -5,6 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Turntable } from "@/components/racing/Turntable";
 import { ArtTile } from "@/components/racing/ArtTile";
 import { SEGMENTS, CAPABILITIES } from "@/components/welcome/segments";
+import { framesFor } from "@/components/racing/carImages";
 import {
   DUR,
   EASE_EXPO,
@@ -94,6 +95,7 @@ export function Welcome() {
           paint={segment.paint}
           label={`${segment.name} segment`}
           silhouette={segment.silhouette}
+          frames={framesFor(segment.id)}
         />
 
         <div className="pointer-events-none absolute inset-x-0 top-[19%] flex flex-col items-center px-6 text-center">

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { buildCar, renderCar } from "./carRenderer";
+import { FrameSequence } from "./FrameSequence";
 import type { SilhouetteName } from "./carRenderer";
 
 type Props = {
@@ -13,6 +14,19 @@ type Props = {
   idleSpeed?: number;
   /** Which body to build. Defaults to the racing prototype. */
   silhouette?: SilhouetteName;
+  /**
+   * An ordered turntable frame sequence, one image per angle. When present
+   * this replaces the generated car entirely and drag scrubs through the
+   * frames, which is how a real configurator works.
+   */
+  frames?: string[];
+  /**
+   * A single photograph, used when there is no sequence. Shown against the
+   * same studio backdrop so a page of mixed sources still reads as one set.
+   */
+  poster?: string;
+  /** Alt text for the photographic paths. */
+  posterAlt?: string;
 };
 
 /** Default radians per second while idling. */
@@ -35,6 +49,9 @@ export function Turntable({
   paused = false,
   idleSpeed = DEFAULT_IDLE_SPEED,
   silhouette = "race",
+  frames,
+  poster,
+  posterAlt,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -169,6 +186,38 @@ export function Turntable({
       canvas.removeEventListener("pointercancel", up);
     };
   }, []);
+
+  // Supplied photography always wins over generated geometry.
+  if (frames && frames.length > 0) {
+    return <FrameSequence frames={frames} label={label} paused={paused} />;
+  }
+
+  if (poster) {
+    return (
+      <div className="absolute inset-0 overflow-hidden bg-[#0b0b0d]">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 80% at 50% 42%, #6f747c 0%, #26292e 46%, #0a0b0c 100%)",
+          }}
+        />
+        <img
+          src={poster}
+          alt={posterAlt ?? label}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-contain"
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(70% 60% at 50% 55%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.62) 100%)",
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div ref={wrapRef} className="absolute inset-0 overflow-hidden">

@@ -67,6 +67,7 @@ export function ListingDetail() {
                 make={listing.make}
                 model={listing.model}
                 title={listing.title}
+                imageUrl={listing.main_image_url}
                 className="aspect-[16/10] w-full"
               />
 
@@ -112,21 +113,10 @@ export function ListingDetail() {
                   )}
                 </div>
 
-                {/* The portal's own photo, kept as the record of the actual
-                    vehicle next to the stylised render. */}
                 {listing.main_image_url && (
-                  <div className="mt-5 flex items-center gap-3">
-                    <img
-                      src={listing.main_image_url}
-                      alt={`Seller photo for ${listing.title}`}
-                      loading="lazy"
-                      className="h-16 w-16 rounded-xl object-cover"
-                      style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}
-                    />
-                    <span className="text-[10.5px] leading-snug text-white/40">
-                      Seller photo, as published<br />by {listing.portal_name}
-                    </span>
-                  </div>
+                  <p className="mt-5 text-[10.5px] text-white/40">
+                    Photograph as published by {listing.portal_name}.
+                  </p>
                 )}
               </div>
             </motion.div>

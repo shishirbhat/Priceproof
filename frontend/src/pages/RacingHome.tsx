@@ -9,6 +9,7 @@ import { PitHero } from "@/components/racing/PitHero";
 import { JournalGrid } from "@/components/racing/JournalGrid";
 import { Footer } from "@/components/racing/Footer";
 import { MODELS } from "@/components/racing/data";
+import { framesFor } from "@/components/racing/carImages";
 import { DUR, EASE_EXPO } from "@/lib/motion";
 
 /**
@@ -49,7 +50,12 @@ export function RacingHome() {
 
       {/* Hero. The turntable fills the viewport behind the chrome. */}
       <section className="relative h-[100svh] min-h-[560px] w-full overflow-hidden">
-        <Turntable paint={model.paint} label={model.title} paused={detailOpen} />
+        <Turntable
+          paint={model.paint}
+          label={model.title}
+          paused={detailOpen}
+          frames={framesFor(model.id)}
+        />
 
         {/* Model name and class, keyed so they cross-fade on switch. */}
         <motion.div

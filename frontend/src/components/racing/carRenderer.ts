@@ -14,14 +14,6 @@
 
 export type Vec3 = [number, number, number];
 
-type Face = {
-  pts: Vec3[];
-  color: string;
-  /** Emissive faces skip lighting and never darken — lamps and light bars. */
-  emissive?: boolean;
-  /** Emissive faces additionally bloom by this radius, in world units. */
-  glow?: number;
-};
 
 /** Longitudinal stations. x runs nose (negative) to tail (positive). */
 type Station = {
@@ -150,8 +142,15 @@ export const SILHOUETTES: Record<SilhouetteName, Silhouette> = {
   },
 };
 
-/** Points per cross-section. Higher reads rounder but costs fill rate. */
-const RING = 18;
+
+/**
+ * Tessellation. The previous build used 18 points per section and no
+ * longitudinal subdivision, which is what made it read as a CAD viewport:
+ * at that density flat shading shows every facet. Density plus a specular
+ * term is what turns the same geometry into something that looks rendered.
+ */
+const RING = 30;
+const LONG_SAMPLES = 46;
 
 /** Superellipse exponent. Higher is boxier; 3.2 reads as a car body. */
 const SECTION_N = 3.2;
@@ -164,10 +163,7 @@ function ring(s: Station): Vec3[] {
   const pts: Vec3[] = [];
   for (let i = 0; i < RING; i++) {
     const t = (i / RING) * Math.PI * 2;
-    // 0 at the floor, 1 at the roof.
     const up = 0.5 + 0.5 * superEllipse(Math.sin(t));
-    // Smoothstep the taper so the shoulder line stays soft, and apply it
-    // only across the upper half — the sills stay full width.
     const k = up * up * (3 - 2 * up);
     const widthScale = 1 + (s.taper - 1) * k;
     pts.push([
@@ -177,6 +173,43 @@ function ring(s: Station): Vec3[] {
     ]);
   }
   return pts;
+}
+
+/** Catmull-Rom through one channel of the station list. */
+function spline(v0: number, v1: number, v2: number, v3: number, t: number): number {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return 0.5 * (
+    2 * v1 +
+    (-v0 + v2) * t +
+    (2 * v0 - 5 * v1 + 4 * v2 - v3) * t2 +
+    (-v0 + 3 * v1 - 3 * v2 + v3) * t3
+  );
+}
+
+/**
+ * Resample the hand-authored stations onto a smooth spline. The control
+ * stations stay readable and editable; the surface the renderer sees is
+ * dense enough that the facets disappear.
+ */
+function resample(stations: Station[], samples: number): Station[] {
+  const n = stations.length;
+  const at = (i: number) => stations[Math.max(0, Math.min(n - 1, i))];
+  const out: Station[] = [];
+  for (let s = 0; s < samples; s++) {
+    const u = (s / (samples - 1)) * (n - 1);
+    const i = Math.min(n - 2, Math.floor(u));
+    const t = u - i;
+    const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
+    out.push({
+      x: spline(p0.x, p1.x, p2.x, p3.x, t),
+      w: Math.max(0.02, spline(p0.w, p1.w, p2.w, p3.w, t)),
+      yb: spline(p0.yb, p1.yb, p2.yb, p3.yb, t),
+      yt: spline(p0.yt, p1.yt, p2.yt, p3.yt, t),
+      taper: spline(p0.taper, p1.taper, p2.taper, p3.taper, t),
+    });
+  }
+  return out;
 }
 
 function sub(a: Vec3, b: Vec3): Vec3 {
@@ -196,40 +229,78 @@ function normalize(v: Vec3): Vec3 {
   return [v[0] / l, v[1] / l, v[2] / l];
 }
 
-function faceNormal(p: Vec3[]): Vec3 {
+function polyNormal(p: Vec3[]): Vec3 {
   return normalize(cross(sub(p[1], p[0]), sub(p[2], p[0])));
 }
 
-/** A cylinder lying on the Z axis — every wheel on the car. */
-function wheel(cx: number, cz: number, r: number, halfWidth: number, seg = 16): Face[] {
-  const faces: Face[] = [];
-  const inner = cz > 0 ? cz - halfWidth : cz + halfWidth;
-  const outer = cz > 0 ? cz + halfWidth : cz - halfWidth;
+/**
+ * One shaded polygon.
+ *
+ * `gloss` is what separates painted bodywork from rubber: it scales both
+ * the specular lobe and how much of the environment the surface picks up.
+ */
+type Poly = {
+  pts: Vec3[];
+  n: Vec3;
+  color: string;
+  gloss: number;
+  emissive?: boolean;
+};
+
+/** A wheel: tyre carcass, tread band, and a dished rim with spokes. */
+function wheel(cx: number, cz: number, r: number, halfWidth: number): Poly[] {
+  const out: Poly[] = [];
+  const seg = 26;
+  const side = cz > 0 ? 1 : -1;
+  const inner = cz - side * halfWidth;
+  const outer = cz + side * halfWidth;
+  const rimR = r * 0.62;
+
   for (let i = 0; i < seg; i++) {
     const a = (i / seg) * Math.PI * 2;
     const b = ((i + 1) / seg) * Math.PI * 2;
-    const p1: Vec3 = [cx + Math.cos(a) * r, r + Math.sin(a) * r, outer];
-    const p2: Vec3 = [cx + Math.cos(b) * r, r + Math.sin(b) * r, outer];
-    const p3: Vec3 = [cx + Math.cos(b) * r, r + Math.sin(b) * r, inner];
-    const p4: Vec3 = [cx + Math.cos(a) * r, r + Math.sin(a) * r, inner];
-    // Tread.
-    faces.push({ pts: [p1, p2, p3, p4], color: "#0c0d0f" });
-    // Outer sidewall, drawn as a fan back to the hub.
-    faces.push({
-      pts: [[cx, r, outer], p1, p2],
-      color: i % 6 === 0 ? "#1e2126" : "#15171a",
+    const ca = Math.cos(a), sa = Math.sin(a);
+    const cb = Math.cos(b), sb = Math.sin(b);
+
+    // Tread, slightly crowned so the shoulder catches light.
+    const t1: Vec3 = [cx + ca * r, r + sa * r, outer];
+    const t2: Vec3 = [cx + cb * r, r + sb * r, outer];
+    const t3: Vec3 = [cx + cb * r, r + sb * r, inner];
+    const t4: Vec3 = [cx + ca * r, r + sa * r, inner];
+    out.push({ pts: [t1, t2, t3, t4], n: normalize([ca, sa, 0]), color: "#0b0c0e", gloss: 0.10 });
+
+    // Sidewall, from tread down to the rim lip.
+    const s1: Vec3 = [cx + ca * r, r + sa * r, outer];
+    const s2: Vec3 = [cx + cb * r, r + sb * r, outer];
+    const s3: Vec3 = [cx + cb * rimR, r + sb * rimR, outer];
+    const s4: Vec3 = [cx + ca * rimR, r + sa * rimR, outer];
+    out.push({ pts: [s1, s2, s3, s4], n: [0, 0, side], color: "#121417", gloss: 0.16 });
+
+    // Rim face, inset a little so the tyre reads as sitting proud of it.
+    const rimZ = outer - side * halfWidth * 0.22;
+    const r1: Vec3 = [cx + ca * rimR, r + sa * rimR, rimZ];
+    const r2: Vec3 = [cx + cb * rimR, r + sb * rimR, rimZ];
+    const hub: Vec3 = [cx, r, rimZ];
+    // Five spokes: alternate light and dark wedges around the dish.
+    const spoke = Math.floor((i / seg) * 10) % 2 === 0;
+    out.push({
+      pts: [hub, r1, r2],
+      n: [0, 0, side],
+      color: spoke ? "#3c4149" : "#20242a",
+      gloss: spoke ? 0.7 : 0.35,
     });
   }
-  return faces;
+  return out;
 }
 
-/** An axis-aligned box, used for the wing plane and its endplates. */
+/** An axis-aligned box. */
 function box(
   x0: number, x1: number,
   y0: number, y1: number,
   z0: number, z1: number,
   color: string,
-): Face[] {
+  gloss = 0.5,
+): Poly[] {
   const v: Vec3[] = [
     [x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0],
     [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1],
@@ -238,18 +309,19 @@ function box(
     [0, 1, 2, 3], [5, 4, 7, 6], [4, 0, 3, 7],
     [1, 5, 6, 2], [3, 2, 6, 7], [4, 5, 1, 0],
   ];
-  return idx.map((f) => ({ pts: f.map((i) => v[i]), color }));
+  return idx.map((f) => {
+    const pts = f.map((i) => v[i]);
+    return { pts, n: polyNormal(pts), color, gloss };
+  });
 }
 
-/**
- * Assemble the full car. Paint is applied per call so the switcher can
- * restyle the same mesh without rebuilding geometry every frame.
- */
 export type CarMesh = {
-  faces: Face[];
+  polys: Poly[];
   /** Overall extents, so the camera can frame whatever body it is given. */
   length: number;
   height: number;
+  /** Axle positions and radius, used to place contact shadows. */
+  contacts: Array<{ x: number; z: number; r: number }>;
 };
 
 export function buildCar(
@@ -257,22 +329,21 @@ export function buildCar(
   silhouette: SilhouetteName = "race",
 ): CarMesh {
   const spec = SILHOUETTES[silhouette];
-  const body = spec.stations;
-  const faces: Face[] = [];
+  const control = spec.stations;
+  const body = resample(control, LONG_SAMPLES);
+  const polys: Poly[] = [];
   const rings = body.map(ring);
 
-  // Loft the body panels between adjacent stations.
+  // Loft the body panels. Normals come from the surrounding surface rather
+  // than the single quad, which keeps the shading continuous across seams.
   for (let s = 0; s < rings.length - 1; s++) {
     for (let i = 0; i < RING; i++) {
       const j = (i + 1) % RING;
-      faces.push({
-        pts: [rings[s][i], rings[s][j], rings[s + 1][j], rings[s + 1][i]],
-        color: paint.base,
-      });
+      const pts = [rings[s][i], rings[s][j], rings[s + 1][j], rings[s + 1][i]];
+      polys.push({ pts, n: polyNormal(pts), color: paint.base, gloss: 0.55 });
     }
   }
 
-  // Cap the nose and tail with triangle fans.
   const last = body.length - 1;
   const nose = body[0];
   const tail = body[last];
@@ -280,71 +351,74 @@ export function buildCar(
   const capTail: Vec3 = [tail.x + 0.04, (tail.yb + tail.yt) / 2, 0];
   for (let i = 0; i < RING; i++) {
     const j = (i + 1) % RING;
-    faces.push({ pts: [capNose, rings[0][j], rings[0][i]], color: paint.base });
-    faces.push({ pts: [capTail, rings[last][i], rings[last][j]], color: paint.base });
+    const a = [capNose, rings[0][j], rings[0][i]];
+    const b = [capTail, rings[last][i], rings[last][j]];
+    polys.push({ pts: a, n: polyNormal(a), color: paint.base, gloss: 0.55 });
+    polys.push({ pts: b, n: polyNormal(b), color: paint.base, gloss: 0.55 });
   }
 
-  // Racing aero. Road bodies get a plain valance instead.
   if (spec.aero) {
-    faces.push(...box(-2.30, -1.60, 0.06, 0.09, -0.92, 0.92, "#0e1013"));
-    faces.push(...box(1.90, 2.32, 0.07, 0.11, -0.90, 0.90, "#0e1013"));
-    // Rear wing: plane plus two endplates, carried on twin uprights.
-    faces.push(...box(1.72, 2.24, 1.44, 1.51, -1.00, 1.00, "#101216"));
-    faces.push(...box(1.70, 2.26, 1.14, 1.56, -1.04, -0.98, "#15181c"));
-    faces.push(...box(1.70, 2.26, 1.14, 1.56, 0.98, 1.04, "#15181c"));
-    faces.push(...box(1.86, 1.96, 0.84, 1.46, -0.32, -0.24, "#0d0f12"));
-    faces.push(...box(1.86, 1.96, 0.84, 1.46, 0.24, 0.32, "#0d0f12"));
+    polys.push(...box(-2.30, -1.60, 0.06, 0.09, -0.92, 0.92, "#0e1013", 0.3));
+    polys.push(...box(1.90, 2.32, 0.07, 0.11, -0.90, 0.90, "#0e1013", 0.3));
+    polys.push(...box(1.72, 2.24, 1.44, 1.51, -1.00, 1.00, "#101216", 0.45));
+    polys.push(...box(1.70, 2.26, 1.14, 1.56, -1.04, -0.98, "#15181c", 0.45));
+    polys.push(...box(1.70, 2.26, 1.14, 1.56, 0.98, 1.04, "#15181c", 0.45));
+    polys.push(...box(1.86, 1.96, 0.84, 1.46, -0.32, -0.24, "#0d0f12", 0.4));
+    polys.push(...box(1.86, 1.96, 0.84, 1.46, 0.24, 0.32, "#0d0f12", 0.4));
   } else {
     const w = tail.w * 0.92;
-    faces.push(...box(nose.x - 0.06, nose.x + 0.30, nose.yb - 0.06, nose.yb + 0.04, -w, w, "#0e1013"));
-    faces.push(...box(tail.x - 0.30, tail.x + 0.05, tail.yb - 0.06, tail.yb + 0.04, -w, w, "#0e1013"));
+    polys.push(...box(nose.x - 0.06, nose.x + 0.30, nose.yb - 0.06, nose.yb + 0.04, -w, w, "#0e1013", 0.25));
+    polys.push(...box(tail.x - 0.30, tail.x + 0.05, tail.yb - 0.06, tail.yb + 0.04, -w, w, "#0e1013", 0.25));
   }
 
-  // Wheels, inset slightly under the arches.
   const { front, rear, radius, track } = spec.wheels;
   const tyreWidth = radius * 0.44;
-  faces.push(...wheel(front, -track, radius, tyreWidth));
-  faces.push(...wheel(front, track, radius, tyreWidth));
-  faces.push(...wheel(rear, -track, radius, tyreWidth));
-  faces.push(...wheel(rear, track, radius, tyreWidth));
+  polys.push(...wheel(front, -track, radius, tyreWidth));
+  polys.push(...wheel(front, track, radius, tyreWidth));
+  polys.push(...wheel(rear, -track, radius, tyreWidth));
+  polys.push(...wheel(rear, track, radius, tyreWidth));
 
-  // Full-width tail bar, and a pair of headlights, tracked to this body.
+  // Lights.
   const tlY = spec.tailLightY;
   const hlY = spec.headLightY;
-  faces.push(
+  polys.push(
     ...box(tail.x + 0.02, tail.x + 0.05, tlY, tlY + 0.10, -tail.w * 0.82, tail.w * 0.82, paint.accent).map(
-      (f) => ({ ...f, emissive: true, glow: 0.5 }),
+      (f) => ({ ...f, emissive: true }),
     ),
   );
   for (const sign of [-1, 1]) {
-    faces.push(
+    polys.push(
       ...box(
         nose.x - 0.04, nose.x,
         hlY, hlY + 0.09,
         sign > 0 ? nose.w * 0.34 : -nose.w * 0.78,
         sign > 0 ? nose.w * 0.78 : -nose.w * 0.34,
-        paint.accent,
-      ).map((f) => ({ ...f, emissive: true, glow: 0.34 })),
+        "#dfe6f2",
+      ).map((f) => ({ ...f, emissive: true })),
     );
   }
 
-  // Glasshouse — a darker cap over the cabin stations reads as glazing.
-  for (let s = spec.glassFrom; s < spec.glassTo; s++) {
+  // Glasshouse. Glass is the glossiest thing on the car.
+  const gFrom = Math.round((spec.glassFrom / (control.length - 1)) * (body.length - 1));
+  const gTo = Math.round((spec.glassTo / (control.length - 1)) * (body.length - 1));
+  for (let s = gFrom; s < gTo; s++) {
     for (let i = 0; i < RING; i++) {
       const j = (i + 1) % RING;
-      if (rings[s][i][1] < spec.glassAbove) continue;
-      faces.push({
-        pts: [rings[s][i], rings[s][j], rings[s + 1][j], rings[s + 1][i]],
-        color: "#080a0d",
-      });
+      if (rings[s][i][1] < spec.glassAbove * 1.06) continue;
+      const pts = [rings[s][i], rings[s][j], rings[s + 1][j], rings[s + 1][i]];
+      polys.push({ pts, n: polyNormal(pts), color: "#0a0d12", gloss: 0.8 });
     }
   }
 
-  // Extents drive the camera fit, so a tall SUV frames as well as a
-  // low prototype without any per-caller tuning.
   const length = tail.x - nose.x + (spec.aero ? 0.5 : 0.4);
   const height = Math.max(...body.map((b) => b.yt), spec.aero ? 1.56 : 0) + 0.1;
-  return { faces, length, height };
+  const contacts = [
+    { x: front, z: -track, r: radius },
+    { x: front, z: track, r: radius },
+    { x: rear, z: -track, r: radius },
+    { x: rear, z: track, r: radius },
+  ];
+  return { polys, length, height, contacts };
 }
 
 const CAM_Z = 26;
@@ -354,7 +428,6 @@ function project(
   p: Vec3, yaw: number, cx: number, cy: number, f: number,
 ): [number, number, number] {
   const [x, y, z] = p;
-  // Yaw about the vertical axis, then pitch the camera down slightly.
   const rx = x * Math.cos(yaw) - z * Math.sin(yaw);
   const rz = x * Math.sin(yaw) + z * Math.cos(yaw);
   const ry = y * Math.cos(ELEVATION) - rz * Math.sin(ELEVATION);
@@ -364,23 +437,40 @@ function project(
   return [cx + rx * s, cy - ry * s, rz2];
 }
 
-const KEY = normalize([-0.42, 0.78, 0.46]);
-const RIM = normalize([0.35, 0.30, -0.86]);
-
-function shade(hex: string, amount: number): string {
-  const n = parseInt(hex.slice(1), 16);
-  const r = Math.min(255, Math.max(0, Math.round(((n >> 16) & 255) * amount)));
-  const g = Math.min(255, Math.max(0, Math.round(((n >> 8) & 255) * amount)));
-  const b = Math.min(255, Math.max(0, Math.round((n & 255) * amount)));
-  return `rgb(${r},${g},${b})`;
-}
+/** Studio rig: a key light high and forward, plus a cool rear fill. */
+const KEY = normalize([-0.40, 0.80, 0.44]);
+const FILL = normalize([0.62, 0.22, -0.55]);
+/** Half-vector for the key, against a viewer looking down +Z. */
+const HALF = normalize([KEY[0], KEY[1], KEY[2] + 1]);
 
 /**
- * Draw one frame of the turntable.
+ * Colour cache.
  *
- * `yaw` is in radians and unbounded — the caller keeps accumulating it and
- * we take it modulo a turn, so drag momentum never has to be clamped.
+ * At this tessellation the renderer asks for a fill colour a few thousand
+ * times a frame. Quantising the lighting terms and memoising the resulting
+ * string turns that from string building into a map lookup.
  */
+const colorCache = new Map<string, string>();
+
+function shade(hex: string, diffuse: number, specular: number): string {
+  const dq = Math.round(diffuse * 96);
+  const sq = Math.round(specular * 48);
+  const key = `${hex}${dq},${sq}`;
+  const hit = colorCache.get(key);
+  if (hit) return hit;
+
+  const n = parseInt(hex.slice(1), 16);
+  const d = dq / 96;
+  const s = (sq / 48) * 255;
+  const r = Math.min(255, Math.max(0, Math.round(((n >> 16) & 255) * d + s)));
+  const g = Math.min(255, Math.max(0, Math.round(((n >> 8) & 255) * d + s)));
+  const b = Math.min(255, Math.max(0, Math.round((n & 255) * d + s)));
+  const out = `rgb(${r},${g},${b})`;
+  // Bounded so a long session cannot grow it without limit.
+  if (colorCache.size < 8192) colorCache.set(key, out);
+  return out;
+}
+
 export function renderCar(
   ctx: CanvasRenderingContext2D,
   mesh: CarMesh,
@@ -389,24 +479,20 @@ export function renderCar(
   yaw: number,
   accent: string,
 ) {
-  const faces = mesh.faces;
-  ctx.clearRect(0, 0, width, height);
-
+  const polys = mesh.polys;
   const cx = width / 2;
   const cy = height * 0.60;
-  // Focal length, solved so the car fits the frame rather than being a
-  // fixed multiple of it — a fixed multiple left it tiny on phones and
-  // cropped on short landscape windows.
   const f = Math.min(
     (width * 0.68 * CAM_Z) / mesh.length,
     (height * 0.36 * CAM_Z) / mesh.height,
   );
-  // Backdrop geometry is viewport-relative, not focal-length-relative.
   const S = Math.min(width, height);
   const D = Math.hypot(width, height) / 2;
 
-  // Studio cyclorama: a bright pool of light behind the car falling off
-  // hard into the corners.
+  const cosY = Math.cos(yaw);
+  const sinY = Math.sin(yaw);
+
+  // Studio cyclorama.
   const bg = ctx.createRadialGradient(cx, cy - S * 0.16, S * 0.02, cx, cy, D * 1.02);
   bg.addColorStop(0, "#8b9099");
   bg.addColorStop(0.30, "#4a4e55");
@@ -415,10 +501,9 @@ export function renderCar(
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, width, height);
 
-  // The ground plane (y = 0) projects to cy, so that is the horizon.
   const floorY = cy;
 
-  // Floor pool — the ellipse of light the car sits in.
+  // Floor pool.
   const pool = ctx.createRadialGradient(cx, floorY, S * 0.01, cx, floorY, S * 0.62);
   pool.addColorStop(0, "rgba(226,230,236,0.34)");
   pool.addColorStop(0.5, "rgba(140,148,160,0.13)");
@@ -431,20 +516,37 @@ export function renderCar(
   ctx.fillRect(0, floorY - S * 0.7, width, S * 1.4);
   ctx.restore();
 
+  // Contact shadows: one soft pool under each wheel. Without these the car
+  // floats, which is most of what made the old render look like a viewport.
+  for (const c of mesh.contacts) {
+    const [sx, sy] = project([c.x, 0, c.z], yaw, cx, cy, f);
+    const rr = (c.r * f) / CAM_Z;
+    const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, rr * 1.9);
+    g.addColorStop(0, "rgba(0,0,0,0.62)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.scale(1, 0.30);
+    ctx.translate(-sx, -sy);
+    ctx.fillStyle = g;
+    ctx.fillRect(sx - rr * 2, sy - rr * 2, rr * 4, rr * 4);
+    ctx.restore();
+  }
+
   const drawPass = (mirror: boolean) => {
-    const projected = faces.map((face) => {
-      const pts = face.pts.map((p) =>
+    const projected = polys.map((poly) => {
+      const pts = poly.pts.map((p) =>
         project(mirror ? ([p[0], -p[1] * 0.96, p[2]] as Vec3) : p, yaw, cx, cy, f),
       );
-      const depth = pts.reduce((a, p) => a + p[2], 0) / pts.length;
-      return { face, pts, depth };
+      let depth = 0;
+      for (const p of pts) depth += p[2];
+      return { poly, pts, depth: depth / pts.length };
     });
 
-    // Painter's algorithm: far faces first.
     projected.sort((a, b) => a.depth - b.depth);
 
-    for (const { face, pts } of projected) {
-      // Backface cull in screen space via the signed area.
+    for (const { poly, pts } of projected) {
+      // Backface cull via signed area.
       let area = 0;
       for (let i = 0; i < pts.length; i++) {
         const j = (i + 1) % pts.length;
@@ -453,23 +555,31 @@ export function renderCar(
       if (area >= 0) continue;
 
       let fill: string;
-      if (face.emissive) {
-        fill = face.color;
+      if (poly.emissive) {
+        fill = poly.color;
       } else {
-        // Light the face in world space, after yaw, so highlights travel.
-        const worldPts = face.pts.map((p): Vec3 => {
-          const [x, y, z] = p;
-          return [
-            x * Math.cos(yaw) - z * Math.sin(yaw),
-            y,
-            x * Math.sin(yaw) + z * Math.cos(yaw),
-          ];
-        });
-        const n = faceNormal(worldPts);
-        const key = Math.max(0, n[0] * KEY[0] + n[1] * KEY[1] + n[2] * KEY[2]);
-        const rim = Math.max(0, n[0] * RIM[0] + n[1] * RIM[1] + n[2] * RIM[2]);
-        const lit = 0.46 + key * 1.30 + Math.pow(rim, 3) * 1.35;
-        fill = shade(face.color, lit);
+        // Rotate the normal with the body so highlights travel across it.
+        const n = poly.n;
+        const nx = n[0] * cosY - n[2] * sinY;
+        const ny = mirror ? -n[1] : n[1];
+        const nz = n[0] * sinY + n[2] * cosY;
+
+        const key = Math.max(0, nx * KEY[0] + ny * KEY[1] + nz * KEY[2]);
+        const fillL = Math.max(0, nx * FILL[0] + ny * FILL[1] + nz * FILL[2]);
+
+        // Environment: bright above the horizon, dark below, with a hard
+        // transition. This is what makes paint read as paint.
+        const env = ny > 0 ? 0.5 + 0.5 * ny : 0.16 * (1 + ny);
+
+        const diffuse =
+          0.26 + key * 0.54 + fillL * 0.16 + env * poly.gloss * 0.20;
+
+        // Blinn-Phong lobe, tightened by gloss.
+        const h = Math.max(0, nx * HALF[0] + ny * HALF[1] + nz * HALF[2]);
+        const specular =
+          poly.gloss * Math.pow(h, 42 + poly.gloss * 120) * (0.30 + poly.gloss * 0.45);
+
+        fill = shade(poly.color, diffuse, specular);
       }
 
       ctx.beginPath();
@@ -479,26 +589,25 @@ export function renderCar(
       ctx.fillStyle = fill;
       ctx.globalAlpha = mirror ? 0.16 : 1;
       ctx.fill();
-      // Hairline stroke in the fill colour closes the seams between quads
-      // without introducing a visible wireframe.
+      // Hairline stroke in the fill colour closes sub-pixel seams between
+      // adjacent quads without drawing a visible wireframe.
       ctx.strokeStyle = fill;
-      ctx.lineWidth = 0.7;
+      ctx.lineWidth = 0.6;
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
   };
 
-  // Reflection underneath, clipped to the floor and faded out.
+  // Reflection.
   ctx.save();
   ctx.beginPath();
   ctx.rect(0, floorY, width, height - floorY);
   ctx.clip();
-  ctx.filter = "blur(3px)";
+  ctx.filter = "blur(4px)";
   drawPass(true);
   ctx.filter = "none";
   ctx.restore();
 
-  // A gradient wash over the reflection so it dissolves into the floor.
   const wash = ctx.createLinearGradient(0, floorY, 0, floorY + S * 0.34);
   wash.addColorStop(0, "rgba(6,6,7,0.30)");
   wash.addColorStop(1, "rgba(6,6,7,0.96)");
@@ -507,7 +616,7 @@ export function renderCar(
 
   drawPass(false);
 
-  // Bloom off the light bar, strongest when the tail faces the camera.
+  // Tail-light bloom, strongest with the back of the car to camera.
   const facing = Math.cos(yaw);
   if (facing < 0.25) {
     const strength = Math.min(1, (0.25 - facing) / 1.1);
@@ -518,7 +627,6 @@ export function renderCar(
     ctx.fillRect(0, 0, width, height);
   }
 
-  // Corner vignette, which is what makes the studio read as enclosed.
   const vig = ctx.createRadialGradient(cx, cy, S * 0.30, cx, cy, D * 1.05);
   vig.addColorStop(0, "rgba(0,0,0,0)");
   vig.addColorStop(1, "rgba(0,0,0,0.88)");

@@ -5,14 +5,14 @@ import type { SilhouetteName } from "@/components/racing/carRenderer";
 /**
  * A rotating stand-in for the listed car.
  *
- * Portal listing photos are inconsistent — different angles, watermarks,
- * wildly different crops, and often missing altogether — so a grid of them
- * never reads as one product. This renders every car through the same
- * studio instead, with the paint derived from the listing so two different
- * cars never look identical and the same car always looks the same.
+ * The seller's own photograph is the real car and always wins — it is
+ * presented against a common studio backdrop so a page of wildly different
+ * crops and lighting still reads as one set.
  *
- * Where a real photo exists it is shown alongside, not replaced: this is
- * presentation, and must never be mistaken for the actual vehicle.
+ * Only when a listing carries no usable photo does this fall back to
+ * generated geometry, which is labelled as a render so it can never be
+ * mistaken for the actual vehicle. Paint is hashed from make and model so
+ * the same car always comes back the same colour.
  */
 
 /** Body tones, chosen to stay legible against the studio backdrop. */
@@ -58,12 +58,14 @@ type Props = {
   make: string | null;
   model: string | null;
   title: string;
+  /** The seller's photograph, as published by the portal. */
+  imageUrl?: string | null;
   /** Pass through when the portal publishes a real body-type field. */
   bodyType?: SilhouetteName;
   className?: string;
 };
 
-export function ListingCar({ make, model, title, bodyType, className = "" }: Props) {
+export function ListingCar({ make, model, title, imageUrl, bodyType, className = "" }: Props) {
   // Key off make+model so every trim of the same car shares a colour, and
   // fall back to the title when the portal did not break the fields out.
   const seed = `${make ?? ""}|${model ?? ""}` .trim() === "|" ? title : `${make}|${model}`;
@@ -84,10 +86,19 @@ export function ListingCar({ make, model, title, bodyType, className = "" }: Pro
     >
       {/* A slower idle than the showroom hero — this sits next to data the
           reader is trying to actually read. */}
-      <Turntable paint={paint} label={label} idleSpeed={0.16} silhouette={silhouette} />
-      <span className="pointer-events-none absolute bottom-3 left-4 text-[9.5px] tracking-[0.18em] text-white/35 uppercase">
-        Illustrative render
-      </span>
+      <Turntable
+        paint={paint}
+        label={label}
+        idleSpeed={0.16}
+        silhouette={silhouette}
+        poster={imageUrl ?? undefined}
+        posterAlt={`${label} — photograph published by the seller`}
+      />
+      {!imageUrl && (
+        <span className="pointer-events-none absolute bottom-3 left-4 text-[9.5px] tracking-[0.18em] text-white/35 uppercase">
+          Render · no seller photo
+        </span>
+      )}
     </div>
   );
 }
