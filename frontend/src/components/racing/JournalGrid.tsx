@@ -3,7 +3,7 @@ import { ArtTile } from "./ArtTile";
 import { EventCalendar } from "./EventCalendar";
 import { JOURNAL } from "./data";
 import type { JournalItem } from "./data";
-import { EASE_EXPO, REVEAL_VIEWPORT, STAGGER, revealVariants } from "./tokens";
+import { EASE_EXPO, REVEAL_VIEWPORT, STAGGER, revealVariants } from "@/lib/motion";
 
 /**
  * The journal bento grid.

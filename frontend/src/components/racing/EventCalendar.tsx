@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { EVENT_DAYS } from "./data";
-import { DUR, EASE_EXPO } from "./tokens";
+import { DUR, EASE_EXPO } from "@/lib/motion";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",

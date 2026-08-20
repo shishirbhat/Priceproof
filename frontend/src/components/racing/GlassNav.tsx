@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { NAV_ITEMS } from "./data";
-import { DUR, EASE_EXPO, SPRING_SNAP } from "./tokens";
+import { DUR, EASE_EXPO, SPRING_SNAP } from "@/lib/motion";
 
 type Props = {
   /** Hidden while the detail overlay owns the screen. */

@@ -34,7 +34,7 @@ export function MarketActivity() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="// 04 MARKET ACTIVITY"
+        eyebrow="Days on market"
         title="Market Activity"
         description="A listing disappearing between two collection runs is the only sold/removed signal a search-results collector gives — days-on-market is derived from that, bounded by scrape cadence, not read off a 'days ago' label."
       />

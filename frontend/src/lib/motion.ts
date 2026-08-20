@@ -1,5 +1,9 @@
 /**
- * Motion + design tokens for the racing experience.
+ * Motion + design tokens.
+ *
+ * The single source of motion for the whole product — the racing front end
+ * and the intelligence dashboard both import from here, so a curve tweaked
+ * in one place changes everywhere.
  *
  * Every timing here was matched against the reference recordings frame by
  * frame: the turntable settles over roughly two thirds of a second, panels

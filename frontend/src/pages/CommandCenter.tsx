@@ -36,7 +36,7 @@ export function CommandCenter() {
   return (
     <div className="space-y-8">
       <PageHeader
-        eyebrow="// 01 COMMAND CENTER"
+        eyebrow="Overview"
         title="Command Center"
         description="Live read on market value, days-on-market, and cross-portal price gaps across every tracked listings portal."
       />

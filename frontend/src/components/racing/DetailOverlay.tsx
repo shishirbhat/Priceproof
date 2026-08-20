@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArtTile } from "./ArtTile";
 import type { CarModel } from "./data";
-import { DUR, EASE_EXPO, SPRING_PANEL } from "./tokens";
+import { DUR, EASE_EXPO, SPRING_PANEL } from "@/lib/motion";
 
 type Props = {
   model: CarModel;

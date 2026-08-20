@@ -173,7 +173,7 @@ export function MarketValue() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="// 02 MARKET VALUE"
+        eyebrow="Pricing intelligence"
         title="Market Value"
         description="Every active listing scored against the median of comparable listings — same make and model, or make and model-year when a model line is too thin. A verdict is only ever given with enough comparables to back it; otherwise it says so honestly."
       />

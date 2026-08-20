@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { REVEAL_VIEWPORT, STAGGER, revealVariants } from "./tokens";
+import { REVEAL_VIEWPORT, STAGGER, revealVariants } from "@/lib/motion";
 
 const COLUMNS = [
   { title: "Racing", links: ["Series", "Calendar", "Results", "Standings"] },

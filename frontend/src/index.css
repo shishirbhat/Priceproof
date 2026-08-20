@@ -87,19 +87,19 @@
    mode. :root carries the dark palette directly rather than gating it
    behind a .dark toggle class. */
 :root {
-    --background: oklch(0.08 0 0);
+    --background: oklch(0.045 0 0);
     --foreground: oklch(0.93 0 0);
-    --card: oklch(0.11 0 0);
+    --card: oklch(0.075 0 0);
     --card-foreground: oklch(0.93 0 0);
-    --popover: oklch(0.12 0 0);
+    --popover: oklch(0.095 0 0);
     --popover-foreground: oklch(0.93 0 0);
     --primary: oklch(0.93 0 0);
-    --primary-foreground: oklch(0.08 0 0);
-    --secondary: oklch(0.17 0 0);
+    --primary-foreground: oklch(0.045 0 0);
+    --secondary: oklch(0.135 0 0);
     --secondary-foreground: oklch(0.93 0 0);
-    --muted: oklch(0.15 0 0);
+    --muted: oklch(0.12 0 0);
     --muted-foreground: oklch(0.62 0 0);
-    --accent: oklch(0.19 0 0);
+    --accent: oklch(0.155 0 0);
     --accent-foreground: oklch(0.93 0 0);
     --destructive: oklch(0.6 0.21 25);
     --border: oklch(1 0 0 / 10%);
@@ -110,16 +110,16 @@
     --chart-3: oklch(0.78 0.15 85);
     --chart-4: oklch(0.68 0.18 320);
     --chart-5: oklch(0.65 0.02 260);
-    --radius: 0.5rem;
-    --sidebar: oklch(0.06 0 0);
+    --radius: 0.58rem;
+    --sidebar: oklch(0.035 0 0);
     --sidebar-foreground: oklch(0.85 0 0);
     --sidebar-primary: oklch(0.93 0 0);
     --sidebar-primary-foreground: oklch(0.08 0 0);
-    --sidebar-accent: oklch(0.14 0 0);
+    --sidebar-accent: oklch(0.115 0 0);
     --sidebar-accent-foreground: oklch(0.93 0 0);
     --sidebar-border: oklch(1 0 0 / 8%);
     --sidebar-ring: oklch(0.55 0 0);
-    --chart-background: oklch(0.11 0 0);
+    --chart-background: oklch(0.075 0 0);
     --chart-foreground: oklch(0.55 0 0);
     --chart-foreground-muted: oklch(0.42 0 0);
     --chart-line-primary: var(--chart-1);
@@ -139,7 +139,7 @@
     --chart-scale-03: oklch(0.48 0.09 235);
     --chart-scale-04: oklch(0.62 0.12 235);
     --chart-scale-05: oklch(0.75 0.15 235);
-    --chart-scale-pattern-color: oklch(0.11 0 0);
+    --chart-scale-pattern-color: oklch(0.075 0 0);
 
     /* Validated status palette (dataviz skill reference palette) — tested
        for dark-surface contrast and distinctness from the categorical chart
@@ -154,25 +154,25 @@
     /* Signature brand accent — reserved for identity moments (logo, landing
        page, nav active state), never for generic dashboard actions, so it
        doesn't compete with the severity colors' meaning inside data views. */
-    --brand: oklch(0.72 0.19 235);
-    --brand-foreground: oklch(0.08 0 0);
-    --brand-dim: oklch(0.72 0.19 235 / 0.15);
+    --brand: oklch(0.575 0.225 22);
+    --brand-foreground: oklch(0.98 0 0);
+    --brand-dim: oklch(0.575 0.225 22 / 0.16);
 }
 
 .dark {
-    --background: oklch(0.08 0 0);
+    --background: oklch(0.045 0 0);
     --foreground: oklch(0.93 0 0);
-    --card: oklch(0.11 0 0);
+    --card: oklch(0.075 0 0);
     --card-foreground: oklch(0.93 0 0);
-    --popover: oklch(0.12 0 0);
+    --popover: oklch(0.095 0 0);
     --popover-foreground: oklch(0.93 0 0);
     --primary: oklch(0.93 0 0);
-    --primary-foreground: oklch(0.08 0 0);
-    --secondary: oklch(0.17 0 0);
+    --primary-foreground: oklch(0.045 0 0);
+    --secondary: oklch(0.135 0 0);
     --secondary-foreground: oklch(0.93 0 0);
-    --muted: oklch(0.15 0 0);
+    --muted: oklch(0.12 0 0);
     --muted-foreground: oklch(0.62 0 0);
-    --accent: oklch(0.19 0 0);
+    --accent: oklch(0.155 0 0);
     --accent-foreground: oklch(0.93 0 0);
     --destructive: oklch(0.6 0.21 25);
     --border: oklch(1 0 0 / 10%);
@@ -183,15 +183,15 @@
     --chart-3: oklch(0.78 0.15 85);
     --chart-4: oklch(0.68 0.18 320);
     --chart-5: oklch(0.65 0.02 260);
-    --sidebar: oklch(0.06 0 0);
+    --sidebar: oklch(0.035 0 0);
     --sidebar-foreground: oklch(0.85 0 0);
     --sidebar-primary: oklch(0.93 0 0);
     --sidebar-primary-foreground: oklch(0.08 0 0);
-    --sidebar-accent: oklch(0.14 0 0);
+    --sidebar-accent: oklch(0.115 0 0);
     --sidebar-accent-foreground: oklch(0.93 0 0);
     --sidebar-border: oklch(1 0 0 / 8%);
     --sidebar-ring: oklch(0.55 0 0);
-    --chart-background: oklch(0.11 0 0);
+    --chart-background: oklch(0.075 0 0);
     --chart-foreground: oklch(0.55 0 0);
     --chart-foreground-muted: oklch(0.42 0 0);
     --chart-crosshair: oklch(0.5 0 0);
@@ -206,7 +206,7 @@
     --chart-scale-03: oklch(0.48 0.09 235);
     --chart-scale-04: oklch(0.62 0.12 235);
     --chart-scale-05: oklch(0.75 0.15 235);
-    --chart-scale-pattern-color: oklch(0.11 0 0);
+    --chart-scale-pattern-color: oklch(0.075 0 0);
 }
 
 @layer base {
@@ -248,9 +248,9 @@
 body {
   background-color: var(--background);
   background-image:
-    radial-gradient(1200px 700px at 12% -15%, oklch(0.72 0.14 235 / 0.22), transparent 60%),
-    radial-gradient(1000px 600px at 105% 5%, oklch(0.68 0.18 320 / 0.14), transparent 55%),
-    radial-gradient(900px 600px at 45% 115%, oklch(0.72 0.13 165 / 0.10), transparent 60%);
+    radial-gradient(1200px 700px at 12% -15%, oklch(0.575 0.225 22 / 0.13), transparent 60%),
+    radial-gradient(1000px 600px at 105% 5%, oklch(0.70 0.02 250 / 0.07), transparent 55%),
+    radial-gradient(900px 600px at 45% 115%, oklch(0.65 0.03 20 / 0.06), transparent 60%);
   background-attachment: fixed;
   animation: ambient-drift 40s ease-in-out infinite;
 }
@@ -289,4 +289,21 @@ body::before {
     0 2px 4px oklch(0 0 0 / 0.4),
     0 16px 40px -12px oklch(0 0 0 / 0.6),
     inset 0 1px 0 0 oklch(1 0 0 / 0.05);
+}
+
+
+/* The racing surface: a flat near-black panel held by a hairline inset ring
+   rather than a border, so nothing shifts by a pixel when it highlights.
+   This is the single card treatment across the site and the dashboard. */
+@utility surface {
+  background: #0b0b0d;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+}
+@utility surface-hover {
+  transition: background-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@utility surface-hover-on {
+  background: #101013;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.13);
 }

@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { MODELS } from "./data";
-import { REVEAL_VIEWPORT, STAGGER, revealVariants } from "./tokens";
+import { REVEAL_VIEWPORT, STAGGER, revealVariants } from "@/lib/motion";
 
 const SERIES = MODELS.map((m) => ({
   id: m.id,

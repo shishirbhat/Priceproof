@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
+import { DUR, EASE_EXPO } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "./AnimatedNumber";
 
@@ -47,17 +48,18 @@ export function StatTile({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: DUR.base, delay, ease: EASE_EXPO }}
       className={cn(
-        "group relative flex flex-col justify-between gap-4 overflow-hidden rounded-xl border border-white/[0.06] p-4",
-        "bg-gradient-to-b from-white/[0.035] to-transparent bg-card shadow-elevate",
-        "transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-white/[0.12]",
+        "group relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl bg-[#0b0b0d] p-4",
+        "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]",
+        "transition-[background-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "hover:-translate-y-0.5 hover:bg-[#101013] hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]",
         tone !== "neutral" && TONE_GLOW[tone],
         className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <span className="text-[10px] uppercase tracking-[0.20em] text-white/45">
           {label}
         </span>
         {icon && (
@@ -66,12 +68,18 @@ export function StatTile({
           </span>
         )}
       </div>
-      <span className={cn("text-[2.25rem] leading-none font-semibold tracking-tight", TONE_TEXT[tone])}>
+      <span className={cn("text-[2.1rem] leading-none font-light tracking-tight", TONE_TEXT[tone])}>
         {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
       </span>
-      {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
-      {/* subtle top-edge sheen, like light catching a bevel */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      {hint ? <span className="text-[11px] text-white/45">{hint}</span> : null}
+      {/* Accent bar wipes the top edge on hover — the same affordance the
+          front end's series cards use. */}
+      <span
+        className={cn(
+          "pointer-events-none absolute inset-x-0 top-0 h-px w-0 transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full",
+          tone === "neutral" ? "bg-brand" : "bg-current opacity-60",
+        )}
+      />
     </motion.div>
   );
 }

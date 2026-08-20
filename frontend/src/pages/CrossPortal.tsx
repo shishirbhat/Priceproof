@@ -17,7 +17,7 @@ export function CrossPortal() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="// 03 CROSS-PORTAL MATCHES"
+        eyebrow="Duplicate detection"
         title="Cross-Portal Matches"
         description="Listings believed to be the same physical car, cross-posted to two different portals — matched on make, model, year, registration prefix, and city, since no India listings portal publishes a full VIN or plate on its results grid. Dealer-owned stock is excluded by construction: a dealer who bought the car outright can't have a duplicate elsewhere."
       />

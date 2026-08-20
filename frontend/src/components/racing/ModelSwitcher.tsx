@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { MODELS } from "./data";
-import { DUR, EASE_EXPO, SPRING_SNAP } from "./tokens";
+import { DUR, EASE_EXPO, SPRING_SNAP } from "@/lib/motion";
 
 type Props = {
   activeId: string;

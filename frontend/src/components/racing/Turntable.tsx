@@ -1,15 +1,22 @@
 import { useEffect, useMemo, useRef } from "react";
 import { buildCar, renderCar } from "./carRenderer";
-import type { CarModel } from "./data";
+import type { SilhouetteName } from "./carRenderer";
 
 type Props = {
-  model: CarModel;
-  /** Paused while the detail overlay is open, so we stop burning frames. */
+  /** Body and accent colours. Any caller can style the same mesh. */
+  paint: { base: string; accent: string };
+  /** Accessible description of what is being shown. */
+  label: string;
+  /** Paused while an overlay is open, so we stop burning frames. */
   paused?: boolean;
+  /** Radians per second while idling. */
+  idleSpeed?: number;
+  /** Which body to build. Defaults to the racing prototype. */
+  silhouette?: SilhouetteName;
 };
 
-/** Radians per second while idling. Matches the reference's slow drift. */
-const IDLE_SPEED = 0.34;
+/** Default radians per second while idling. */
+const DEFAULT_IDLE_SPEED = 0.34;
 /** Multiplier converting a pixel of horizontal drag into yaw. */
 const DRAG_SENSITIVITY = 0.0075;
 /** Per-frame velocity retention after release — the flick-to-spin feel. */
@@ -22,7 +29,13 @@ const FRICTION = 0.94;
  * canvas is sized to its container in device pixels, and the whole loop
  * stops when the element scrolls out of view or the tab is hidden.
  */
-export function Turntable({ model, paused = false }: Props) {
+export function Turntable({
+  paint,
+  label,
+  paused = false,
+  idleSpeed = DEFAULT_IDLE_SPEED,
+  silhouette = "race",
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
@@ -35,11 +48,13 @@ export function Turntable({ model, paused = false }: Props) {
   const pausedRef = useRef(paused);
   pausedRef.current = paused;
 
-  const faces = useMemo(() => buildCar(model.paint), [model.paint]);
-  const facesRef = useRef(faces);
-  facesRef.current = faces;
-  const accentRef = useRef(model.paint.accent);
-  accentRef.current = model.paint.accent;
+  const mesh = useMemo(() => buildCar(paint, silhouette), [paint, silhouette]);
+  const meshRef = useRef(mesh);
+  meshRef.current = mesh;
+  const accentRef = useRef(paint.accent);
+  accentRef.current = paint.accent;
+  const speedRef = useRef(idleSpeed);
+  speedRef.current = idleSpeed;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -94,17 +109,17 @@ export function Turntable({ model, paused = false }: Props) {
           yaw.current += velocity.current * dt * 60;
           velocity.current *= FRICTION;
         } else if (!pausedRef.current && !reduced.matches) {
-          yaw.current += IDLE_SPEED * dt;
+          yaw.current += speedRef.current * dt;
         }
       }
 
-      renderCar(ctx, facesRef.current, width, height, yaw.current, accentRef.current);
+      renderCar(ctx, meshRef.current, width, height, yaw.current, accentRef.current);
     };
     raf = requestAnimationFrame(frame);
 
     // Draw one frame immediately so a paused or reduced-motion visitor
     // still gets a fully composed hero rather than an empty canvas.
-    renderCar(ctx, facesRef.current, width, height, yaw.current, accentRef.current);
+    renderCar(ctx, meshRef.current, width, height, yaw.current, accentRef.current);
 
     return () => {
       cancelAnimationFrame(raf);
@@ -162,7 +177,7 @@ export function Turntable({ model, paused = false }: Props) {
         className="block h-full w-full touch-none select-none"
         style={{ cursor: "grab" }}
         role="img"
-        aria-label={`${model.title} — drag to rotate the car`}
+        aria-label={`${label} — drag to rotate the car`}
       />
     </div>
   );

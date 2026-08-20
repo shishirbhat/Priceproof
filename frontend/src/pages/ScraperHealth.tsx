@@ -50,7 +50,7 @@ export function ScraperHealth() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="// 07 SCRAPER HEALTH"
+        eyebrow="Collection health"
         title="Scraper Health"
         description="Every Bright Data Scraper Studio run, its field coverage over time, and the credit/page-load budget — the evidence that the platform is doing real work, including recovering when a target site changes under it."
       />

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
-import { DUR, EASE_EXPO } from "./tokens";
+import { DUR, EASE_EXPO } from "@/lib/motion";
 
 const LINES = ["Porsche Motorsport.", "From racing to everything we are."];
 

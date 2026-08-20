@@ -35,7 +35,24 @@ type Station = {
   taper: number;
 };
 
-const BODY: Station[] = [
+/** A complete body: stations plus the fittings that belong to it. */
+type Silhouette = {
+  stations: Station[];
+  /** Front and rear axle position, wheel radius, and track half-width. */
+  wheels: { front: number; rear: number; radius: number; track: number };
+  /** Racing aero — wing, splitter, diffuser. Road cars have none. */
+  aero: boolean;
+  /** Height of the rear light bar, which follows the tail of each body. */
+  tailLightY: number;
+  /** Height of the head lights. */
+  headLightY: number;
+  /** Cabin stations get the darker glazing treatment. */
+  glassFrom: number;
+  glassTo: number;
+  glassAbove: number;
+};
+
+const RACE: Station[] = [
   { x: -2.12, w: 0.46, yb: 0.14, yt: 0.34, taper: 0.72 },
   { x: -1.78, w: 0.66, yb: 0.11, yt: 0.46, taper: 0.80 },
   { x: -1.34, w: 0.78, yb: 0.12, yt: 0.58, taper: 0.86 },
@@ -47,6 +64,91 @@ const BODY: Station[] = [
   { x: 1.94, w: 0.78, yb: 0.15, yt: 0.72, taper: 0.90 },
   { x: 2.14, w: 0.62, yb: 0.20, yt: 0.66, taper: 0.94 },
 ];
+
+/** Short overhangs, tall glasshouse, near-vertical tailgate. */
+const HATCHBACK: Station[] = [
+  { x: -1.80, w: 0.52, yb: 0.22, yt: 0.55, taper: 0.80 },
+  { x: -1.50, w: 0.70, yb: 0.18, yt: 0.72, taper: 0.86 },
+  { x: -1.10, w: 0.78, yb: 0.18, yt: 0.86, taper: 0.90 },
+  { x: -0.70, w: 0.80, yb: 0.19, yt: 1.06, taper: 0.74 },
+  { x: -0.20, w: 0.82, yb: 0.19, yt: 1.34, taper: 0.62 },
+  { x: 0.45, w: 0.82, yb: 0.19, yt: 1.38, taper: 0.60 },
+  { x: 1.05, w: 0.81, yb: 0.19, yt: 1.30, taper: 0.64 },
+  { x: 1.50, w: 0.78, yb: 0.19, yt: 1.04, taper: 0.80 },
+  { x: 1.78, w: 0.66, yb: 0.22, yt: 0.82, taper: 0.88 },
+];
+
+/** Three-box: bonnet, cabin, and a separate boot deck behind it. */
+const SEDAN: Station[] = [
+  { x: -2.05, w: 0.52, yb: 0.20, yt: 0.50, taper: 0.80 },
+  { x: -1.70, w: 0.72, yb: 0.16, yt: 0.64, taper: 0.86 },
+  { x: -1.25, w: 0.80, yb: 0.16, yt: 0.78, taper: 0.90 },
+  { x: -0.75, w: 0.83, yb: 0.17, yt: 0.96, taper: 0.88 },
+  { x: -0.20, w: 0.85, yb: 0.17, yt: 1.24, taper: 0.64 },
+  { x: 0.40, w: 0.85, yb: 0.17, yt: 1.28, taper: 0.60 },
+  { x: 0.95, w: 0.84, yb: 0.17, yt: 1.08, taper: 0.70 },
+  { x: 1.50, w: 0.82, yb: 0.17, yt: 0.86, taper: 0.86 },
+  { x: 1.95, w: 0.74, yb: 0.19, yt: 0.82, taper: 0.90 },
+  { x: 2.08, w: 0.60, yb: 0.24, yt: 0.76, taper: 0.94 },
+];
+
+/** Raised floor, upright glass, and a roofline that stays high to the tail. */
+const SUV: Station[] = [
+  { x: -2.02, w: 0.56, yb: 0.30, yt: 0.68, taper: 0.82 },
+  { x: -1.68, w: 0.76, yb: 0.26, yt: 0.88, taper: 0.88 },
+  { x: -1.24, w: 0.86, yb: 0.26, yt: 1.04, taper: 0.92 },
+  { x: -0.72, w: 0.89, yb: 0.27, yt: 1.22, taper: 0.86 },
+  { x: -0.18, w: 0.90, yb: 0.27, yt: 1.56, taper: 0.70 },
+  { x: 0.45, w: 0.90, yb: 0.27, yt: 1.62, taper: 0.68 },
+  { x: 1.05, w: 0.89, yb: 0.27, yt: 1.58, taper: 0.70 },
+  { x: 1.62, w: 0.86, yb: 0.27, yt: 1.38, taper: 0.80 },
+  { x: 2.00, w: 0.74, yb: 0.29, yt: 1.08, taper: 0.88 },
+];
+
+export type SilhouetteName = "race" | "hatchback" | "sedan" | "suv";
+
+export const SILHOUETTES: Record<SilhouetteName, Silhouette> = {
+  race: {
+    stations: RACE,
+    wheels: { front: -1.30, rear: 1.38, radius: 0.34, track: 0.86 },
+    aero: true,
+    tailLightY: 0.70,
+    headLightY: 0.34,
+    glassFrom: 3,
+    glassTo: 7,
+    glassAbove: 0.80,
+  },
+  hatchback: {
+    stations: HATCHBACK,
+    wheels: { front: -1.14, rear: 1.14, radius: 0.37, track: 0.84 },
+    aero: false,
+    tailLightY: 0.90,
+    headLightY: 0.66,
+    glassFrom: 3,
+    glassTo: 7,
+    glassAbove: 1.02,
+  },
+  sedan: {
+    stations: SEDAN,
+    wheels: { front: -1.34, rear: 1.34, radius: 0.37, track: 0.86 },
+    aero: false,
+    tailLightY: 0.86,
+    headLightY: 0.60,
+    glassFrom: 3,
+    glassTo: 7,
+    glassAbove: 0.96,
+  },
+  suv: {
+    stations: SUV,
+    wheels: { front: -1.30, rear: 1.34, radius: 0.45, track: 0.90 },
+    aero: false,
+    tailLightY: 1.16,
+    headLightY: 0.82,
+    glassFrom: 3,
+    glassTo: 7,
+    glassAbove: 1.24,
+  },
+};
 
 /** Points per cross-section. Higher reads rounder but costs fill rate. */
 const RING = 18;
@@ -143,9 +245,21 @@ function box(
  * Assemble the full car. Paint is applied per call so the switcher can
  * restyle the same mesh without rebuilding geometry every frame.
  */
-export function buildCar(paint: { base: string; accent: string }): Face[] {
+export type CarMesh = {
+  faces: Face[];
+  /** Overall extents, so the camera can frame whatever body it is given. */
+  length: number;
+  height: number;
+};
+
+export function buildCar(
+  paint: { base: string; accent: string },
+  silhouette: SilhouetteName = "race",
+): CarMesh {
+  const spec = SILHOUETTES[silhouette];
+  const body = spec.stations;
   const faces: Face[] = [];
-  const rings = BODY.map(ring);
+  const rings = body.map(ring);
 
   // Loft the body panels between adjacent stations.
   for (let s = 0; s < rings.length - 1; s++) {
@@ -159,49 +273,66 @@ export function buildCar(paint: { base: string; accent: string }): Face[] {
   }
 
   // Cap the nose and tail with triangle fans.
-  const capNose: Vec3 = [BODY[0].x - 0.05, (BODY[0].yb + BODY[0].yt) / 2, 0];
-  const last = BODY.length - 1;
-  const capTail: Vec3 = [BODY[last].x + 0.04, (BODY[last].yb + BODY[last].yt) / 2, 0];
+  const last = body.length - 1;
+  const nose = body[0];
+  const tail = body[last];
+  const capNose: Vec3 = [nose.x - 0.05, (nose.yb + nose.yt) / 2, 0];
+  const capTail: Vec3 = [tail.x + 0.04, (tail.yb + tail.yt) / 2, 0];
   for (let i = 0; i < RING; i++) {
     const j = (i + 1) % RING;
     faces.push({ pts: [capNose, rings[0][j], rings[0][i]], color: paint.base });
     faces.push({ pts: [capTail, rings[last][i], rings[last][j]], color: paint.base });
   }
 
-  // Splitter and rear diffuser — flat planes just above the floor.
-  faces.push(...box(-2.30, -1.60, 0.06, 0.09, -0.92, 0.92, "#0e1013"));
-  faces.push(...box(1.90, 2.32, 0.07, 0.11, -0.90, 0.90, "#0e1013"));
-
-  // Rear wing: plane plus two endplates, carried on twin uprights.
-  faces.push(...box(1.72, 2.24, 1.44, 1.51, -1.00, 1.00, "#101216"));
-  faces.push(...box(1.70, 2.26, 1.14, 1.56, -1.04, -0.98, "#15181c"));
-  faces.push(...box(1.70, 2.26, 1.14, 1.56, 0.98, 1.04, "#15181c"));
-  faces.push(...box(1.86, 1.96, 0.84, 1.46, -0.32, -0.24, "#0d0f12"));
-  faces.push(...box(1.86, 1.96, 0.84, 1.46, 0.24, 0.32, "#0d0f12"));
+  // Racing aero. Road bodies get a plain valance instead.
+  if (spec.aero) {
+    faces.push(...box(-2.30, -1.60, 0.06, 0.09, -0.92, 0.92, "#0e1013"));
+    faces.push(...box(1.90, 2.32, 0.07, 0.11, -0.90, 0.90, "#0e1013"));
+    // Rear wing: plane plus two endplates, carried on twin uprights.
+    faces.push(...box(1.72, 2.24, 1.44, 1.51, -1.00, 1.00, "#101216"));
+    faces.push(...box(1.70, 2.26, 1.14, 1.56, -1.04, -0.98, "#15181c"));
+    faces.push(...box(1.70, 2.26, 1.14, 1.56, 0.98, 1.04, "#15181c"));
+    faces.push(...box(1.86, 1.96, 0.84, 1.46, -0.32, -0.24, "#0d0f12"));
+    faces.push(...box(1.86, 1.96, 0.84, 1.46, 0.24, 0.32, "#0d0f12"));
+  } else {
+    const w = tail.w * 0.92;
+    faces.push(...box(nose.x - 0.06, nose.x + 0.30, nose.yb - 0.06, nose.yb + 0.04, -w, w, "#0e1013"));
+    faces.push(...box(tail.x - 0.30, tail.x + 0.05, tail.yb - 0.06, tail.yb + 0.04, -w, w, "#0e1013"));
+  }
 
   // Wheels, inset slightly under the arches.
-  faces.push(...wheel(-1.30, -0.86, 0.34, 0.15));
-  faces.push(...wheel(-1.30, 0.86, 0.34, 0.15));
-  faces.push(...wheel(1.38, -0.88, 0.37, 0.17));
-  faces.push(...wheel(1.38, 0.88, 0.37, 0.17));
+  const { front, rear, radius, track } = spec.wheels;
+  const tyreWidth = radius * 0.44;
+  faces.push(...wheel(front, -track, radius, tyreWidth));
+  faces.push(...wheel(front, track, radius, tyreWidth));
+  faces.push(...wheel(rear, -track, radius, tyreWidth));
+  faces.push(...wheel(rear, track, radius, tyreWidth));
 
-  // The signature full-width tail bar, and a pair of headlights.
-  faces.push(...box(2.16, 2.19, 0.70, 0.80, -0.54, 0.54, paint.accent).map(
-    (f) => ({ ...f, emissive: true, glow: 0.5 }),
-  ));
-  faces.push(...box(-2.18, -2.14, 0.34, 0.42, -0.42, -0.20, paint.accent).map(
-    (f) => ({ ...f, emissive: true, glow: 0.34 }),
-  ));
-  faces.push(...box(-2.18, -2.14, 0.34, 0.42, 0.20, 0.42, paint.accent).map(
-    (f) => ({ ...f, emissive: true, glow: 0.34 }),
-  ));
+  // Full-width tail bar, and a pair of headlights, tracked to this body.
+  const tlY = spec.tailLightY;
+  const hlY = spec.headLightY;
+  faces.push(
+    ...box(tail.x + 0.02, tail.x + 0.05, tlY, tlY + 0.10, -tail.w * 0.82, tail.w * 0.82, paint.accent).map(
+      (f) => ({ ...f, emissive: true, glow: 0.5 }),
+    ),
+  );
+  for (const sign of [-1, 1]) {
+    faces.push(
+      ...box(
+        nose.x - 0.04, nose.x,
+        hlY, hlY + 0.09,
+        sign > 0 ? nose.w * 0.34 : -nose.w * 0.78,
+        sign > 0 ? nose.w * 0.78 : -nose.w * 0.34,
+        paint.accent,
+      ).map((f) => ({ ...f, emissive: true, glow: 0.34 })),
+    );
+  }
 
   // Glasshouse — a darker cap over the cabin stations reads as glazing.
-  for (let s = 3; s < 7; s++) {
+  for (let s = spec.glassFrom; s < spec.glassTo; s++) {
     for (let i = 0; i < RING; i++) {
       const j = (i + 1) % RING;
-      const a = rings[s][i];
-      if (a[1] < 0.80) continue;
+      if (rings[s][i][1] < spec.glassAbove) continue;
       faces.push({
         pts: [rings[s][i], rings[s][j], rings[s + 1][j], rings[s + 1][i]],
         color: "#080a0d",
@@ -209,7 +340,11 @@ export function buildCar(paint: { base: string; accent: string }): Face[] {
     }
   }
 
-  return faces;
+  // Extents drive the camera fit, so a tall SUV frames as well as a
+  // low prototype without any per-caller tuning.
+  const length = tail.x - nose.x + (spec.aero ? 0.5 : 0.4);
+  const height = Math.max(...body.map((b) => b.yt), spec.aero ? 1.56 : 0) + 0.1;
+  return { faces, length, height };
 }
 
 const CAM_Z = 26;
@@ -248,12 +383,13 @@ function shade(hex: string, amount: number): string {
  */
 export function renderCar(
   ctx: CanvasRenderingContext2D,
-  faces: Face[],
+  mesh: CarMesh,
   width: number,
   height: number,
   yaw: number,
   accent: string,
 ) {
+  const faces = mesh.faces;
   ctx.clearRect(0, 0, width, height);
 
   const cx = width / 2;
@@ -261,11 +397,9 @@ export function renderCar(
   // Focal length, solved so the car fits the frame rather than being a
   // fixed multiple of it — a fixed multiple left it tiny on phones and
   // cropped on short landscape windows.
-  const CAR_LENGTH = 4.6;
-  const CAR_HEIGHT = 1.6;
   const f = Math.min(
-    (width * 0.68 * CAM_Z) / CAR_LENGTH,
-    (height * 0.36 * CAM_Z) / CAR_HEIGHT,
+    (width * 0.68 * CAM_Z) / mesh.length,
+    (height * 0.36 * CAM_Z) / mesh.height,
   );
   // Backdrop geometry is viewport-relative, not focal-length-relative.
   const S = Math.min(width, height);
