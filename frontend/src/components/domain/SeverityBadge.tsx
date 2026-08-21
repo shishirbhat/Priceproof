@@ -1,20 +1,21 @@
 import { cn } from "@/lib/utils";
 import type { MarketVerdict } from "@/lib/api";
 
+/**
+ * The verdict chip. A filled pill rather than a square outline — the
+ * references treat a status as a solid, confident object, and a verdict is
+ * the most important thing on a market-value row.
+ */
 const STYLES: Record<MarketVerdict, string> = {
-  GOOD_DEAL:
-    "bg-severity-genuine/10 text-severity-genuine border-severity-genuine/25 shadow-[0_0_12px_-4px] shadow-severity-genuine/40",
-  FAIR:
-    "bg-muted-foreground/10 text-foreground border-white/[0.12]",
-  OVERPRICED:
-    "bg-severity-violation/10 text-severity-violation border-severity-violation/25 shadow-[0_0_12px_-4px] shadow-severity-violation/40",
-  INSUFFICIENT_COMPARABLES:
-    "bg-severity-drift/10 text-severity-drift border-severity-drift/25 shadow-[0_0_12px_-4px] shadow-severity-drift/40",
+  GOOD_DEAL: "bg-severity-genuine/15 text-severity-genuine ring-1 ring-severity-genuine/30",
+  FAIR: "bg-surface-3 text-label-2 ring-1 ring-[var(--hairline-strong)]",
+  OVERPRICED: "bg-severity-violation/15 text-severity-violation ring-1 ring-severity-violation/30",
+  INSUFFICIENT_COMPARABLES: "bg-severity-drift/15 text-severity-drift ring-1 ring-severity-drift/30",
 };
 
 const DOT: Record<MarketVerdict, string> = {
   GOOD_DEAL: "bg-severity-genuine",
-  FAIR: "bg-muted-foreground",
+  FAIR: "bg-label-3",
   OVERPRICED: "bg-severity-violation",
   INSUFFICIENT_COMPARABLES: "bg-severity-drift",
 };
@@ -30,7 +31,7 @@ export function SeverityBadge({ verdict }: { verdict: MarketVerdict }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+        "inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-[11.5px] font-medium tracking-[0.01em]",
         STYLES[verdict],
       )}
     >

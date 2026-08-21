@@ -28,10 +28,18 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-severity-violation/30 bg-severity-violation/10 p-10 text-center">
-          <AlertTriangle className="h-6 w-6 text-severity-violation" />
-          <div className="text-sm font-medium text-foreground">Something went wrong rendering this page</div>
-          <div className="max-w-md font-mono text-xs text-muted-foreground">{this.state.error.message}</div>
+        <div
+          className="flex flex-col items-center gap-4 rounded-lg bg-severity-violation/[0.07] p-12 text-center"
+          style={{ boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--severity-violation) 30%, transparent)" }}
+        >
+          <AlertTriangle className="h-5 w-5 text-severity-violation" />
+          <div className="label-mono text-severity-violation">Render error</div>
+          <div className="display-4 max-w-md text-foreground">
+            Something went wrong rendering this page
+          </div>
+          <div className="max-w-md font-mono text-[11.5px] leading-relaxed break-all text-label-3">
+            {this.state.error.message}
+          </div>
         </div>
       );
     }

@@ -35,3 +35,21 @@ step; 24–36 frames is the usual range. Anything `<img>` can decode works —
 Only add images you have the right to publish. Manufacturer press and
 studio photography is generally copyrighted and not licensed for reuse.
 Nothing in this folder is redistributed with the repository by default.
+
+## Marketing front door (`/welcome`)
+
+The hero on `/welcome` cycles **vehicle segments**, not the racing models, so
+it looks for these four folder ids:
+
+```
+hatchback/   sedan/   suv/   luxury/
+```
+
+Until a photo lands in one of these, that segment falls back to generated
+geometry — a plain grey silhouette that reads as placeholder art, because
+that is what it is. It is fine as an honest "no photo supplied" state and
+poor as the hero image of a marketing page, so put a real photo here before
+showing this to anyone.
+
+One image per folder gives a still; two or more become a drag-scrubbable
+360° turntable.

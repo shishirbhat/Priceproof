@@ -2,31 +2,47 @@ import type { ReactNode } from "react";
 import { AlertTriangle, Inbox, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * Query lifecycle surfaces.
+ *
+ * These are the states a data product actually spends most of its time in,
+ * so they get the same design attention as the happy path: mono labels, the
+ * hairline panel treatment, and a sweeping rule that makes "loading" read as
+ * an instrument acquiring a signal rather than a spinner.
+ */
+
 export function LoadingState({ label = "Loading" }: { label?: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-dashed border-border p-8 text-sm text-muted-foreground">
-      <Loader2 className="h-4 w-4 animate-spin" />
-      {label}…
+    <div className="panel relative flex items-center gap-3 overflow-hidden rounded-lg px-4 py-3.5">
+      <Loader2 className="h-3.5 w-3.5 animate-spin text-label-3" />
+      <span className="label-mono text-label-2">{label}</span>
+      <span className="rule-sweep absolute inset-x-0 bottom-0 h-px bg-hot/60" />
     </div>
   );
 }
 
 export function ErrorState({ message }: { message: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-severity-violation/30 bg-severity-violation/10 p-8 text-sm text-severity-violation">
-      <AlertTriangle className="h-4 w-4 shrink-0" />
-      {message}
+    <div
+      className="flex items-center gap-3 rounded-lg bg-severity-violation/[0.07] px-4 py-3"
+      style={{ boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--severity-violation) 30%, transparent)" }}
+    >
+      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-severity-violation" />
+      <span className="label-mono text-severity-violation">Failed</span>
+      <span className="min-w-0 truncate font-mono text-[11.5px] text-label-2">{message}</span>
     </div>
   );
 }
 
 export function EmptyState({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border p-10 text-center">
-      <Inbox className="h-5 w-5 text-muted-foreground" />
-      <div className="text-sm font-medium text-foreground">{title}</div>
+    <div
+      className="flex flex-col items-center gap-2.5 rounded-lg border border-dashed border-[var(--hairline-strong)] px-6 py-8 text-center"
+    >
+      <Inbox className="h-4 w-4 text-label-4" />
+      <div className="label-mono text-label-2">{title}</div>
       {description ? (
-        <div className="max-w-sm text-xs text-muted-foreground">{description}</div>
+        <div className="max-w-sm text-[12.5px] leading-relaxed text-label-3">{description}</div>
       ) : null}
     </div>
   );
@@ -34,14 +50,17 @@ export function EmptyState({ title, description }: { title: string; description?
 
 export function ListRowSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <ul className="divide-y divide-border">
+    <ul>
       {Array.from({ length: rows }, (_, i) => (
-        <li key={i} className="flex items-center justify-between gap-3 py-2.5">
-          <div className="flex-1 space-y-1.5">
-            <Skeleton className="h-3.5 w-40" />
-            <Skeleton className="h-3 w-24" />
+        <li
+          key={i}
+          className="flex items-center justify-between gap-3 border-t border-[var(--hairline)] py-3.5 first:border-t-0"
+        >
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-3.5 w-40 rounded-lg" />
+            <Skeleton className="h-2.5 w-24 rounded-lg" />
           </div>
-          <Skeleton className="h-5 w-16 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-lg" />
         </li>
       ))}
     </ul>
@@ -50,11 +69,11 @@ export function ListRowSkeleton({ rows = 5 }: { rows?: number }) {
 
 export function TileGridSkeleton({ tiles = 6 }: { tiles?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: tiles }, (_, i) => (
-        <div key={i} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
-          <Skeleton className="h-3 w-20" />
-          <Skeleton className="h-8 w-12" />
+        <div key={i} className="panel flex flex-col gap-6 p-5">
+          <Skeleton className="h-2.5 w-20 rounded-lg" />
+          <Skeleton className="h-9 w-14 rounded-lg" />
         </div>
       ))}
     </div>
@@ -63,11 +82,11 @@ export function TileGridSkeleton({ tiles = 6 }: { tiles?: number }) {
 
 export function TableSkeleton({ rows = 6, cols = 4 }: { rows?: number; cols?: number }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {Array.from({ length: rows }, (_, r) => (
         <div key={r} className="flex gap-4">
           {Array.from({ length: cols }, (_, c) => (
-            <Skeleton key={c} className="h-4 flex-1" />
+            <Skeleton key={c} className="h-3.5 flex-1 rounded-lg" />
           ))}
         </div>
       ))}

@@ -1,30 +1,53 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { Turntable } from "@/components/racing/Turntable";
 import { ArtTile } from "@/components/racing/ArtTile";
 import { SEGMENTS, CAPABILITIES } from "@/components/welcome/segments";
 import { framesFor } from "@/components/racing/carImages";
 import {
   DUR,
+  EASE_66,
   EASE_EXPO,
   REVEAL_VIEWPORT,
-  SPRING_SNAP,
-  STAGGER,
+  STAGGER_WIDE,
   revealVariants,
+  revealDisplayVariants,
 } from "@/lib/motion";
 
-const SECTIONS = ["Segments", "Capabilities", "Method"] as const;
+const SECTIONS = [
+  { id: "segments", label: "Segments" },
+  { id: "capabilities", label: "Capabilities" },
+  { id: "method", label: "Method" },
+];
+
+/** The ticker strip under the nav — upvent's live-status idiom. */
+const TICKER = [
+  "APPEND-ONLY SNAPSHOT HISTORY",
+  "BRIGHT DATA SCRAPER STUDIO",
+  "MEDIAN-SCORED AGAINST COMPARABLES",
+  "CROSS-PORTAL FUZZY MATCHING",
+  "DELISTING-DERIVED DAYS ON MARKET",
+  "FIELD-LEVEL DRIFT DETECTION",
+];
+
+/** The figures the product stands on, stated plainly. */
+const FIGURES = [
+  { k: "5", label: "Minimum comparables before any verdict is given" },
+  { k: "6h", label: "Collection cadence, running on GitHub Actions" },
+  { k: "2", label: "Portals connected — Cars24 and CarWale" },
+  { k: "0", label: "Rows ever updated in place" },
+];
 
 /**
  * The front door.
  *
- * Same design language as the showroom build — studio turntable, glass
- * navigation, expo-out motion throughout — applied to what this product
- * actually does. The car in the hero is the domain, not decoration: every
- * verdict the platform produces is scoped to a vehicle segment, so the
- * segments are what the hero cycles through.
+ * Built on the same system as the dashboard, at marketing scale: the mono
+ * structural voice, the indexed flat list, viewport-relative display type,
+ * and acid reserved for identity moments. The car in the hero is the domain,
+ * not decoration — every verdict the platform produces is scoped to a
+ * vehicle segment, so the segments are what the hero cycles through.
  */
 export function Welcome() {
   const [active, setActive] = useState(0);
@@ -39,58 +62,73 @@ export function Welcome() {
   }, []);
 
   return (
-    <div id="top" className="min-h-screen bg-[#050506] text-white antialiased">
-      {/* Navigation */}
+    <div id="top" className="min-h-screen bg-surface-0 text-foreground antialiased">
+      {/* ---------------------------------------------------------------- */}
+      {/* Navigation — a flat bar that gains a hairline and a plane on
+          scroll, rather than a floating pill. */}
       <motion.header
-        className="pointer-events-none fixed inset-x-0 top-0 z-40 px-4 pt-4 sm:px-6 sm:pt-5"
+        className="fixed inset-x-0 top-0 z-40 transition-colors duration-300"
         initial={{ y: -28, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: DUR.panel, ease: EASE_EXPO }}
+        transition={{ duration: DUR.panel, ease: EASE_66 }}
+        style={{
+          background: scrolled ? "rgb(8 9 10 / 0.9)" : "transparent",
+          backdropFilter: scrolled ? "blur(10px)" : "none",
+          boxShadow: scrolled ? "inset 0 -1px 0 0 var(--hairline)" : "none",
+        }}
       >
-        <nav className="relative mx-auto flex max-w-[1600px] items-center justify-between">
-          <a href="#top" className="pointer-events-auto leading-[1.05]">
-            <span className="block text-[11px] font-semibold tracking-[0.30em] text-white">
+        <nav className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-4 sm:px-6 lg:px-10">
+          <a href="#top" className="group">
+            <span className="block font-mono text-[12px] font-medium tracking-[0.34em] text-label-1 transition-colors duration-200 group-hover:text-hot">
               PRICEPROOF
             </span>
-            <span className="block text-[8px] tracking-[0.26em] text-white/45">
-              MARKET INTELLIGENCE
-            </span>
+            <span className="label-mono-sm mt-1 block">Market Intelligence</span>
           </a>
 
-          <div className="pointer-events-auto absolute left-1/2 hidden -translate-x-1/2 md:block">
-            <div
-              className="flex items-center gap-0.5 rounded-full p-1 backdrop-blur-xl transition-colors duration-300"
-              style={{
-                background: scrolled ? "rgba(14,14,16,0.82)" : "rgba(18,18,20,0.55)",
-                boxShadow: scrolled
-                  ? "inset 0 0 0 1px rgba(255,255,255,0.09), 0 8px 30px rgba(0,0,0,0.45)"
-                  : "inset 0 0 0 1px rgba(255,255,255,0.06)",
-              }}
-            >
-              {SECTIONS.map((s) => (
-                <a
-                  key={s}
-                  href={`#${s.toLowerCase()}`}
-                  className="rounded-full px-3.5 py-1.5 text-[12.5px] text-white/70 transition-colors duration-200 hover:bg-white/10 hover:text-white"
-                >
-                  {s}
-                </a>
-              ))}
-            </div>
+          <div className="hidden items-center gap-8 md:flex">
+            {SECTIONS.map((s, i) => (
+              <a key={s.id} href={`#${s.id}`} className="group flex items-center gap-2">
+                <span className="index-numeral text-label-4 transition-colors duration-200 group-hover:text-hot">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="label-mono transition-colors duration-200 group-hover:text-label-1">
+                  {s.label}
+                </span>
+              </a>
+            ))}
           </div>
 
           <Link
             to="/"
-            className="group pointer-events-auto flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-2 text-[12px] font-medium text-brand-foreground transition-transform duration-200 hover:scale-[1.03]"
+            className="group flex items-center gap-2 rounded-full bg-hot px-5 py-2.5 text-hot-foreground shadow-[0_6px_20px_-6px_var(--hot-glow)] transition-all duration-300 ease-[cubic-bezier(0.66,0,0.01,1)] hover:bg-hot-bright hover:shadow-[0_10px_28px_-6px_var(--hot-glow)]"
           >
-            Open dashboard
+            <span className="font-mono text-[10px] font-medium tracking-[0.18em] uppercase">
+              Open dashboard
+            </span>
             <ArrowUpRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </nav>
+
+        {/* Status ticker. Duplicated once so the marquee wraps seamlessly. */}
+        <div
+          className="overflow-hidden py-2"
+          style={{ boxShadow: "inset 0 -1px 0 0 var(--hairline)" }}
+          aria-hidden="true"
+        >
+          <div className="marquee flex w-max gap-10 whitespace-nowrap">
+            {[...TICKER, ...TICKER].map((t, i) => (
+              <span key={i} className="flex items-center gap-10">
+                <span className="font-mono text-[9px] tracking-[0.26em] text-label-4">{t}</span>
+                <span className="h-1 w-1 shrink-0 bg-hot/60" />
+              </span>
+            ))}
+          </div>
+        </div>
       </motion.header>
 
+      {/* ---------------------------------------------------------------- */}
       {/* Hero — the studio, cycling the segments the platform scores. */}
-      <section className="relative h-[100svh] min-h-[580px] w-full overflow-hidden">
+      <section id="segments" className="relative h-[92svh] min-h-[560px] w-full overflow-hidden">
         <Turntable
           paint={segment.paint}
           label={`${segment.name} segment`}
@@ -98,36 +136,32 @@ export function Welcome() {
           frames={framesFor(segment.id)}
         />
 
-        <div className="pointer-events-none absolute inset-x-0 top-[19%] flex flex-col items-center px-6 text-center">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 pb-28 text-center">
           <AnimatePresence mode="wait">
             <motion.div
               key={segment.id}
-              initial={{ opacity: 0, y: 14 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: DUR.base, ease: EASE_EXPO }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: DUR.panel, ease: EASE_66 }}
             >
-              <span className="text-[10px] tracking-[0.3em] text-white/45 uppercase">
-                {segment.name}
-              </span>
-              <h1 className="mt-3 max-w-3xl text-[34px] leading-[1.08] font-light tracking-tight text-white sm:text-[50px]">
-                {segment.headline}
-              </h1>
-              <p className="mx-auto mt-4 max-w-md text-[12.5px] leading-[1.6] text-white/50">
+              <div className="flex items-center justify-center gap-3">
+                <span className="index-numeral">{String(active + 1).padStart(2, "0")}</span>
+                <span className="label-mono text-label-2">{segment.name} segment</span>
+              </div>
+              <h1 className="display-2 mx-auto mt-5 max-w-4xl text-label-1">{segment.headline}</h1>
+              <p className="mx-auto mt-6 max-w-md text-[13px] leading-[1.65] text-label-2">
                 {segment.note}
               </p>
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Segment switcher, carrying the showroom's sliding indicator. */}
-        <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-6 sm:pb-8">
+        {/* Segment switcher — the same segmented readout the dashboard uses
+            for verdict filters, so the two halves share one control. */}
+        <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-8">
           <div
-            className="flex items-center gap-0.5 overflow-x-auto rounded-full p-1 backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            style={{
-              background: "rgba(14,14,16,0.82)",
-              boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08), 0 10px 34px rgba(0,0,0,0.5)",
-            }}
+            className="panel flex gap-1 overflow-x-auto rounded-full p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             role="tablist"
             aria-label="Vehicle segment"
           >
@@ -138,37 +172,61 @@ export function Welcome() {
                 role="tab"
                 aria-selected={i === active}
                 onClick={() => setActive(i)}
-                className={`relative shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] whitespace-nowrap outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-white/40 ${
-                  i === active ? "text-white" : "text-white/60 hover:text-white/90"
+                className={`relative shrink-0 rounded-full px-5 py-2.5 text-[12px] font-medium tracking-[0.06em] whitespace-nowrap uppercase outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-hot/50 ${
+                  i === active ? "text-hot-foreground" : "text-label-3 hover:text-label-1"
                 }`}
               >
+                <span className="relative z-10">{s.name}</span>
                 {i === active && (
                   <motion.span
                     layoutId="segment-pill"
-                    className="absolute inset-0 rounded-full bg-white/[0.14]"
-                    transition={SPRING_SNAP}
+                    className="absolute inset-0 -z-10 rounded-full bg-hot"
+                    transition={{ duration: DUR.micro, ease: EASE_EXPO }}
                   />
                 )}
-                <span className="relative z-10">{s.name}</span>
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Capabilities */}
-      <section id="capabilities" className="px-4 py-20 sm:px-6 lg:px-10 lg:py-28">
-        <div className="mx-auto max-w-[1400px]">
+      {/* ---------------------------------------------------------------- */}
+      {/* Figures band — four numbers, hairline-gridded. */}
+      <section className="px-4 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-[1600px]">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={REVEAL_VIEWPORT}
-            variants={revealVariants}
+            transition={{ staggerChildren: STAGGER_WIDE }}
+            className="grid grid-cols-2 gap-4 lg:grid-cols-4"
           >
-            <span className="block text-[10px] tracking-[0.28em] text-white/40 uppercase">
-              Capabilities
-            </span>
-            <h2 className="mt-2.5 max-w-2xl text-[26px] leading-[1.12] font-light tracking-tight sm:text-[34px]">
+            {FIGURES.map((f) => (
+              <motion.div key={f.label} variants={revealVariants} className="panel px-6 py-8">
+                <div className="readout text-hot">{f.k}</div>
+                <div className="mt-4 text-[12.5px] leading-[1.6] text-label-2">{f.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------------------- */}
+      {/* Capabilities — an index, not a card grid. Each row is a full-width
+          rule that lights up and pushes its arrow on hover. */}
+      <section id="capabilities" className="px-4 py-24 sm:px-6 lg:px-10 lg:py-36">
+        <div className="mx-auto max-w-[1600px]">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={REVEAL_VIEWPORT}
+            variants={revealDisplayVariants}
+          >
+            <div className="flex items-center gap-3">
+              <span className="index-numeral">02</span>
+              <span className="label-mono text-label-2">Capabilities</span>
+            </div>
+            <h2 className="display-3 mt-6 max-w-3xl text-label-1">
               Four questions a single listing page can never answer.
             </h2>
           </motion.div>
@@ -177,49 +235,66 @@ export function Welcome() {
             initial="hidden"
             whileInView="visible"
             viewport={REVEAL_VIEWPORT}
-            transition={{ staggerChildren: STAGGER }}
-            className="mt-10 grid gap-3 sm:grid-cols-2"
+            transition={{ staggerChildren: STAGGER_WIDE }}
+            className="mt-16"
           >
             {CAPABILITIES.map((c) => (
               <motion.div key={c.n} variants={revealVariants}>
                 <Link
                   to={c.to}
-                  className="group relative flex h-full flex-col justify-between gap-8 overflow-hidden rounded-2xl bg-[#0b0b0d] p-6 transition-colors duration-300 hover:bg-[#101013]"
-                  style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07)" }}
+                  className="group relative grid grid-cols-1 items-start gap-4 py-8 transition-colors duration-300 md:grid-cols-[5rem_minmax(0,22rem)_minmax(0,1fr)_3rem]"
+                  style={{ boxShadow: "inset 0 1px 0 0 var(--hairline)" }}
                 >
-                  <span className="absolute inset-x-0 top-0 h-[2px] w-0 bg-brand transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full" />
-                  <span className="text-[10px] tracking-[0.2em] text-white/35">{c.n}</span>
-                  <span>
-                    <span className="block text-[19px] leading-tight font-light">{c.title}</span>
-                    <span className="mt-3 block max-w-md text-[12px] leading-[1.62] text-white/50">
-                      {c.body}
-                    </span>
-                    <span className="mt-4 flex items-center gap-1.5 text-[11.5px] text-white/70 transition-colors group-hover:text-white">
-                      Open
-                      <ArrowUpRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </span>
+                  <span className="index-numeral pt-2 transition-colors duration-300 group-hover:text-hot">
+                    {c.n}
                   </span>
+
+                  <span className="display-4 text-label-1 transition-colors duration-300 group-hover:text-hot">
+                    {c.title}
+                  </span>
+
+                  <span className="max-w-2xl text-[13.5px] leading-[1.7] text-label-2">
+                    {c.body}
+                  </span>
+
+                  <span className="flex items-start justify-start pt-2 md:justify-end">
+                    <ArrowRight className="h-4 w-4 text-label-4 transition-all duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:translate-x-2 group-hover:text-hot" />
+                  </span>
+
+                  {/* The acid rule that draws across the row on hover. */}
+                  <span className="pointer-events-none absolute inset-x-0 top-0 h-[2px] w-full origin-left scale-x-0 bg-hot transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100" />
                 </Link>
               </motion.div>
             ))}
+            <div className="h-px bg-[var(--hairline)]" />
           </motion.div>
         </div>
       </section>
 
-      {/* Method — the statement section. */}
+      {/* ---------------------------------------------------------------- */}
+      {/* Method — the statement section, with the line-by-line word reveal. */}
       <section
         id="method"
-        className="relative isolate overflow-hidden px-4 py-24 sm:px-6 lg:px-10 lg:py-32"
+        className="relative isolate overflow-hidden px-4 py-28 sm:px-6 lg:px-10 lg:py-40"
       >
-        <div className="absolute inset-0 -z-10 opacity-45">
-          <ArtTile id="method-band" tone={["#141a24", "#5a2630"]} />
+        <div className="absolute inset-0 -z-10 opacity-30">
+          <ArtTile id="method-band" tone={["#0f1111", "#1b2352"]} />
         </div>
         <div
           className="absolute inset-0 -z-10"
-          style={{ background: "linear-gradient(to top, #050506 4%, rgba(5,5,6,0.68) 60%, #050506 100%)" }}
+          style={{
+            background:
+              "linear-gradient(to top, var(--surface-0) 4%, rgb(8 9 10 / 0.7) 60%, var(--surface-0) 100%)",
+          }}
         />
-        <div className="mx-auto max-w-[1400px]">
-          <h2 className="max-w-3xl text-[26px] leading-[1.18] font-light tracking-tight sm:text-[38px]">
+
+        <div className="mx-auto max-w-[1600px]">
+          <div className="flex items-center gap-3">
+            <span className="index-numeral">03</span>
+            <span className="label-mono text-label-2">Method</span>
+          </div>
+
+          <h2 className="display-2 mt-8 max-w-4xl text-label-1">
             {["Append-only history.", "Every verdict traceable to the snapshot it came from."].map(
               (line, i) => (
                 <span key={line} className="block overflow-hidden">
@@ -228,7 +303,7 @@ export function Welcome() {
                     initial={{ y: "104%" }}
                     whileInView={{ y: "0%" }}
                     viewport={{ once: true, margin: "-18% 0px" }}
-                    transition={{ duration: DUR.panel, ease: EASE_EXPO, delay: i * 0.09 }}
+                    transition={{ duration: DUR.hero, ease: EASE_66, delay: i * 0.09 }}
                   >
                     {line}
                   </motion.span>
@@ -236,12 +311,13 @@ export function Welcome() {
               ),
             )}
           </h2>
+
           <motion.p
             initial="hidden"
             whileInView="visible"
             viewport={REVEAL_VIEWPORT}
             variants={revealVariants}
-            className="mt-6 max-w-xl text-[13px] leading-[1.65] text-white/55"
+            className="mt-8 max-w-xl text-[14px] leading-[1.7] text-label-2"
           >
             Nothing is ever updated in place. Each collection run appends a new
             snapshot, so a price cut, a delisting and a portal changing shape are
@@ -255,40 +331,46 @@ export function Welcome() {
             whileInView="visible"
             viewport={REVEAL_VIEWPORT}
             variants={revealVariants}
-            className="mt-10"
+            className="mt-12"
           >
             <Link
               to="/"
-              className="group inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[13px] font-medium text-black transition-transform duration-200 hover:scale-[1.03]"
+              className="group inline-flex items-center gap-3 rounded-full bg-hot px-7 py-4 text-hot-foreground shadow-[0_8px_28px_-6px_var(--hot-glow)] transition-all duration-300 ease-[cubic-bezier(0.66,0,0.01,1)] hover:bg-hot-bright hover:shadow-[0_14px_36px_-6px_var(--hot-glow)]"
             >
-              Open the dashboard
+              <span className="font-mono text-[11px] font-medium tracking-[0.18em] uppercase">
+                Open the dashboard
+              </span>
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           </motion.div>
         </div>
       </section>
 
-      <footer
-        className="px-4 py-12 sm:px-6 lg:px-10"
-        style={{ boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.07)" }}
-      >
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-end justify-between gap-6">
-          <div className="leading-[1.05]">
-            <span className="block text-[13px] font-semibold tracking-[0.30em] text-white">
+      {/* ---------------------------------------------------------------- */}
+      <footer className="rule-t px-4 py-14 sm:px-6 lg:px-10">
+        <div className="mx-auto flex max-w-[1600px] flex-wrap items-end justify-between gap-8">
+          <div>
+            <span className="block font-mono text-[13px] font-medium tracking-[0.34em] text-label-1">
               PRICEPROOF
             </span>
-            <span className="block text-[9px] tracking-[0.26em] text-white/45">
-              MARKET INTELLIGENCE
-            </span>
+            <span className="label-mono-sm mt-1.5 block">Market Intelligence</span>
+            <span className="mt-4 block h-[3px] w-12 rounded-full bg-hot" />
           </div>
-          <div className="flex flex-wrap items-center gap-5 text-[11.5px] text-white/45">
-            <Link to="/racing" className="transition-colors hover:text-white">
+
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+            <Link to="/racing" className="label-mono transition-colors duration-200 hover:text-label-1">
               Showroom build
             </Link>
-            <Link to="/" className="transition-colors hover:text-white">
+            <Link
+              to="/welcome/classic"
+              className="label-mono transition-colors duration-200 hover:text-label-1"
+            >
+              Classic landing
+            </Link>
+            <Link to="/" className="label-mono transition-colors duration-200 hover:text-label-1">
               Dashboard
             </Link>
-            <span>Into the Scrape-Verse · Bright Data</span>
+            <span className="label-mono-sm">Into the Scrape-Verse · Bright Data</span>
           </div>
         </div>
       </footer>

@@ -100,20 +100,56 @@ deploy would actually work, both already in place:
 
 ## Design
 
-Dark-first, enterprise-data-terminal direction (Bloomberg/Linear, not a
-consumer app) — see `frontend/src/index.css` for the token system
-(background depth via layered radial glow + grain, a validated status
-palette for severity states, one signature brand accent reserved for
-identity moments and kept out of data views on purpose).
+One design system — "Instrument" — mashed from four references, each
+contributing the thing it does best rather than a slice of its look. The
+tokens live in `frontend/src/index.css`, the motion tokens in
+`frontend/src/lib/motion.ts`, and both the marketing pages and the eight
+dashboard pages are built from them.
 
-The landing page (`frontend/src/pages/Landing.tsx`,
-`frontend/src/components/landing/`) uses a mouse-reactive canvas
-particle-field hero, a glass nav, scroll-driven word reveal, and a
-branded percentage-counter preloader, reassembled around PriceProof's
-own content and brand color. Its "how it works" section renders the real
-`PriceHistoryChart` component (not a mockup) against a canned dataset,
-and the product-showcase section is a live `iframe` of the actual running
-dashboard, so neither can go stale.
+- **haoqi.design** — the substrate. A green-shifted near-black (`#0F1111`)
+  with a four-step surface ladder, and a strict label opacity ladder
+  (100 / 60 / 32 / 16) that does all the hierarchy work, so the UI never
+  needs a second text color. Its signature easing,
+  `cubic-bezier(.66,0,.01,1)`, is the house curve, and display type is set
+  viewport-relative and clamped.
+- **upvent.co** — monospace as the *structural* voice, not decoration:
+  every eyebrow, table header, axis label and metadata key is mono,
+  uppercase and widely tracked. Its progress/dash motion vocabulary shows
+  up in the loading and collection-health states.
+- **racing.porsche.com** — data-plate discipline. Indexed rows (`01`, `02`,
+  …) in the gutter, near-square corners, hairline inset rings instead of
+  borders, and an electric blue carrying structure and interaction.
+- **primesec.ai** — an acid highlight against high-contrast neutral, used
+  sparingly enough that it still reads as a signal rather than a theme.
+
+The rule that keeps it coherent is that **color means something**:
+
+- **Acid** (`--brand`, `#d4ff32`) is identity only — logo, nav active
+  state, section indices, the one primary CTA per page. It is deliberately
+  kept out of data views so it can never compete with a verdict.
+- **Electric blue** (`--electric`) is interaction, focus, and the primary
+  data series — the one saturated color allowed in both worlds, because it
+  never carries a verdict.
+- The **severity triad** (`--severity-violation` / `-genuine` / `-drift`)
+  is the only other saturated color and always carries a verdict. Teal
+  replaced the previous green for "good" so it can't be confused with acid
+  at a glance, and the categorical chart slots avoid the triad's hues
+  entirely.
+
+Shared building blocks rather than per-page styling: `PageHeader` opens
+every dashboard page, `Panel`/`PanelRow` compose every section, `StatTile`
+is the KPI readout, and the `surface`/`panel`/`label-mono`/`display-*`
+utilities are defined once in `index.css`.
+
+The marketing front door (`frontend/src/pages/Welcome.tsx`) leads with a
+studio turntable cycling the vehicle segments the platform actually scores,
+a status ticker, a hairline-gridded figures band, and the capabilities as an
+indexed flat list rather than a card grid. The original landing
+(`frontend/src/pages/Landing.tsx`, `frontend/src/components/landing/`) is
+kept reachable at `/welcome/classic` and carries the same tokens; its "how
+it works" section renders the real `PriceHistoryChart` component (not a
+mockup) against a canned dataset, and its product-showcase section is a live
+`iframe` of the actual running dashboard, so neither can go stale.
 
 ## Self-healing scraper cron
 

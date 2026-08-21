@@ -4,8 +4,7 @@ import { api } from "@/lib/api";
 import { QueryState, ListRowSkeleton } from "@/components/domain/QueryState";
 import { SeededBadge } from "@/components/domain/SeededBadge";
 import { PageHeader } from "@/components/domain/PageHeader";
-import { FadeIn } from "@/components/domain/FadeIn";
-import { Card } from "@/components/ui/card";
+import { Panel, PanelRow } from "@/components/domain/Panel";
 import { AnimatedBar } from "@/components/domain/AnimatedBar";
 import { PackageX, Clock } from "lucide-react";
 
@@ -32,16 +31,15 @@ export function MarketActivity() {
   const maxAvg = Math.max(1, ...(daysOnMarket.data ?? []).map((r) => Number(r.avg_days_on_market)));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         eyebrow="Days on market"
+        index="04"
         title="Market Activity"
         description="A listing disappearing between two collection runs is the only sold/removed signal a search-results collector gives — days-on-market is derived from that, bounded by scrape cadence, not read off a 'days ago' label."
       />
 
-      <FadeIn>
-      <Card className="gap-3 p-5">
-        <h2 className="text-[13px] font-semibold tracking-tight">Average days-on-market by make</h2>
+      <Panel index="01" title="Average days-on-market by make">
         <QueryState
           isLoading={daysOnMarket.isLoading}
           error={daysOnMarket.error}
@@ -51,18 +49,21 @@ export function MarketActivity() {
           skeleton={<ListRowSkeleton rows={3} />}
         >
           {(rows) => (
-            <div className="space-y-2">
+            <div className="space-y-3.5">
               {rows.map((r, i) => (
-                <div key={r.make} className="flex items-center gap-3">
-                  <span className="w-32 shrink-0 truncate text-xs">
-                    {r.make} <span className="text-muted-foreground">· {r.sold_count} sold</span>
+                <div key={r.make} className="flex items-center gap-4">
+                  <span className="w-36 shrink-0 truncate">
+                    <span className="text-[12.5px] text-label-1">{r.make}</span>
+                    <span className="ml-2 font-mono text-[10px] tracking-[0.1em] text-label-3 tabular-nums">
+                      {r.sold_count} SOLD
+                    </span>
                   </span>
                   <AnimatedBar
                     pct={(Number(r.avg_days_on_market) / maxAvg) * 100}
                     delay={i * 60}
                     className="bg-severity-drift"
                   />
-                  <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-muted-foreground">
+                  <span className="w-16 shrink-0 text-right font-mono text-[11px] tabular-nums text-label-2">
                     {r.avg_days_on_market}d
                   </span>
                 </div>
@@ -70,71 +71,79 @@ export function MarketActivity() {
             </div>
           )}
         </QueryState>
-      </Card>
-      </FadeIn>
+      </Panel>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card className="gap-3 p-5">
-          <h2 className="text-[13px] font-semibold tracking-tight">Delisting feed</h2>
+        <Panel index="02" title="Delisting feed" delay={0.05} bodyClassName="px-5 py-0">
           <QueryState
             isLoading={events.isLoading}
             error={events.error}
             data={events.data}
             isEmpty={(d) => d.length === 0}
             emptyTitle="No delisting events yet"
-            skeleton={<ListRowSkeleton rows={6} />}
+            skeleton={<div className="py-4"><ListRowSkeleton rows={6} /></div>}
           >
             {(rows) => (
-              <ul className="divide-y divide-white/[0.05]">
+              <ul>
                 {rows.slice(0, 15).map((e) => (
-                  <li key={e.listing_id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <PackageX className="h-4 w-4 shrink-0 text-severity-violation" />
-                      <Link to={`/listings/${e.listing_id}`} className="transition-colors hover:text-foreground/80">
+                  <PanelRow key={e.listing_id}>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <PackageX className="h-3.5 w-3.5 shrink-0 text-severity-violation" />
+                      <Link
+                        to={`/listings/${e.listing_id}`}
+                        className="truncate text-[13px] tracking-[-0.01em] text-label-1 transition-colors duration-200 hover:text-brand"
+                      >
                         {e.title}
                       </Link>
                       {e.is_seeded && <SeededBadge isSeeded />}
                     </div>
-                    <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                    <span className="shrink-0 font-mono text-[11px] text-label-3 tabular-nums">
                       {formatDate(e.delisted_at)}
                     </span>
-                  </li>
+                  </PanelRow>
                 ))}
               </ul>
             )}
           </QueryState>
-        </Card>
+        </Panel>
 
-        <Card className="gap-3 p-5">
-          <h2 className="text-[13px] font-semibold tracking-tight">Aging inventory (still active)</h2>
+        <Panel
+          index="03"
+          title="Aging inventory · still active"
+          delay={0.1}
+          bodyClassName="px-5 py-0"
+        >
           <QueryState
             isLoading={activeLongest.isLoading}
             error={activeLongest.error}
             data={activeLongest.data}
             isEmpty={(d) => d.length === 0}
             emptyTitle="No active listings recorded yet"
-            skeleton={<ListRowSkeleton rows={6} />}
+            skeleton={<div className="py-4"><ListRowSkeleton rows={6} /></div>}
           >
             {(rows) => (
-              <ul className="divide-y divide-white/[0.05]">
+              <ul>
                 {rows.slice(0, 15).map((e) => (
-                  <li key={e.listing_id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <Link to={`/listings/${e.listing_id}`} className="transition-colors hover:text-foreground/80">
+                  <PanelRow key={e.listing_id}>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Clock className="h-3.5 w-3.5 shrink-0 text-label-3" />
+                      <Link
+                        to={`/listings/${e.listing_id}`}
+                        className="truncate text-[13px] tracking-[-0.01em] text-label-1 transition-colors duration-200 hover:text-brand"
+                      >
                         {e.title}
                       </Link>
                       {e.is_seeded && <SeededBadge isSeeded />}
                     </div>
-                    <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+                    <span className="shrink-0 font-mono text-[11px] tabular-nums text-label-3">
                       {formatDays(e.days_active_seconds)} and counting
                     </span>
-                  </li>
+                  </PanelRow>
                 ))}
               </ul>
             )}
           </QueryState>
-        </Card>
+        </Panel>
       </div>
     </div>
   );

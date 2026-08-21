@@ -81,7 +81,7 @@ export function ListingCar({ make, model, title, imageUrl, bodyType, className =
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl bg-[#0b0b0d] ${className}`}
+      className={`panel relative overflow-hidden rounded-lg ${className}`}
       style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07)" }}
     >
       {/* A slower idle than the showroom hero — this sits next to data the
@@ -95,7 +95,7 @@ export function ListingCar({ make, model, title, imageUrl, bodyType, className =
         posterAlt={`${label} — photograph published by the seller`}
       />
       {!imageUrl && (
-        <span className="pointer-events-none absolute bottom-3 left-4 text-[9.5px] tracking-[0.18em] text-white/35 uppercase">
+        <span className="label-mono-sm pointer-events-none absolute bottom-3 left-4">
           Render · no seller photo
         </span>
       )}

@@ -8,76 +8,87 @@ interface StatTileProps {
   label: string;
   value: ReactNode;
   icon?: ReactNode;
-  tone?: "neutral" | "violation" | "genuine" | "drift";
+  tone?: "neutral" | "hot" | "violation" | "genuine" | "drift";
   hint?: string;
+  /** Small uppercase unit riding beside the figure, e.g. "listings". */
+  unit?: string;
   className?: string;
   delay?: number;
 }
 
 const TONE_TEXT: Record<NonNullable<StatTileProps["tone"]>, string> = {
-  neutral: "text-foreground",
+  neutral: "text-label-1",
+  hot: "text-hot",
   violation: "text-severity-violation",
   genuine: "text-severity-genuine",
   drift: "text-severity-drift",
 };
 
-const TONE_GLOW: Record<NonNullable<StatTileProps["tone"]>, string> = {
-  neutral: "",
-  violation: "shadow-[0_0_0_1px_oklch(0.62_0.21_25/0.15),0_8px_24px_-12px_oklch(0.62_0.21_25/0.35)]",
-  genuine: "shadow-[0_0_0_1px_oklch(0.7_0.19_150/0.15),0_8px_24px_-12px_oklch(0.7_0.19_150/0.3)]",
-  drift: "shadow-[0_0_0_1px_oklch(0.78_0.15_80/0.15),0_8px_24px_-12px_oklch(0.78_0.15_80/0.3)]",
+const TONE_CHIP: Record<NonNullable<StatTileProps["tone"]>, string> = {
+  neutral: "bg-surface-3 text-label-2",
+  hot: "bg-hot/15 text-hot",
+  violation: "bg-severity-violation/15 text-severity-violation",
+  genuine: "bg-severity-genuine/15 text-severity-genuine",
+  drift: "bg-severity-drift/15 text-severity-drift",
 };
 
-const TONE_ICON_BG: Record<NonNullable<StatTileProps["tone"]>, string> = {
-  neutral: "bg-white/[0.05] text-muted-foreground",
-  violation: "bg-severity-violation/10 text-severity-violation",
-  genuine: "bg-severity-genuine/10 text-severity-genuine",
-  drift: "bg-severity-drift/10 text-severity-drift",
-};
-
+/**
+ * The KPI readout.
+ *
+ * A big light numeral with a small uppercase unit beside it, an icon in a
+ * tinted chip, and a raised card under it — the shape every one of the
+ * references uses for a headline figure. The previous version was a flat
+ * square plate with a 10px mono label, which is why a row of six of them read
+ * as a spreadsheet header rather than an instrument cluster.
+ */
 export function StatTile({
   label,
   value,
   icon,
   tone = "neutral",
   hint,
+  unit,
   className,
   delay = 0,
 }: StatTileProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: DUR.base, delay, ease: EASE_EXPO }}
       className={cn(
-        "group relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl bg-[#0b0b0d] p-4",
-        "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]",
-        "transition-[background-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        "hover:-translate-y-0.5 hover:bg-[#101013] hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]",
-        tone !== "neutral" && TONE_GLOW[tone],
+        "panel-interactive group relative flex flex-col justify-between gap-5 overflow-hidden p-5",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-[10px] uppercase tracking-[0.20em] text-white/45">
-          {label}
-        </span>
+      <div className="flex items-start justify-between gap-3">
+        <span className="label-mono text-label-2">{label}</span>
         {icon && (
-          <span className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-md", TONE_ICON_BG[tone])}>
+          <span
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300",
+              TONE_CHIP[tone],
+            )}
+          >
             {icon}
           </span>
         )}
       </div>
-      <span className={cn("text-[2.1rem] leading-none font-light tracking-tight", TONE_TEXT[tone])}>
-        {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
-      </span>
-      {hint ? <span className="text-[11px] text-white/45">{hint}</span> : null}
-      {/* Accent bar wipes the top edge on hover — the same affordance the
-          front end's series cards use. */}
+
+      <div className="flex items-baseline gap-2">
+        <span className={cn("readout", TONE_TEXT[tone])}>
+          {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+        </span>
+        {unit ? <span className="readout-unit">{unit}</span> : null}
+      </div>
+
+      {hint ? <span className="text-[12px] leading-snug text-label-3">{hint}</span> : null}
+
+      {/* Accent rule wipes the bottom edge on hover. */}
       <span
         className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 h-px w-0 transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full",
-          tone === "neutral" ? "bg-brand" : "bg-current opacity-60",
+          "pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100",
+          tone === "neutral" ? "bg-hot" : "bg-current",
         )}
       />
     </motion.div>
