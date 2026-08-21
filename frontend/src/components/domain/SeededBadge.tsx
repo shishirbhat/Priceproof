@@ -12,7 +12,7 @@ export function SeededBadge({ isSeeded, className }: { isSeeded: boolean; classN
   return (
     <span
       className={cn(
-        "label-mono-sm inline-flex items-center gap-1.5 rounded-sm border border-dashed border-[var(--hairline-strong)] px-1.5 py-1 text-label-3",
+        "label-mono-sm inline-flex items-center gap-1.5 rounded-full bg-surface-3 px-2.5 py-1 text-label-3",
         className,
       )}
     >

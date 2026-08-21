@@ -17,7 +17,7 @@ const RULE_TYPES = [
 
 /** The field treatment shared by both selects and the threshold input. */
 const FIELD_CLASS =
-  "h-10 rounded-sm bg-surface-3 px-3 font-mono text-[12px] text-label-1 shadow-[inset_0_0_0_1px_var(--hairline-strong)] transition-colors duration-200 hover:bg-surface-2 focus:outline-none focus:shadow-[inset_0_0_0_1px_var(--electric)]";
+  "h-10 rounded-lg bg-surface-3 px-3 font-mono text-[12px] text-label-1 shadow-[inset_0_0_0_1px_var(--hairline-strong)] transition-colors duration-200 hover:bg-surface-2 focus:outline-none focus:shadow-[inset_0_0_0_1px_var(--electric)]";
 
 export function Alerts() {
   const alerts = useQuery({ queryKey: ["alerts"], queryFn: api.alerts });
@@ -162,7 +162,7 @@ export function Alerts() {
                         aria-label={`Delete alert for ${a.title}`}
                         disabled={remove.isPending}
                         onClick={() => remove.mutate(a.id)}
-                        className="rounded-sm p-1.5 text-label-4 transition-colors duration-200 hover:bg-severity-violation/10 hover:text-severity-violation disabled:opacity-50"
+                        className="rounded-lg p-1.5 text-label-4 transition-colors duration-200 hover:bg-severity-violation/10 hover:text-severity-violation disabled:opacity-50"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

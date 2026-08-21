@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       return (
         <div
-          className="flex flex-col items-center gap-4 rounded-sm bg-severity-violation/[0.07] p-12 text-center"
+          className="flex flex-col items-center gap-4 rounded-lg bg-severity-violation/[0.07] p-12 text-center"
           style={{ boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--severity-violation) 30%, transparent)" }}
         >
           <AlertTriangle className="h-5 w-5 text-severity-violation" />

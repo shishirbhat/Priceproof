@@ -86,7 +86,7 @@ export function ListingDetail() {
                   model={listing.model}
                   title={listing.title}
                   imageUrl={listing.main_image_url}
-                  className="aspect-[16/10] w-full rounded-sm"
+                  className="aspect-[16/10] w-full rounded-lg"
                 />
 
                 <div className="min-w-0">
@@ -178,7 +178,7 @@ export function ListingDetail() {
                 {chartData.length > 1 ? (
                   <PriceHistoryChart data={chartData} />
                 ) : (
-                  <div className="label-mono rounded-sm border border-dashed border-[var(--hairline-strong)] p-8 text-center">
+                  <div className="label-mono rounded-lg border border-dashed border-[var(--hairline-strong)] p-8 text-center">
                     Not enough snapshots yet to chart
                   </div>
                 )}

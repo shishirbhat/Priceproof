@@ -29,65 +29,66 @@ export function CommandCenter() {
         description="Live read on market value, days-on-market, and cross-portal price gaps across every tracked listings portal."
       />
 
-      {/* The KPI band is laid out as a single hairline-gridded plate rather
-          than six floating cards — an instrument cluster, not a card wall. */}
+      {/* Bento, not a uniform strip. The two figures that carry a verdict get
+          double width and a tone; the rest are quiet. Six identical plates in
+          a row is a spreadsheet header — the point of a command centre is that
+          your eye lands on the thing that needs attention. */}
       <QueryState
         isLoading={kpis.isLoading}
         error={kpis.error}
         data={kpis.data}
-        skeleton={<TileGridSkeleton />}
+        skeleton={<TileGridSkeleton tiles={6} />}
       >
         {(data) => (
-          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-sm bg-[var(--hairline)] md:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatTile
-              index="01"
               label="Listings tracked"
               value={data.listings_tracked}
-              icon={<Car className="h-3.5 w-3.5" />}
-              className="rounded-none shadow-none"
+              unit="live"
+              icon={<Car className="h-4 w-4" />}
+              tone="hot"
+              className="lg:col-span-2"
+              hint="Every active listing across every connected portal."
               delay={0}
             />
             <StatTile
-              index="02"
-              label="Portals"
-              value={data.portals}
-              icon={<Globe2 className="h-3.5 w-3.5" />}
-              className="rounded-none shadow-none"
+              label="Overpriced"
+              value={data.overpriced_count}
+              unit="listings"
+              icon={<ShieldX className="h-4 w-4" />}
+              tone={data.overpriced_count > 0 ? "violation" : "neutral"}
               delay={0.04}
             />
             <StatTile
-              index="03"
-              label="Price changes 24h"
-              value={data.price_changes_24h}
-              icon={<TrendingUp className="h-3.5 w-3.5" />}
-              className="rounded-none shadow-none"
+              label="Cross-portal"
+              value={data.cross_portal_matches}
+              unit="matches"
+              icon={<GitCompareArrows className="h-4 w-4" />}
+              tone={data.cross_portal_matches > 0 ? "drift" : "neutral"}
               delay={0.08}
             />
             <StatTile
-              index="04"
-              label="Newly delisted 24h"
-              value={data.newly_delisted_24h}
-              icon={<PackageX className="h-3.5 w-3.5" />}
-              tone={data.newly_delisted_24h > 0 ? "drift" : "neutral"}
-              className="rounded-none shadow-none"
+              label="Portals"
+              value={data.portals}
+              unit="connected"
+              icon={<Globe2 className="h-4 w-4" />}
               delay={0.12}
             />
             <StatTile
-              index="05"
-              label="Cross-portal matches"
-              value={data.cross_portal_matches}
-              icon={<GitCompareArrows className="h-3.5 w-3.5" />}
-              tone={data.cross_portal_matches > 0 ? "drift" : "neutral"}
-              className="rounded-none shadow-none"
+              label="Price changes"
+              value={data.price_changes_24h}
+              unit="24h"
+              icon={<TrendingUp className="h-4 w-4" />}
               delay={0.16}
             />
             <StatTile
-              index="06"
-              label="Overpriced listings"
-              value={data.overpriced_count}
-              icon={<ShieldX className="h-3.5 w-3.5" />}
-              tone={data.overpriced_count > 0 ? "violation" : "neutral"}
-              className="rounded-none shadow-none"
+              label="Newly delisted"
+              value={data.newly_delisted_24h}
+              unit="24h"
+              icon={<PackageX className="h-4 w-4" />}
+              tone={data.newly_delisted_24h > 0 ? "drift" : "neutral"}
+              className="lg:col-span-2"
+              hint="A listing vanishing between runs is the only sold signal a portal gives."
               delay={0.2}
             />
           </div>

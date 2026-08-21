@@ -38,7 +38,7 @@ export function CrossPortal() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={REVEAL_VIEWPORT}
                 transition={{ duration: DUR.base, delay: i * 0.05, ease: EASE_EXPO }}
-                className="panel rounded-sm"
+                className="panel rounded-lg"
               >
                 <header className="relative flex flex-wrap items-center justify-between gap-3 px-5 py-4">
                   <div className="flex min-w-0 items-center gap-3">

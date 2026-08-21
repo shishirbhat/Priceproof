@@ -9,29 +9,22 @@
 /* ============================================================================
    INSTRUMENT — the PriceProof design system
    ----------------------------------------------------------------------------
-   One system mashed from four references, each contributing the thing it
-   does best rather than a slice of its look:
+   Dark technical instrumentation: raised cards on a slate-black page, one hot
+   orange carrying emphasis wherever emphasis belongs, big readouts, and real
+   corner radius.
 
-   - haoqi.design      the substrate. A green-shifted near-black (#0F1111),
-                       an elevated step (#191B1B), and a strict four-rung
-                       label opacity ladder (100 / 60 / 32 / 16) that does
-                       all the hierarchy work so we never need a second
-                       text color. Its signature easing — cubic-bezier(
-                       .66,0,.01,1) — and viewport-relative display type.
-   - upvent.co         monospace as the *structural* face, not decoration:
-                       every label, axis, table header and figure is mono.
-                       Its progress/dash motion vocabulary.
-   - racing.porsche.com  the data-plate discipline. Condensed, tightly
-                       tracked display type, indexed rows, and an electric
-                       blue carrying structure and interaction.
-   - primesec.ai       the acid highlight against high-contrast neutral,
-                       used sparingly enough that it still reads as a
-                       signal rather than a theme.
+   This replaces an earlier pass that was flat, square, monochrome and kept its
+   accent out of data views on principle. That principle was wrong: in the work
+   this is modelled on, the accent is *on* the live data — the flow ribbon, the
+   gauge fill, the active toggle — and holding it back is what made the product
+   read as a grey wireframe.
 
-   The rule that keeps it coherent: color means something. Acid is identity
-   only (logo, nav, CTA, section indices) and is banned from data views.
-   Electric blue is interaction and the primary data series. The severity
-   triad is the only other saturated color and always carries a verdict.
+   Three rules:
+     1. Surfaces are raised, never painted on. Lighter than the page, top-lit
+        rim, real shadow, 16px radius.
+     2. The accent is for emphasis and liveness, and it is used generously.
+     3. The severity triad means a verdict and nothing else, and is held clear
+        of the accent's hue so the two can never be confused.
    ========================================================================== */
 
 @theme inline {
@@ -69,13 +62,13 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
+    --radius-sm: calc(var(--radius) * 0.45);
+    --radius-md: calc(var(--radius) * 0.65);
     --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+    --radius-xl: calc(var(--radius) * 1.3);
+    --radius-2xl: calc(var(--radius) * 1.6);
+    --radius-3xl: calc(var(--radius) * 2);
+    --radius-4xl: calc(var(--radius) * 2.4);
     --color-chart-scale-pattern-color: var(----chart-scale-pattern-color);
     --color-chart-scale-05: var(----chart-scale-05);
     --color-chart-scale-04: var(----chart-scale-04);
@@ -98,8 +91,7 @@
     --color-chart-foreground: var(----chart-foreground);
     --color-chart-background: var(----chart-background);
 
-    /* Domain severity states — always attached to a verdict, never
-       decorative. */
+    /* Verdict colours. Always paired with a word, never colour alone. */
     --color-severity-violation: var(--severity-violation);
     --color-severity-violation-foreground: var(--severity-violation-foreground);
     --color-severity-genuine: var(--severity-genuine);
@@ -107,160 +99,152 @@
     --color-severity-drift: var(--severity-drift);
     --color-severity-drift-foreground: var(--severity-drift-foreground);
 
-    /* Identity. `brand` is the acid; the aliases exist so intent reads at
-       the call site. */
+    /* The accent. `hot` is the semantic name; `brand` is kept as an alias so
+       the many existing bg-brand / text-brand call sites pick it up. */
+    --color-hot: var(--hot);
+    --color-hot-bright: var(--hot-bright);
+    --color-hot-deep: var(--hot-deep);
+    --color-hot-foreground: var(--hot-foreground);
     --color-brand: var(--brand);
     --color-brand-foreground: var(--brand-foreground);
     --color-brand-dim: var(--brand-dim);
-    --color-acid: var(--brand);
-    --color-acid-foreground: var(--brand-foreground);
 
-    /* Interaction + structure. */
     --color-electric: var(--electric);
     --color-electric-dim: var(--electric-dim);
 
-    /* The surface ladder — four steps, no more. */
     --color-surface-0: var(--surface-0);
     --color-surface-1: var(--surface-1);
     --color-surface-2: var(--surface-2);
     --color-surface-3: var(--surface-3);
 
-    /* haoqi's label ladder. Hierarchy comes from opacity, not from
-       inventing more grays. */
     --color-label-1: var(--label-1);
     --color-label-2: var(--label-2);
     --color-label-3: var(--label-3);
     --color-label-4: var(--label-4);
 }
 
-/* Enterprise instrument panel, dark-only by design — this app has no light
-   mode, so :root carries the palette directly rather than gating it behind
-   a .dark class. */
 :root {
-    /* --- substrate (haoqi) --------------------------------------------- */
-    --surface-0: #08090a;   /* page plane, below everything */
-    --surface-1: #0f1111;   /* default panel */
-    --surface-2: #161818;   /* raised / hover */
-    --surface-3: #1e2020;   /* input wells, active rows */
+    /* --- substrate -------------------------------------------------------
+       Cards sit above the page rather than being cut out of it. The previous
+       palette kept every surface within 3% of black, which is why the whole
+       thing read as one flat sheet. Each step here is a visible lift. */
+    --surface-0: #0b0e13;   /* page */
+    --surface-1: #141922;   /* card */
+    --surface-2: #1b212c;   /* raised / hover */
+    --surface-3: #252d3a;   /* wells, tracks, inactive controls */
 
-    --label: 232, 234, 233;
+    --label: 233, 237, 244;
     --label-1: rgb(var(--label));
-    --label-2: rgb(var(--label) / 0.60);
-    --label-3: rgb(var(--label) / 0.32);
-    --label-4: rgb(var(--label) / 0.16);
+    --label-2: rgb(var(--label) / 0.66);
+    --label-3: rgb(var(--label) / 0.42);
+    --label-4: rgb(var(--label) / 0.22);
 
-    /* Hairlines, not borders — a 1px inset ring never shifts layout when a
-       panel highlights. */
-    --hairline: rgb(var(--label) / 0.09);
-    --hairline-strong: rgb(var(--label) / 0.16);
+    --hairline: rgb(var(--label) / 0.08);
+    --hairline-strong: rgb(var(--label) / 0.14);
+    --rim: rgb(var(--label) / 0.10);
 
+    /* --- the accent ------------------------------------------------------ */
+    --hot: #ff6b1a;
+    --hot-bright: #ff8c42;
+    --hot-deep: #d94e00;
+    --hot-foreground: #1a0a00;
+    --hot-dim: rgb(255 107 26 / 0.14);
+    --hot-glow: rgb(255 107 26 / 0.32);
+
+    --brand: var(--hot);
+    --brand-foreground: var(--hot-foreground);
+    --brand-dim: var(--hot-dim);
+
+    --electric: #4d8dff;
+    --electric-dim: rgb(77 141 255 / 0.14);
+
+    /* --- shadcn surface roles -------------------------------------------- */
     --background: var(--surface-0);
     --foreground: var(--label-1);
     --card: var(--surface-1);
     --card-foreground: var(--label-1);
     --popover: var(--surface-2);
     --popover-foreground: var(--label-1);
-    --primary: var(--label-1);
-    --primary-foreground: var(--surface-0);
+    --primary: var(--hot);
+    --primary-foreground: var(--hot-foreground);
     --secondary: var(--surface-2);
     --secondary-foreground: var(--label-1);
     --muted: var(--surface-2);
     --muted-foreground: var(--label-2);
+    /* shadcn owns --accent as its subtle hover surface — naming the orange
+       --accent would turn every hover state orange. */
     --accent: var(--surface-3);
     --accent-foreground: var(--label-1);
-    --destructive: #ff4d3d;
+    --destructive: #ff3b5c;
     --border: var(--hairline);
     --input: var(--hairline-strong);
-    --ring: var(--electric);
+    --ring: var(--hot);
 
-    /* Near-square. The references almost never round a structural panel;
-       radius is reserved for pills and controls. */
-    --radius: 0.25rem;
+    /* Rounded, not square. All three references sit at 16px+, and it is most
+       of what separates "product" from "wireframe". */
+    --radius: 1rem;
 
-    --sidebar: var(--surface-0);
+    --sidebar: #0e131a;
     --sidebar-foreground: var(--label-2);
     --sidebar-primary: var(--label-1);
     --sidebar-primary-foreground: var(--surface-0);
     --sidebar-accent: var(--surface-2);
     --sidebar-accent-foreground: var(--label-1);
     --sidebar-border: var(--hairline);
-    --sidebar-ring: var(--electric);
+    --sidebar-ring: var(--hot);
 
-    /* --- identity + interaction ---------------------------------------- */
-    /* Acid, sitting between haoqi's #C0FE04 and primesec's #f9fe2e.
-       Identity only: logo, nav active state, section indices, primary CTA.
-       Never inside a data view, where it would compete with the severity
-       triad's meaning. */
-    --brand: #d4ff32;
-    --brand-foreground: #0a0c05;
-    --brand-dim: rgb(212 255 50 / 0.14);
-
-    /* Porsche's structural blue. Interaction, focus rings, and the primary
-       data series — the one saturated color allowed in both worlds,
-       because it never carries a verdict. */
-    --electric: #4d6bff;
-    --electric-dim: rgb(77 107 255 / 0.14);
-
-    /* --- data ----------------------------------------------------------- */
-    /* Categorical slots deliberately avoid the severity triad's hues. A
-       teal line in a price chart would read as a "good deal" verdict when it
-       only ever means "this series"; blue and magenta carry no such freight.
-       Slots 1 and 2 are the only ones the product's charts actually use. */
-    --chart-1: var(--electric);   /* asking price */
-    --chart-2: #d45cb0;           /* upvent magenta — segment median */
-    --chart-3: #8b8f8f;
-    --chart-4: #7a8cff;
-    --chart-5: #b8a6d9;
+    /* --- data ------------------------------------------------------------
+       Slot 1 is the accent: the primary series should be the hot colour, the
+       way the reference puts orange on the live flow ribbon. */
+    --chart-1: var(--hot);
+    --chart-2: #4d8dff;
+    --chart-3: #16d6a3;
+    --chart-4: #b98cff;
+    --chart-5: #7a8699;
     --chart-background: var(--surface-1);
     --chart-foreground: var(--label-2);
     --chart-foreground-muted: var(--label-3);
     --chart-line-primary: var(--chart-1);
     --chart-line-secondary: var(--chart-2);
     --chart-crosshair: rgb(var(--label) / 0.45);
-    --chart-grid: rgb(var(--label) / 0.08);
+    --chart-grid: rgb(var(--label) / 0.07);
     --chart-brush-border: var(--chart-grid);
-    --chart-tooltip-background: rgb(22 24 24 / 0.96);
+    --chart-tooltip-background: rgb(27 33 44 / 0.97);
     --chart-tooltip-foreground: var(--label-1);
     --chart-tooltip-muted: var(--label-2);
     --chart-marker-background: var(--surface-3);
     --chart-marker-border: rgb(var(--label) / 0.28);
     --chart-marker-foreground: var(--label-1);
     --chart-label: var(--label-2);
-    --chart-scale-01: #1b2352;
-    --chart-scale-02: #2b3a86;
-    --chart-scale-03: #3d52bf;
-    --chart-scale-04: #4d6bff;
-    --chart-scale-05: #8fa2ff;
+    --chart-scale-01: #3a1c08;
+    --chart-scale-02: #6b2f08;
+    --chart-scale-03: #a3450b;
+    --chart-scale-04: #ff6b1a;
+    --chart-scale-05: #ffb37a;
     --chart-scale-pattern-color: var(--surface-1);
 
-    /* Validated status triad — checked for contrast on --surface-1 and for
-       hue separation from each other, from acid (100°) and from electric.
-       Teal replaces the old green so "good" can never be mistaken for the
-       acid identity color at a glance. */
-    --severity-violation: #ff4d3d;      /* overpriced / critical */
+    /* Severity triad, pushed away from the accent's hue so a verdict never
+       reads as "emphasis" and emphasis never reads as a verdict: crimson
+       rather than red-orange, teal rather than green, and a cool yellow held
+       well clear of the orange. */
+    --severity-violation: #ff3b5c;
     --severity-violation-foreground: #ffffff;
-    --severity-genuine: #00c9a7;        /* good deal / healthy */
-    --severity-genuine-foreground: #04211c;
-    --severity-drift: #ffbe0b;          /* warning / insufficient data */
-    --severity-drift-foreground: #241a00;
+    --severity-genuine: #16d6a3;
+    --severity-genuine-foreground: #04241d;
+    --severity-drift: #ffd23f;
+    --severity-drift-foreground: #241d00;
 
-    /* --- motion --------------------------------------------------------- */
-    /* haoqi's signature curve: almost nothing happens, then everything
-       does, then it lands without a bounce. */
+    /* --- motion ----------------------------------------------------------- */
     --ease-66: cubic-bezier(0.66, 0, 0.01, 1);
     --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-    /* --- type scale ------------------------------------------------------ */
-    /* Viewport-relative display sizes, the way haoqi and upvent set them,
-       clamped so they stay sane on a 4K monitor and legible on a phone. */
-    --display-1: clamp(2.75rem, 7.2svw, 6.5rem);
-    --display-2: clamp(2.1rem, 5.6svw, 4.5rem);
-    --display-3: clamp(1.65rem, 4svw, 3rem);
-    --display-4: clamp(1.35rem, 2.6svw, 2rem);
+    /* --- type scale -------------------------------------------------------- */
+    --display-1: clamp(2.6rem, 6.4svw, 5.4rem);
+    --display-2: clamp(2rem, 4.6svw, 3.6rem);
+    --display-3: clamp(1.6rem, 3.2svw, 2.5rem);
+    --display-4: clamp(1.25rem, 2svw, 1.65rem);
 }
 
-/* Kept so any `.dark`-scoped third-party component resolves to the same
-   palette instead of falling back to shadcn's defaults. */
 .dark {
     --background: var(--surface-0);
     --foreground: var(--label-1);
@@ -268,8 +252,8 @@
     --card-foreground: var(--label-1);
     --popover: var(--surface-2);
     --popover-foreground: var(--label-1);
-    --primary: var(--label-1);
-    --primary-foreground: var(--surface-0);
+    --primary: var(--hot);
+    --primary-foreground: var(--hot-foreground);
     --secondary: var(--surface-2);
     --secondary-foreground: var(--label-1);
     --muted: var(--surface-2);
@@ -278,168 +262,217 @@
     --accent-foreground: var(--label-1);
     --border: var(--hairline);
     --input: var(--hairline-strong);
-    --ring: var(--electric);
-    --sidebar: var(--surface-0);
+    --ring: var(--hot);
+    --sidebar: #0e131a;
     --sidebar-foreground: var(--label-2);
     --sidebar-accent: var(--surface-2);
     --sidebar-accent-foreground: var(--label-1);
     --sidebar-border: var(--hairline);
-    --sidebar-ring: var(--electric);
+    --sidebar-ring: var(--hot);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
   html {
     @apply font-sans;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    }
-  /* Display type is set the way the references set it: tight tracking, low
-     weight, short leading. The size does the shouting, not the weight. */
+  }
   h1, h2, h3 {
-    letter-spacing: -0.035em;
-    line-height: 1.02;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
   }
   ::selection {
-    background: var(--brand);
-    color: var(--brand-foreground);
+    background: var(--hot);
+    color: var(--hot-foreground);
   }
 }
 
-/* Figures get tabular numerals everywhere — a price ticking up or down
-   should never reflow its neighbors. */
+/* Figures get tabular numerals — a price ticking up or down should never
+   reflow its neighbours. */
 .font-mono, [data-numeric] {
   font-variant-numeric: tabular-nums;
 }
 
 /* ---------------------------------------------------------------------------
-   Type utilities
+   Type
    ------------------------------------------------------------------------ */
 
-/* The single micro-label treatment, used for every eyebrow, table header,
-   axis label and metadata key in the product. Mono + uppercase + wide
-   tracking is upvent's structural voice, and it's what makes a dashboard
-   read as an instrument rather than a web page. */
+/* Micro-labels. Sans rather than mono, and larger and less tracked than the
+   previous pass, which pushed 10px/0.22em mono onto every label in the
+   product and made the whole UI feel like a terminal log. */
 @utility label-mono {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1.2;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.12em;
 }
 @utility label-mono-sm {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  line-height: 1.2;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.14em;
 }
 
-/* Section indices — the 00 / 01 / 02 gutter numerals shared by haoqi's
-   project index and Porsche's data plates. */
 @utility index-numeral {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
 }
 
-/* Default colors for the label utilities live here, at zero specificity, so
-   an explicit text-* utility at a call site always wins. Declared inside the
-   utility they would compete within the same cascade layer and could
-   silently swallow every override. */
+@utility display-1 { font-size: var(--display-1); line-height: 0.95; letter-spacing: -0.035em; font-weight: 400; }
+@utility display-2 { font-size: var(--display-2); line-height: 1.0; letter-spacing: -0.03em; font-weight: 400; }
+@utility display-3 { font-size: var(--display-3); line-height: 1.05; letter-spacing: -0.025em; font-weight: 500; }
+@utility display-4 { font-size: var(--display-4); line-height: 1.15; letter-spacing: -0.015em; font-weight: 500; }
+
+/* Section titles — the reference's "ENERGY FLOW" treatment. Large, light,
+   uppercase, generously tracked; loud enough to structure a page on its own. */
+@utility section-title {
+  font-size: clamp(1.05rem, 1.5svw, 1.4rem);
+  line-height: 1.05;
+  font-weight: 300;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* The readout: a big figure with a small unit riding beside it. The single
+   most characteristic element in all three references, and the thing this app
+   had none of. */
+@utility readout {
+  font-size: clamp(1.9rem, 3.2svw, 2.9rem);
+  line-height: 0.9;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+@utility readout-sm {
+  font-size: clamp(1.4rem, 2.1svw, 1.9rem);
+  line-height: 0.95;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+@utility readout-unit {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+/* Default colours at zero specificity, so an explicit text-* always wins. */
 @layer components {
-  :where(.label-mono, .label-mono-sm) {
-    color: var(--label-3);
-  }
-  :where(.index-numeral) {
-    color: var(--brand);
-  }
+  :where(.label-mono, .label-mono-sm) { color: var(--label-3); }
+  :where(.index-numeral) { color: var(--hot); }
+  :where(.readout-unit) { color: var(--label-3); }
 }
-
-@utility display-1 { font-size: var(--display-1); line-height: 0.96; letter-spacing: -0.04em; font-weight: 300; }
-@utility display-2 { font-size: var(--display-2); line-height: 1.0; letter-spacing: -0.038em; font-weight: 300; }
-@utility display-3 { font-size: var(--display-3); line-height: 1.05; letter-spacing: -0.032em; font-weight: 300; }
-@utility display-4 { font-size: var(--display-4); line-height: 1.1; letter-spacing: -0.025em; font-weight: 400; }
 
 /* ---------------------------------------------------------------------------
    Surfaces
    ------------------------------------------------------------------------ */
 
-/* The single panel treatment across the marketing site and the dashboard: a
-   flat near-black plane held by a hairline inset ring rather than a border,
-   so nothing shifts by a pixel when it highlights. */
+/* A surface reads as raised when three things agree: it is lighter than what
+   is behind it, it has a top-lit rim, and it casts a shadow. All three, plus
+   a real corner radius. The previous pass had none of them. */
 @utility surface {
-  background: var(--surface-1);
-  box-shadow: inset 0 0 0 1px var(--hairline);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 45%);
+  border: 1px solid var(--rim);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
+    0 2px 4px rgb(0 0 0 / 0.35),
+    0 12px 28px -12px rgb(0 0 0 / 0.55);
 }
 @utility surface-hover {
-  transition: background-color 300ms var(--ease-expo),
-              box-shadow 300ms var(--ease-expo);
+  transition: border-color 300ms var(--ease-expo),
+              box-shadow 300ms var(--ease-expo),
+              transform 300ms var(--ease-expo);
 }
 @utility surface-hover-on {
-  background: var(--surface-2);
-  box-shadow: inset 0 0 0 1px var(--hairline-strong);
+  border-color: var(--hairline-strong);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.07),
+    0 4px 8px rgb(0 0 0 / 0.4),
+    0 20px 40px -16px rgb(0 0 0 / 0.6);
 }
 
-/* A panel that behaves on its own — the common case, so it shouldn't need
-   three classes at every call site. */
 @utility panel {
-  background: var(--surface-1);
-  box-shadow: inset 0 0 0 1px var(--hairline);
-  transition: background-color 300ms var(--ease-expo),
-              box-shadow 300ms var(--ease-expo);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 45%);
+  border: 1px solid var(--rim);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
+    0 2px 4px rgb(0 0 0 / 0.35),
+    0 12px 28px -12px rgb(0 0 0 / 0.55);
 }
+
 @utility panel-interactive {
-  background: var(--surface-1);
-  box-shadow: inset 0 0 0 1px var(--hairline);
-  transition: background-color 300ms var(--ease-expo),
-              box-shadow 300ms var(--ease-expo);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 45%);
+  border: 1px solid var(--rim);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
+    0 2px 4px rgb(0 0 0 / 0.35),
+    0 12px 28px -12px rgb(0 0 0 / 0.55);
+  transition: border-color 300ms var(--ease-expo),
+              box-shadow 300ms var(--ease-expo),
+              transform 300ms var(--ease-expo);
   &:hover {
-    background: var(--surface-2);
-    box-shadow: inset 0 0 0 1px var(--hairline-strong);
+    border-color: var(--hairline-strong);
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.07),
+      0 4px 8px rgb(0 0 0 / 0.4),
+      0 22px 44px -16px rgb(0 0 0 / 0.62);
   }
 }
 
-/* Hairline rules used to divide list rows and section bands. */
-@utility rule-t { box-shadow: inset 0 1px 0 0 var(--hairline); }
-@utility rule-b { box-shadow: inset 0 -1px 0 0 var(--hairline); }
+/* The hot panel — at most one per screen. Carries the accent the way the
+   reference gives its live output block the orange treatment. */
+@utility panel-hot {
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgb(255 107 26 / 0.16), transparent 62%),
+    linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 45%);
+  border: 1px solid rgb(255 107 26 / 0.28);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.06),
+    0 2px 4px rgb(0 0 0 / 0.35),
+    0 18px 40px -18px rgb(255 107 26 / 0.28);
+}
 
-/* Layered shadow tokens — a single flat box-shadow reads cheap. Real depth
-   is a tight contact shadow plus a soft ambient one. */
+@utility rule-t { border-top: 1px solid var(--hairline); }
+@utility rule-b { border-bottom: 1px solid var(--hairline); }
+
 .shadow-elevate {
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.5),
     0 8px 24px -8px rgb(0 0 0 / 0.6),
-    inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05);
 }
 .shadow-elevate-lg {
   box-shadow:
     0 2px 4px rgb(0 0 0 / 0.5),
     0 16px 40px -12px rgb(0 0 0 / 0.7),
-    inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+    inset 0 1px 0 0 rgb(255 255 255 / 0.06);
 }
 
 /* ---------------------------------------------------------------------------
    Page plane
    ------------------------------------------------------------------------ */
 
-/* Depth: a flat black background reads as an unfinished template, so the
-   page plane carries three soft radial glows plus a fine grain.
-
-   Performance note, learned the hard way: this used to set
-   `background-attachment: fixed` on <body> and animate `background-position`
-   on a 40s loop. Both are repaint traps. Fixed attachment defeats scroll
-   compositing, so every scroll frame repainted the whole viewport — three
-   large radial gradients across a Retina display is several million pixels
-   a frame — and the animation kept repainting even while idle. The drift
-   was imperceptible and cost more than everything else on the page put
-   together. The gradients now sit on one fixed, composited layer that
-   neither repaints nor animates. */
+/* One fixed, static, composited layer. This previously set
+   `background-attachment: fixed` and animated `background-position`, which
+   repainted the full viewport on every scroll frame and never stopped when
+   idle — the single largest cause of the app feeling slow. */
 .page-plane {
   position: fixed;
   inset: 0;
@@ -447,18 +480,16 @@
   pointer-events: none;
   background-color: var(--background);
   background-image:
-    radial-gradient(1200px 700px at 12% -15%, rgb(212 255 50 / 0.055), transparent 60%),
-    radial-gradient(1000px 600px at 105% 5%, rgb(77 107 255 / 0.075), transparent 55%),
-    radial-gradient(900px 600px at 45% 115%, rgb(0 201 167 / 0.05), transparent 60%);
+    radial-gradient(1100px 620px at 8% -12%, rgb(255 107 26 / 0.10), transparent 62%),
+    radial-gradient(900px 560px at 104% 6%, rgb(77 141 255 / 0.07), transparent 58%),
+    radial-gradient(820px 540px at 46% 112%, rgb(255 107 26 / 0.05), transparent 62%);
 }
 
-/* Grain rides the same static layer rather than being a second
-   always-composited fixed element stacked over scrolling content. */
 .page-plane::after {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.035;
+  opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -468,54 +499,38 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Motion vocabulary
+   Motion vocabulary — transform and opacity only, so everything composites.
    ------------------------------------------------------------------------ */
 
-/* upvent's progress/dash idiom — a hairline that sweeps its container.
-   Used under section headers and on live/collecting states. */
 @keyframes rule-sweep {
   0%   { transform: scaleX(0); transform-origin: left center; }
   50%  { transform: scaleX(1); transform-origin: left center; }
   50.1%{ transform: scaleX(1); transform-origin: right center; }
   100% { transform: scaleX(0); transform-origin: right center; }
 }
-@utility rule-sweep {
-  animation: rule-sweep 2.4s var(--ease-66) infinite;
-}
+@utility rule-sweep { animation: rule-sweep 2.4s var(--ease-66) infinite; }
 
-/* A slow scan travelling down a panel — the "instrument is live" cue on
-   collection and health surfaces. */
 @keyframes scan {
   0%   { transform: translateY(-100%); opacity: 0; }
   10%  { opacity: 1; }
   90%  { opacity: 1; }
   100% { transform: translateY(100%); opacity: 0; }
 }
-@utility scan-line {
-  animation: scan 3.2s var(--ease-66) infinite;
-}
+@utility scan-line { animation: scan 3.2s var(--ease-66) infinite; }
 
-/* Marquee for the status ticker in the marketing header. */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-@utility marquee {
-  animation: marquee 38s linear infinite;
-}
+@utility marquee { animation: marquee 38s linear infinite; }
 
-/* Blink for live indicators, borrowed from haoqi's caret. */
 @keyframes soft-blink {
   0%, 45% { opacity: 1; }
   55%, 100% { opacity: 0.25; }
 }
-@utility soft-blink {
-  animation: soft-blink 1.6s var(--ease-66) infinite;
-}
+@utility soft-blink { animation: soft-blink 1.6s var(--ease-66) infinite; }
 
-/* One switch turns the whole vocabulary off. Anything that moves on its own
-   must be listed here — motion.dev handles its own reduced-motion, but CSS
-   animations don't. */
+/* One switch turns the whole vocabulary off. */
 @media (prefers-reduced-motion: reduce) {
   .rule-sweep, .scan-line, .marquee, .soft-blink { animation: none; }
   *, *::before, *::after {

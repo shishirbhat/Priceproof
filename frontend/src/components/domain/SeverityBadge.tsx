@@ -2,19 +2,15 @@ import { cn } from "@/lib/utils";
 import type { MarketVerdict } from "@/lib/api";
 
 /**
- * The verdict chip. Square rather than pill, mono rather than sans, and
- * carrying a leading status square instead of a dot — a verdict is a
- * readout, not a tag. Colors come from the severity triad only, which is
- * why acid is kept out of data views entirely.
+ * The verdict chip. A filled pill rather than a square outline — the
+ * references treat a status as a solid, confident object, and a verdict is
+ * the most important thing on a market-value row.
  */
 const STYLES: Record<MarketVerdict, string> = {
-  GOOD_DEAL:
-    "bg-severity-genuine/10 text-severity-genuine shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--severity-genuine)_28%,transparent)]",
-  FAIR: "bg-surface-2 text-label-2 shadow-[inset_0_0_0_1px_var(--hairline-strong)]",
-  OVERPRICED:
-    "bg-severity-violation/10 text-severity-violation shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--severity-violation)_28%,transparent)]",
-  INSUFFICIENT_COMPARABLES:
-    "bg-severity-drift/10 text-severity-drift shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--severity-drift)_28%,transparent)]",
+  GOOD_DEAL: "bg-severity-genuine/15 text-severity-genuine ring-1 ring-severity-genuine/30",
+  FAIR: "bg-surface-3 text-label-2 ring-1 ring-[var(--hairline-strong)]",
+  OVERPRICED: "bg-severity-violation/15 text-severity-violation ring-1 ring-severity-violation/30",
+  INSUFFICIENT_COMPARABLES: "bg-severity-drift/15 text-severity-drift ring-1 ring-severity-drift/30",
 };
 
 const DOT: Record<MarketVerdict, string> = {
@@ -35,11 +31,11 @@ export function SeverityBadge({ verdict }: { verdict: MarketVerdict }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-sm px-2 py-1 font-mono text-[10px] tracking-[0.14em] uppercase",
+        "inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-[11.5px] font-medium tracking-[0.01em]",
         STYLES[verdict],
       )}
     >
-      <span className={cn("h-1.5 w-1.5", DOT[verdict])} />
+      <span className={cn("h-1.5 w-1.5 rounded-full", DOT[verdict])} />
       {LABELS[verdict]}
     </span>
   );

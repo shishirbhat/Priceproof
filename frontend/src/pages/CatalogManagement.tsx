@@ -32,7 +32,7 @@ export function CatalogManagement() {
 
       {triggerError && (
         <div
-          className="rounded-sm bg-severity-violation/[0.07] px-4 py-3 font-mono text-[11.5px] leading-relaxed text-severity-violation"
+          className="rounded-lg bg-severity-violation/[0.07] px-4 py-3 font-mono text-[11.5px] leading-relaxed text-severity-violation"
           style={{ boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--severity-violation) 30%, transparent)" }}
         >
           {triggerError} — check BRIGHT_DATA_API_TOKEN is set in backend/.env.
@@ -90,7 +90,7 @@ export function CatalogManagement() {
                         <button
                           disabled={trigger.isPending}
                           onClick={() => trigger.mutate(p.id)}
-                          className="inline-flex items-center gap-2 rounded-sm px-3 py-2 font-mono text-[10px] tracking-[0.18em] text-label-2 uppercase shadow-[inset_0_0_0_1px_var(--hairline-strong)] transition-colors duration-200 hover:bg-surface-3 hover:text-label-1 disabled:opacity-50"
+                          className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-mono text-[10px] tracking-[0.18em] text-label-2 uppercase shadow-[inset_0_0_0_1px_var(--hairline-strong)] transition-colors duration-200 hover:bg-surface-3 hover:text-label-1 disabled:opacity-50"
                         >
                           <RefreshCw className={`h-3 w-3 ${trigger.isPending ? "animate-spin" : ""}`} />
                           Collect

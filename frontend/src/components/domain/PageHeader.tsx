@@ -39,12 +39,12 @@ export function PageHeader({
               className="mb-4 flex items-center gap-3"
             >
               {index ? <span className="index-numeral">{index}</span> : null}
-              <span className="label-mono text-label-2">{eyebrow}</span>
+              <span className="label-mono text-hot">{eyebrow}</span>
             </motion.div>
           ) : null}
-          <h1 className="display-3 text-foreground">{title}</h1>
+          <h1 className="display-2 text-foreground">{title}</h1>
           {description ? (
-            <p className="mt-4 max-w-2xl text-[13.5px] leading-[1.65] text-label-2">
+            <p className="mt-4 max-w-2xl text-[14px] leading-[1.7] text-label-2">
               {description}
             </p>
           ) : null}

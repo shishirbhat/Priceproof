@@ -8,40 +8,38 @@ interface StatTileProps {
   label: string;
   value: ReactNode;
   icon?: ReactNode;
-  tone?: "neutral" | "violation" | "genuine" | "drift";
+  tone?: "neutral" | "hot" | "violation" | "genuine" | "drift";
   hint?: string;
+  /** Small uppercase unit riding beside the figure, e.g. "listings". */
+  unit?: string;
   className?: string;
   delay?: number;
-  /** Two-digit ordinal printed in the tile's gutter. */
-  index?: string;
 }
 
 const TONE_TEXT: Record<NonNullable<StatTileProps["tone"]>, string> = {
-  neutral: "text-foreground",
+  neutral: "text-label-1",
+  hot: "text-hot",
   violation: "text-severity-violation",
   genuine: "text-severity-genuine",
   drift: "text-severity-drift",
 };
 
-const TONE_ICON: Record<NonNullable<StatTileProps["tone"]>, string> = {
-  neutral: "text-label-3",
-  violation: "text-severity-violation",
-  genuine: "text-severity-genuine",
-  drift: "text-severity-drift",
-};
-
-const TONE_BAR: Record<NonNullable<StatTileProps["tone"]>, string> = {
-  neutral: "bg-electric",
-  violation: "bg-severity-violation",
-  genuine: "bg-severity-genuine",
-  drift: "bg-severity-drift",
+const TONE_CHIP: Record<NonNullable<StatTileProps["tone"]>, string> = {
+  neutral: "bg-surface-3 text-label-2",
+  hot: "bg-hot/15 text-hot",
+  violation: "bg-severity-violation/15 text-severity-violation",
+  genuine: "bg-severity-genuine/15 text-severity-genuine",
+  drift: "bg-severity-drift/15 text-severity-drift",
 };
 
 /**
- * The KPI readout — a data plate, not a card. Mono label above, oversized
- * light figure below, ordinal in the gutter, and a rule that wipes across
- * the top edge on hover. Tone is the only color, and it always means a
- * severity, never decoration.
+ * The KPI readout.
+ *
+ * A big light numeral with a small uppercase unit beside it, an icon in a
+ * tinted chip, and a raised card under it — the shape every one of the
+ * references uses for a headline figure. The previous version was a flat
+ * square plate with a 10px mono label, which is why a row of six of them read
+ * as a spreadsheet header rather than an instrument cluster.
  */
 export function StatTile({
   label,
@@ -49,9 +47,9 @@ export function StatTile({
   icon,
   tone = "neutral",
   hint,
+  unit,
   className,
   delay = 0,
-  index,
 }: StatTileProps) {
   return (
     <motion.div
@@ -59,43 +57,38 @@ export function StatTile({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: DUR.base, delay, ease: EASE_EXPO }}
       className={cn(
-        "panel-interactive group relative flex flex-col justify-between gap-6 overflow-hidden rounded-sm p-4",
+        "panel-interactive group relative flex flex-col justify-between gap-5 overflow-hidden p-5",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {index ? <span className="index-numeral text-label-4">{index}</span> : null}
-          <span className="label-mono">{label}</span>
-        </div>
+      <div className="flex items-start justify-between gap-3">
+        <span className="label-mono text-label-2">{label}</span>
         {icon && (
-          <span className={cn("shrink-0 transition-colors duration-300", TONE_ICON[tone])}>
+          <span
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300",
+              TONE_CHIP[tone],
+            )}
+          >
             {icon}
           </span>
         )}
       </div>
 
-      <div>
-        <span
-          className={cn(
-            "block text-[2.4rem] leading-[0.95] font-light tracking-[-0.04em] tabular-nums",
-            TONE_TEXT[tone],
-          )}
-        >
+      <div className="flex items-baseline gap-2">
+        <span className={cn("readout", TONE_TEXT[tone])}>
           {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
         </span>
-        {hint ? (
-          <span className="mt-2 block font-mono text-[10px] tracking-[0.08em] text-label-3">
-            {hint}
-          </span>
-        ) : null}
+        {unit ? <span className="readout-unit">{unit}</span> : null}
       </div>
 
-      {/* Accent rule wipes the top edge on hover, on the house curve. */}
+      {hint ? <span className="text-[12px] leading-snug text-label-3">{hint}</span> : null}
+
+      {/* Accent rule wipes the bottom edge on hover. */}
       <span
         className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 h-px origin-left scale-x-0 transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100",
-          TONE_BAR[tone],
+          "pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100",
+          tone === "neutral" ? "bg-hot" : "bg-current",
         )}
       />
     </motion.div>

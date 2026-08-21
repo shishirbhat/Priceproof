@@ -46,23 +46,23 @@ export function Panel({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={REVEAL_VIEWPORT}
       transition={{ duration: DUR.base, delay, ease: EASE_EXPO }}
-      className={cn("panel relative rounded-sm", className)}
+      className={cn("panel relative rounded-lg", className)}
     >
-      <header className="relative flex items-center justify-between gap-4 px-5 py-4">
+      <header className="relative flex items-center justify-between gap-4 px-6 pt-5 pb-4">
         <div className="flex min-w-0 items-center gap-3">
           {index ? <span className="index-numeral">{index}</span> : null}
-          <h2 className="label-mono truncate text-label-2">{title}</h2>
+          <h2 className="section-title truncate text-label-1">{title}</h2>
         </div>
 
         <div className="flex shrink-0 items-center gap-4">
-          {meta ? <span className="label-mono-sm">{meta}</span> : null}
+          {meta ? <span className="label-mono-sm text-label-3">{meta}</span> : null}
           {action ??
             (href ? (
               <Link to={href} className="group flex items-center gap-1.5">
-                <span className="label-mono-sm transition-colors duration-200 group-hover:text-label-1">
+                <span className="label-mono-sm transition-colors duration-200 group-hover:text-hot">
                   {hrefLabel}
                 </span>
-                <ArrowUpRight className="h-3 w-3 text-label-4 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand" />
+                <ArrowUpRight className="h-3.5 w-3.5 text-label-3 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-hot" />
               </Link>
             ) : null)}
         </div>
@@ -72,11 +72,11 @@ export function Panel({
           whileInView={{ scaleX: 1 }}
           viewport={REVEAL_VIEWPORT}
           transition={{ duration: DUR.panel, delay: delay + 0.1, ease: EASE_66 }}
-          className="absolute inset-x-0 bottom-0 h-px origin-left bg-[var(--hairline)]"
+          className="absolute inset-x-6 bottom-0 h-px origin-left bg-[var(--hairline)]"
         />
       </header>
 
-      <div className={cn("px-5 py-4", bodyClassName)}>{children}</div>
+      <div className={cn("px-6 py-5", bodyClassName)}>{children}</div>
     </motion.section>
   );
 }
@@ -96,7 +96,7 @@ export function PanelRow({
   return (
     <li
       className={cn(
-        "rule-t -mx-5 flex items-center justify-between gap-4 px-5 py-3 transition-colors duration-200 first:shadow-none hover:bg-surface-2",
+        "-mx-6 flex items-center justify-between gap-4 border-t border-[var(--hairline)] px-6 py-3.5 transition-colors duration-200 first:border-t-0 hover:bg-surface-2",
         className,
       )}
     >

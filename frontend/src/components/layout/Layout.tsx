@@ -41,7 +41,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <button
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
-            className="label-mono flex items-center gap-2 rounded-sm px-3 py-2 text-label-2 transition-colors hover:text-label-1 lg:hidden"
+            className="label-mono flex items-center gap-2 rounded-lg px-3 py-2 text-label-2 transition-colors hover:text-label-1 lg:hidden"
             style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}
           >
             <Menu className="h-3.5 w-3.5" /> Menu
@@ -49,7 +49,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
           <Link
             to="/welcome"
-            className="group ml-auto flex items-center gap-2 rounded-sm px-3 py-2 transition-colors duration-200"
+            className="group ml-auto flex items-center gap-2 rounded-lg px-3 py-2 transition-colors duration-200"
             style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}
           >
             <span className="label-mono transition-colors duration-200 group-hover:text-label-1">

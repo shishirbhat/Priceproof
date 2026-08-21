@@ -62,9 +62,9 @@ function Nav() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="fixed inset-x-0 top-0 z-50 flex justify-center px-6 py-4"
     >
-      <div className="flex w-full max-w-5xl items-center justify-between rounded-sm bg-surface-1/70 px-4 py-3 backdrop-blur-xl" style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}>
+      <div className="flex w-full max-w-5xl items-center justify-between rounded-lg bg-surface-1/70 px-4 py-3 backdrop-blur-xl" style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}>
         <div className="flex items-center gap-2.5">
-          <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-brand text-brand-foreground">
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand text-brand-foreground">
             <Car className="h-3.5 w-3.5" />
           </div>
           <span className="font-mono text-[11px] font-medium tracking-[0.3em] text-label-1">PRICEPROOF</span>
@@ -77,7 +77,7 @@ function Nav() {
         <MagneticButton strength={0.4}>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-sm bg-brand px-4 py-2 font-mono text-[10px] font-medium tracking-[0.18em] text-brand-foreground uppercase"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 font-mono text-[10px] font-medium tracking-[0.18em] text-brand-foreground uppercase"
           >
             Enter dashboard <ArrowRight className="h-3 w-3" />
           </Link>
@@ -151,7 +151,7 @@ export function Landing() {
             <MagneticButton>
               <Link
                 to="/"
-                className="inline-flex items-center gap-2.5 rounded-sm bg-brand px-6 py-3.5 font-mono text-[11px] font-medium tracking-[0.18em] text-brand-foreground uppercase"
+                className="inline-flex items-center gap-2.5 rounded-lg bg-brand px-6 py-3.5 font-mono text-[11px] font-medium tracking-[0.18em] text-brand-foreground uppercase"
               >
                 Enter dashboard <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -159,7 +159,7 @@ export function Landing() {
             <MagneticButton strength={0.25}>
               <a
                 href="#how"
-                className="inline-flex items-center gap-2 rounded-sm px-6 py-3.5 font-mono text-[11px] tracking-[0.18em] text-label-2 uppercase transition-colors duration-200 hover:bg-surface-2 hover:text-label-1"
+                className="inline-flex items-center gap-2 rounded-lg px-6 py-3.5 font-mono text-[11px] tracking-[0.18em] text-label-2 uppercase transition-colors duration-200 hover:bg-surface-2 hover:text-label-1"
                 style={{ boxShadow: "inset 0 0 0 1px var(--hairline-strong)" }}
               >
                 See a verdict
@@ -190,14 +190,14 @@ export function Landing() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto max-w-5xl [perspective:1600px]"
         >
-          <div className="overflow-hidden rounded-sm bg-surface-1 shadow-elevate-lg" style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}>
+          <div className="overflow-hidden rounded-lg bg-surface-1 shadow-elevate-lg" style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}>
             <div className="rule-b flex items-center gap-2 bg-surface-2 px-4 py-3">
               <div className="flex gap-1.5">
                 <span className="h-2 w-2 bg-severity-violation/50" />
                 <span className="h-2 w-2 bg-severity-drift/50" />
                 <span className="h-2 w-2 bg-severity-genuine/50" />
               </div>
-              <div className="label-mono mx-auto flex items-center gap-1.5 rounded-sm bg-surface-3 px-3 py-1.5">
+              <div className="label-mono mx-auto flex items-center gap-1.5 rounded-lg bg-surface-3 px-3 py-1.5">
                 priceproof.app
               </div>
             </div>
@@ -307,7 +307,7 @@ export function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            className="panel rounded-sm p-6"
+            className="panel rounded-lg p-6"
           >
             <div className="mb-6 flex items-center gap-6">
               <span className="label-mono flex items-center gap-2">
@@ -346,7 +346,7 @@ export function Landing() {
             <MagneticButton>
               <Link
                 to="/"
-                className="inline-flex items-center gap-2.5 rounded-sm bg-surface-0 px-7 py-4 font-mono text-[11px] font-medium tracking-[0.18em] text-label-1 uppercase"
+                className="inline-flex items-center gap-2.5 rounded-lg bg-surface-0 px-7 py-4 font-mono text-[11px] font-medium tracking-[0.18em] text-label-1 uppercase"
               >
                 Enter dashboard <ArrowRight className="h-3.5 w-3.5" />
               </Link>

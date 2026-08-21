@@ -79,7 +79,7 @@ export function Welcome() {
       >
         <nav className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-4 sm:px-6 lg:px-10">
           <a href="#top" className="group">
-            <span className="block font-mono text-[12px] font-medium tracking-[0.34em] text-label-1 transition-colors duration-200 group-hover:text-brand">
+            <span className="block font-mono text-[12px] font-medium tracking-[0.34em] text-label-1 transition-colors duration-200 group-hover:text-hot">
               PRICEPROOF
             </span>
             <span className="label-mono-sm mt-1 block">Market Intelligence</span>
@@ -88,7 +88,7 @@ export function Welcome() {
           <div className="hidden items-center gap-8 md:flex">
             {SECTIONS.map((s, i) => (
               <a key={s.id} href={`#${s.id}`} className="group flex items-center gap-2">
-                <span className="index-numeral text-label-4 transition-colors duration-200 group-hover:text-brand">
+                <span className="index-numeral text-label-4 transition-colors duration-200 group-hover:text-hot">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="label-mono transition-colors duration-200 group-hover:text-label-1">
@@ -100,7 +100,7 @@ export function Welcome() {
 
           <Link
             to="/"
-            className="group flex items-center gap-2 rounded-sm bg-brand px-4 py-2.5 text-brand-foreground transition-transform duration-300 ease-[cubic-bezier(0.66,0,0.01,1)] hover:scale-[1.03]"
+            className="group flex items-center gap-2 rounded-full bg-hot px-5 py-2.5 text-hot-foreground shadow-[0_6px_20px_-6px_var(--hot-glow)] transition-all duration-300 ease-[cubic-bezier(0.66,0,0.01,1)] hover:bg-hot-bright hover:shadow-[0_10px_28px_-6px_var(--hot-glow)]"
           >
             <span className="font-mono text-[10px] font-medium tracking-[0.18em] uppercase">
               Open dashboard
@@ -119,7 +119,7 @@ export function Welcome() {
             {[...TICKER, ...TICKER].map((t, i) => (
               <span key={i} className="flex items-center gap-10">
                 <span className="font-mono text-[9px] tracking-[0.26em] text-label-4">{t}</span>
-                <span className="h-1 w-1 shrink-0 bg-brand/50" />
+                <span className="h-1 w-1 shrink-0 bg-hot/60" />
               </span>
             ))}
           </div>
@@ -161,7 +161,7 @@ export function Welcome() {
             for verdict filters, so the two halves share one control. */}
         <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-8">
           <div
-            className="flex gap-px overflow-x-auto rounded-sm bg-[var(--hairline)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="panel flex gap-1 overflow-x-auto rounded-full p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             role="tablist"
             aria-label="Vehicle segment"
           >
@@ -172,17 +172,15 @@ export function Welcome() {
                 role="tab"
                 aria-selected={i === active}
                 onClick={() => setActive(i)}
-                className={`relative shrink-0 px-5 py-3 font-mono text-[10px] tracking-[0.18em] whitespace-nowrap uppercase outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-brand/50 ${
-                  i === active
-                    ? "bg-surface-3 text-label-1"
-                    : "bg-surface-1/95 text-label-3 hover:bg-surface-2 hover:text-label-2"
+                className={`relative shrink-0 rounded-full px-5 py-2.5 text-[12px] font-medium tracking-[0.06em] whitespace-nowrap uppercase outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-hot/50 ${
+                  i === active ? "text-hot-foreground" : "text-label-3 hover:text-label-1"
                 }`}
               >
                 <span className="relative z-10">{s.name}</span>
                 {i === active && (
                   <motion.span
-                    layoutId="segment-underline"
-                    className="absolute inset-x-0 bottom-0 h-[2px] bg-brand"
+                    layoutId="segment-pill"
+                    className="absolute inset-0 -z-10 rounded-full bg-hot"
                     transition={{ duration: DUR.micro, ease: EASE_EXPO }}
                   />
                 )}
@@ -201,14 +199,12 @@ export function Welcome() {
             whileInView="visible"
             viewport={REVEAL_VIEWPORT}
             transition={{ staggerChildren: STAGGER_WIDE }}
-            className="grid grid-cols-2 gap-px bg-[var(--hairline)] lg:grid-cols-4"
+            className="grid grid-cols-2 gap-4 lg:grid-cols-4"
           >
             {FIGURES.map((f) => (
-              <motion.div key={f.label} variants={revealVariants} className="bg-surface-0 px-6 py-10">
-                <div className="text-[3.5rem] leading-none font-light tracking-[-0.05em] tabular-nums text-label-1">
-                  {f.k}
-                </div>
-                <div className="label-mono mt-4 leading-[1.7]">{f.label}</div>
+              <motion.div key={f.label} variants={revealVariants} className="panel px-6 py-8">
+                <div className="readout text-hot">{f.k}</div>
+                <div className="mt-4 text-[12.5px] leading-[1.6] text-label-2">{f.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -249,11 +245,11 @@ export function Welcome() {
                   className="group relative grid grid-cols-1 items-start gap-4 py-8 transition-colors duration-300 md:grid-cols-[5rem_minmax(0,22rem)_minmax(0,1fr)_3rem]"
                   style={{ boxShadow: "inset 0 1px 0 0 var(--hairline)" }}
                 >
-                  <span className="index-numeral pt-2 transition-colors duration-300 group-hover:text-brand">
+                  <span className="index-numeral pt-2 transition-colors duration-300 group-hover:text-hot">
                     {c.n}
                   </span>
 
-                  <span className="display-4 text-label-1 transition-colors duration-300 group-hover:text-brand">
+                  <span className="display-4 text-label-1 transition-colors duration-300 group-hover:text-hot">
                     {c.title}
                   </span>
 
@@ -262,11 +258,11 @@ export function Welcome() {
                   </span>
 
                   <span className="flex items-start justify-start pt-2 md:justify-end">
-                    <ArrowRight className="h-4 w-4 text-label-4 transition-all duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:translate-x-2 group-hover:text-brand" />
+                    <ArrowRight className="h-4 w-4 text-label-4 transition-all duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:translate-x-2 group-hover:text-hot" />
                   </span>
 
                   {/* The acid rule that draws across the row on hover. */}
-                  <span className="pointer-events-none absolute inset-x-0 top-0 h-px w-full origin-left scale-x-0 bg-brand transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100" />
+                  <span className="pointer-events-none absolute inset-x-0 top-0 h-[2px] w-full origin-left scale-x-0 bg-hot transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100" />
                 </Link>
               </motion.div>
             ))}
@@ -339,7 +335,7 @@ export function Welcome() {
           >
             <Link
               to="/"
-              className="group inline-flex items-center gap-3 rounded-sm bg-brand px-6 py-3.5 text-brand-foreground transition-transform duration-300 ease-[cubic-bezier(0.66,0,0.01,1)] hover:scale-[1.03]"
+              className="group inline-flex items-center gap-3 rounded-full bg-hot px-7 py-4 text-hot-foreground shadow-[0_8px_28px_-6px_var(--hot-glow)] transition-all duration-300 ease-[cubic-bezier(0.66,0,0.01,1)] hover:bg-hot-bright hover:shadow-[0_14px_36px_-6px_var(--hot-glow)]"
             >
               <span className="font-mono text-[11px] font-medium tracking-[0.18em] uppercase">
                 Open the dashboard
@@ -358,7 +354,7 @@ export function Welcome() {
               PRICEPROOF
             </span>
             <span className="label-mono-sm mt-1.5 block">Market Intelligence</span>
-            <span className="mt-4 block h-px w-10 bg-brand" />
+            <span className="mt-4 block h-[3px] w-12 rounded-full bg-hot" />
           </div>
 
           <div className="flex flex-wrap items-center gap-x-8 gap-y-3">

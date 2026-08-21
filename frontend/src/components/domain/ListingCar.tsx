@@ -81,7 +81,7 @@ export function ListingCar({ make, model, title, imageUrl, bodyType, className =
 
   return (
     <div
-      className={`panel relative overflow-hidden rounded-sm ${className}`}
+      className={`panel relative overflow-hidden rounded-lg ${className}`}
       style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07)" }}
     >
       {/* A slower idle than the showroom hero — this sits next to data the

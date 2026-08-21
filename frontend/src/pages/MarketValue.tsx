@@ -77,7 +77,7 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
       whileInView={{ opacity: 1, y: 0 }}
       viewport={REVEAL_VIEWPORT}
       transition={{ duration: DUR.base, delay, ease: EASE_EXPO }}
-      className="panel rounded-sm"
+      className="panel rounded-lg"
     >
       <header className="relative flex items-start justify-between gap-4 px-6 py-5">
         <div className="min-w-0">
@@ -143,7 +143,7 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
       <div className="space-y-5 px-6 py-5">
         <div
           className={cn(
-            "flex items-start gap-3 rounded-sm px-4 py-3.5 text-[13px] leading-[1.6]",
+            "flex items-start gap-3 rounded-lg px-4 py-3.5 text-[13px] leading-[1.6]",
             note.className,
           )}
         >
@@ -161,7 +161,7 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
             chartData.length > 1 ? (
               <PriceHistoryChart data={chartData} />
             ) : (
-              <div className="label-mono rounded-sm border border-dashed border-[var(--hairline-strong)] p-8 text-center">
+              <div className="label-mono rounded-lg border border-dashed border-[var(--hairline-strong)] p-8 text-center">
                 Not enough snapshots yet to chart
               </div>
             )
@@ -194,7 +194,7 @@ export function MarketValue() {
       {/* Verdict filter, as a segmented readout rather than a row of
           buttons — each segment carries its own count, so the distribution
           of verdicts is visible without applying a filter. */}
-      <div className="flex flex-wrap gap-px overflow-hidden rounded-sm bg-[var(--hairline)]">
+      <div className="flex flex-wrap gap-px overflow-hidden rounded-lg bg-[var(--hairline)]">
         {FILTERS.map((f) => {
           const count =
             f.key === "ALL"

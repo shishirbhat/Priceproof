@@ -57,7 +57,7 @@ export function ScraperHealth() {
         description="Every Bright Data Scraper Studio run, its field coverage over time, and the credit/page-load budget — the evidence that the platform is doing real work, including recovering when a target site changes under it."
       />
 
-      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-sm bg-[var(--hairline)] lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg bg-[var(--hairline)] lg:grid-cols-3">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
