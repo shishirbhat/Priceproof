@@ -129,11 +129,17 @@ export function Welcome() {
       {/* ---------------------------------------------------------------- */}
       {/* Hero — the studio, cycling the segments the platform scores. */}
       <section id="segments" className="relative h-[92svh] min-h-[560px] w-full overflow-hidden">
+        {/* idleSpeed 0: the hero renders once and then costs nothing until
+            someone grabs it. A permanently self-rotating canvas that
+            projects and depth-sorts a full mesh every frame is not worth
+            paying for on the page every visitor lands on — and it reads as
+            a product shot rather than a screensaver. */}
         <Turntable
           paint={segment.paint}
           label={`${segment.name} segment`}
           silhouette={segment.silhouette}
           frames={framesFor(segment.id)}
+          idleSpeed={0}
         />
 
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 pb-28 text-center">

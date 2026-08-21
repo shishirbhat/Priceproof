@@ -112,23 +112,41 @@ export function Turntable({
     let raf = 0;
     let prev = performance.now();
 
+    // 30fps is plenty for a slow turntable and halves a genuinely expensive
+    // render — every frame projects and depth-sorts the whole mesh twice.
+    const MIN_FRAME_MS = 1000 / 30;
+
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      const dt = Math.min((now - prev) / 1000, 0.05);
-      prev = now;
 
       const idle = !visible.current || document.hidden;
-      if (idle) return;
+      if (idle) {
+        prev = now;
+        return;
+      }
 
+      const elapsed = now - prev;
+      if (elapsed < MIN_FRAME_MS) return;
+
+      const dt = Math.min(elapsed / 1000, 0.05);
+      prev = now;
+
+      let moved = dragging.current;
       if (!dragging.current) {
         if (Math.abs(velocity.current) > 0.0008) {
           // Coasting after a flick.
           yaw.current += velocity.current * dt * 60;
           velocity.current *= FRICTION;
-        } else if (!pausedRef.current && !reduced.matches) {
+          moved = true;
+        } else if (!pausedRef.current && !reduced.matches && speedRef.current !== 0) {
           yaw.current += speedRef.current * dt;
+          moved = true;
         }
       }
+
+      // A still car does not need re-rendering. With idle rotation off this
+      // drops the hero's cost to nothing until someone grabs it.
+      if (!moved) return;
 
       renderCar(ctx, meshRef.current, width, height, yaw.current, accentRef.current);
     };
