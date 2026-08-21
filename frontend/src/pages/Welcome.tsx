@@ -72,8 +72,7 @@ export function Welcome() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: DUR.panel, ease: EASE_66 }}
         style={{
-          background: scrolled ? "rgb(8 9 10 / 0.9)" : "transparent",
-          backdropFilter: scrolled ? "blur(10px)" : "none",
+          background: scrolled ? "rgb(11 14 19)" : "transparent",
           boxShadow: scrolled ? "inset 0 -1px 0 0 var(--hairline)" : "none",
         }}
       >
