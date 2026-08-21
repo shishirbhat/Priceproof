@@ -13,6 +13,12 @@ import {
   X,
 } from "lucide-react";
 
+/**
+ * The nav is an index, not a menu — each row carries its ordinal in the
+ * gutter, the way haoqi numbers its project list and Porsche numbers its
+ * data plates. That ordinal is also the only place acid appears in the
+ * dashboard chrome.
+ */
 const NAV = [
   { to: "/", label: "Command Center", icon: LayoutGrid, end: true },
   { to: "/market-value", label: "Market Value", icon: Gauge },
@@ -28,12 +34,6 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-/**
- * Dashboard navigation, carrying the same treatment as the front end's
- * floating nav: one shared indicator that slides between items on a spring,
- * a red identity bar on the active row, and the flat near-black surface
- * held by a hairline rather than a border.
- */
 export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   return (
     <>
@@ -47,33 +47,38 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-svh w-64 shrink-0 flex-col bg-[#050506]/95 backdrop-blur-xl",
-          "transition-transform duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-          "lg:sticky lg:top-0 lg:w-60 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex h-svh w-[17rem] shrink-0 flex-col bg-surface-0/95 backdrop-blur-xl",
+          "transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)]",
+          "lg:sticky lg:top-0 lg:w-64 lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
-        style={{ boxShadow: "inset -1px 0 0 0 rgba(255,255,255,0.07)" }}
+        style={{ boxShadow: "inset -1px 0 0 0 var(--hairline)" }}
       >
-        <div className="flex items-start gap-2.5 px-5 pt-6 pb-7">
-          <Link to="/welcome" className="group flex-1 leading-[1.05]">
-            <span className="block text-[12px] font-semibold tracking-[0.30em] text-white transition-colors group-hover:text-brand">
-              PRICEPROOF
-            </span>
-            <span className="mt-0.5 block text-[8px] tracking-[0.26em] text-white/40">
-              MARKET INTELLIGENCE
-            </span>
-          </Link>
-          <button
-            onClick={onClose}
-            aria-label="Close menu"
-            className="rounded-md p-1.5 text-white/50 transition-colors hover:bg-white/[0.07] hover:text-white lg:hidden"
-          >
-            <X className="h-4 w-4" />
-          </button>
+        {/* Identity plate. The acid rule under the wordmark is the app's
+            one unmissable brand moment in the dashboard. */}
+        <div className="px-6 pt-7 pb-6">
+          <div className="flex items-start gap-2">
+            <Link to="/welcome" className="group flex-1">
+              <span className="block font-mono text-[12.5px] font-medium tracking-[0.34em] text-label-1 transition-colors duration-200 group-hover:text-brand">
+                PRICEPROOF
+              </span>
+              <span className="label-mono-sm mt-1.5 block">
+                Market Intelligence
+              </span>
+              <span className="mt-3 block h-px w-8 bg-brand transition-[width] duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:w-full" />
+            </Link>
+            <button
+              onClick={onClose}
+              aria-label="Close menu"
+              className="rounded-sm p-1.5 text-label-3 transition-colors hover:bg-surface-2 hover:text-label-1 lg:hidden"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
-        <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5">
-          {NAV.map(({ to, label, icon: Icon, end }) => (
+        <nav className="flex-1 overflow-y-auto px-3">
+          {NAV.map(({ to, label, icon: Icon, end }, i) => (
             <NavLink
               key={to}
               to={to}
@@ -81,8 +86,8 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               onClick={onClose}
               className={({ isActive }) =>
                 cn(
-                  "relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12.5px] transition-colors duration-200",
-                  isActive ? "text-white" : "text-white/55 hover:text-white/90",
+                  "relative flex items-center gap-3 rounded-sm py-2.5 pr-3 pl-3 transition-colors duration-200",
+                  isActive ? "text-label-1" : "text-label-2 hover:text-label-1",
                 )
               }
             >
@@ -91,21 +96,29 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                   {isActive && (
                     <motion.span
                       layoutId="sidebar-active"
-                      className="absolute inset-0 rounded-lg bg-white/[0.09]"
+                      className="absolute inset-0 rounded-sm bg-surface-2"
                       transition={SPRING_SNAP}
                     />
                   )}
                   {isActive && (
                     <motion.span
                       layoutId="sidebar-active-bar"
-                      className="absolute top-1/2 -left-2.5 h-4 w-0.5 -translate-y-1/2 rounded-full bg-brand"
-                      style={{ boxShadow: "0 0 10px 1px var(--brand)" }}
+                      className="absolute top-1/2 left-0 h-5 w-[2px] -translate-y-1/2 bg-brand"
+                      style={{ boxShadow: "0 0 12px 1px var(--brand)" }}
                       transition={SPRING_SNAP}
                     />
                   )}
-                  <span className="relative flex items-center gap-2.5">
-                    <Icon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{label}</span>
+                  <span
+                    className={cn(
+                      "relative font-mono text-[9.5px] tracking-[0.18em] tabular-nums transition-colors duration-200",
+                      isActive ? "text-brand" : "text-label-4",
+                    )}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="relative flex min-w-0 items-center gap-2.5">
+                    <Icon className="h-[15px] w-[15px] shrink-0" />
+                    <span className="truncate text-[13px] tracking-[-0.01em]">{label}</span>
                   </span>
                 </>
               )}
@@ -113,11 +126,14 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           ))}
         </nav>
 
-        <div
-          className="mt-4 px-5 py-4 text-[10px] tracking-wide text-white/30"
-          style={{ boxShadow: "inset 0 1px 0 0 rgba(255,255,255,0.07)" }}
-        >
-          Into the Scrape-Verse · Bright Data
+        <div className="mt-4 rule-t px-6 py-5">
+          <div className="flex items-center gap-2">
+            <span className="soft-blink h-1 w-1 rounded-full bg-severity-genuine" />
+            <span className="label-mono-sm">Live · Bright Data</span>
+          </div>
+          <p className="mt-2 font-mono text-[9px] leading-relaxed tracking-[0.1em] text-label-4">
+            INTO THE SCRAPE-VERSE
+          </p>
         </div>
       </aside>
     </>

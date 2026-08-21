@@ -3,8 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { QueryState } from "@/components/domain/QueryState";
 import { PageHeader } from "@/components/domain/PageHeader";
-import { FadeIn } from "@/components/domain/FadeIn";
-import { Card } from "@/components/ui/card";
+import { Panel, PanelRow } from "@/components/domain/Panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
@@ -15,6 +14,10 @@ const RULE_TYPES = [
   { value: "below_market_value", label: "Priced below market by %" },
   { value: "sold", label: "Sold / delisted" },
 ];
+
+/** The field treatment shared by both selects and the threshold input. */
+const FIELD_CLASS =
+  "h-10 rounded-sm bg-surface-3 px-3 font-mono text-[12px] text-label-1 shadow-[inset_0_0_0_1px_var(--hairline-strong)] transition-colors duration-200 hover:bg-surface-2 focus:outline-none focus:shadow-[inset_0_0_0_1px_var(--electric)]";
 
 export function Alerts() {
   const alerts = useQuery({ queryKey: ["alerts"], queryFn: api.alerts });
@@ -43,24 +46,24 @@ export function Alerts() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
   });
 
-  const needsThreshold = ruleType === "price_below" || ruleType === "price_drop_pct" || ruleType === "below_market_value";
+  const needsThreshold =
+    ruleType === "price_below" || ruleType === "price_drop_pct" || ruleType === "below_market_value";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         eyebrow="Monitoring"
+        index="05"
         title="Alerts"
         description="In-app delivery. Rule evaluation runs against the append-only listing_snapshots history, same as every other feature."
       />
 
-      <FadeIn>
-      <Card className="gap-3 p-5">
-        <h2 className="text-[13px] font-semibold tracking-tight">New alert rule</h2>
+      <Panel index="01" title="New alert rule">
         <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-            Listing
+          <label className="flex flex-col gap-2">
+            <span className="label-mono">Listing</span>
             <select
-              className="h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-sm transition-colors hover:bg-white/[0.05] focus:border-white/20 focus:outline-none"
+              className={FIELD_CLASS}
               value={listingId}
               onChange={(e) => setListingId(e.target.value)}
             >
@@ -72,10 +75,11 @@ export function Alerts() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-            Rule
+
+          <label className="flex flex-col gap-2">
+            <span className="label-mono">Rule</span>
             <select
-              className="h-9 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-sm transition-colors hover:bg-white/[0.05] focus:border-white/20 focus:outline-none"
+              className={FIELD_CLASS}
               value={ruleType}
               onChange={(e) => setRuleType(e.target.value)}
             >
@@ -86,11 +90,12 @@ export function Alerts() {
               ))}
             </select>
           </label>
+
           {needsThreshold && (
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              Threshold
+            <label className="flex flex-col gap-2">
+              <span className="label-mono">Threshold</span>
               <Input
-                className="h-9 w-28"
+                className={`${FIELD_CLASS} w-32`}
                 type="number"
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
@@ -98,20 +103,33 @@ export function Alerts() {
               />
             </label>
           )}
+
           <Button
-            size="sm"
+            variant="acid"
+            size="lg"
+            className="h-10 px-4 font-mono text-[11px] tracking-[0.16em] uppercase"
             disabled={!listingId || create.isPending}
             onClick={() => create.mutate()}
           >
-            Create alert
+            {create.isPending ? "Creating…" : "Create alert"}
           </Button>
         </div>
-      </Card>
-      </FadeIn>
 
-      <FadeIn delay={0.05}>
-      <Card className="gap-3 p-5">
-        <h2 className="text-[13px] font-semibold tracking-tight">Active rules</h2>
+        {create.isError && (
+          <p className="mt-4 font-mono text-[11px] text-severity-violation">
+            Could not create the rule:{" "}
+            {create.error instanceof Error ? create.error.message : "unknown error"}
+          </p>
+        )}
+      </Panel>
+
+      <Panel
+        index="02"
+        title="Active rules"
+        meta={alerts.data ? `${alerts.data.filter((a) => a.is_active).length} active` : undefined}
+        delay={0.05}
+        bodyClassName="px-5 py-0"
+      >
         <QueryState
           isLoading={alerts.isLoading}
           error={alerts.error}
@@ -121,41 +139,40 @@ export function Alerts() {
           emptyDescription="Create one above — it'll evaluate against every new snapshot."
         >
           {(rows) => (
-            <ul className="divide-y divide-white/[0.05]">
+            <ul>
               {rows
                 .filter((a) => a.is_active)
                 .map((a) => (
-                  <li
-                    key={a.id}
-                    className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 text-sm transition-colors hover:bg-white/[0.03]"
-                  >
-                    <div>
-                      <span className="font-medium">{a.title}</span>{" "}
-                      <span className="text-muted-foreground">
-                        · {RULE_TYPES.find((r) => r.value === a.rule_type)?.label ?? a.rule_type}
-                        {a.threshold != null ? ` ${a.threshold}` : ""} · {a.portal_name}
-                      </span>
+                  <PanelRow key={a.id}>
+                    <div className="min-w-0">
+                      <div className="truncate text-[13px] tracking-[-0.01em] text-label-1">
+                        {a.title}
+                      </div>
+                      <div className="label-mono mt-1.5">
+                        {RULE_TYPES.find((r) => r.value === a.rule_type)?.label ?? a.rule_type}
+                        {a.threshold != null ? ` ${a.threshold}` : ""}
+                        <span className="text-label-4"> / {a.portal_name}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs text-muted-foreground">
-                        fired {a.fired_count}×
+                    <div className="flex shrink-0 items-center gap-4">
+                      <span className="font-mono text-[11px] tabular-nums text-label-3">
+                        {a.fired_count}× fired
                       </span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
+                      <button
                         aria-label={`Delete alert for ${a.title}`}
+                        disabled={remove.isPending}
                         onClick={() => remove.mutate(a.id)}
+                        className="rounded-sm p-1.5 text-label-4 transition-colors duration-200 hover:bg-severity-violation/10 hover:text-severity-violation disabled:opacity-50"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      </button>
                     </div>
-                  </li>
+                  </PanelRow>
                 ))}
             </ul>
           )}
         </QueryState>
-      </Card>
-      </FadeIn>
+      </Panel>
     </div>
   );
 }

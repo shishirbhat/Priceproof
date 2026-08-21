@@ -14,12 +14,12 @@ export function StatBlock({
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.66, delay, ease: [0.66, 0, 0.01, 1] }}
     >
-      <div className="font-sans text-[clamp(3.5rem,8vw,6.5rem)] font-bold leading-[0.9] tracking-tighter text-foreground">
+      <div className="font-sans text-[clamp(3.5rem,8svw,6.5rem)] leading-[0.9] font-light tracking-[-0.05em] text-label-1 tabular-nums">
         {value}
       </div>
-      <div className="mt-3 max-w-[16ch] text-sm text-muted-foreground">{label}</div>
+      <div className="label-mono mt-4 max-w-[22ch] leading-[1.7]">{label}</div>
     </motion.div>
   );
 }

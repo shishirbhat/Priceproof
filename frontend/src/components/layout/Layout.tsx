@@ -3,7 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import { Menu, ArrowUpRight } from "lucide-react";
 import { motion } from "motion/react";
 import { Sidebar } from "./Sidebar";
-import { DUR, EASE_EXPO } from "@/lib/motion";
+import { DUR, EASE_66 } from "@/lib/motion";
 
 export function Layout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -15,7 +15,7 @@ export function Layout({ children }: { children: ReactNode }) {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  // The top bar gains weight on scroll, same as the front end's nav.
+  // The top bar gains weight on scroll, same as the marketing nav.
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
     onScroll();
@@ -31,34 +31,36 @@ export function Layout({ children }: { children: ReactNode }) {
         <motion.div
           className="sticky top-0 z-30 flex items-center gap-3 px-4 py-3 backdrop-blur-xl transition-colors duration-300 sm:px-6 lg:px-10"
           style={{
-            background: scrolled ? "rgba(5,5,6,0.86)" : "transparent",
-            boxShadow: scrolled ? "inset 0 -1px 0 0 rgba(255,255,255,0.07)" : "none",
+            background: scrolled ? "rgb(8 9 10 / 0.88)" : "transparent",
+            boxShadow: scrolled ? "inset 0 -1px 0 0 var(--hairline)" : "none",
           }}
           initial={{ y: -14, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: DUR.base, ease: EASE_EXPO }}
+          transition={{ duration: DUR.base, ease: EASE_66 }}
         >
           <button
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
-            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] text-white/75 backdrop-blur-xl transition-colors hover:text-white lg:hidden"
-            style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+            className="label-mono flex items-center gap-2 rounded-sm px-3 py-2 text-label-2 transition-colors hover:text-label-1 lg:hidden"
+            style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}
           >
             <Menu className="h-3.5 w-3.5" /> Menu
           </button>
 
           <Link
             to="/welcome"
-            className="group ml-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] text-white/65 backdrop-blur-xl transition-colors duration-200 hover:text-white"
-            style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+            className="group ml-auto flex items-center gap-2 rounded-sm px-3 py-2 transition-colors duration-200"
+            style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}
           >
-            The showroom
-            <ArrowUpRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <span className="label-mono transition-colors duration-200 group-hover:text-label-1">
+              The Showroom
+            </span>
+            <ArrowUpRight className="h-3 w-3 text-label-3 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand" />
           </Link>
         </motion.div>
 
-        <div className="px-4 pt-2 pb-10 sm:px-6 lg:px-10">
-          <div className="mx-auto max-w-[1400px]">{children}</div>
+        <div className="px-4 pt-2 pb-16 sm:px-6 lg:px-10">
+          <div className="mx-auto max-w-[1440px]">{children}</div>
         </div>
       </main>
     </div>

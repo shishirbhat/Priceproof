@@ -9,7 +9,11 @@ interface AnimatedBarProps {
   delay?: number;
 }
 
-/** A progress bar that fills in via anime.js rather than snapping to width. */
+/**
+ * A progress bar that fills in via anime.js rather than snapping to width.
+ * Square-ended and hairline-thin, so a row of them reads as a bar chart on
+ * an instrument rather than a stack of pills.
+ */
 export function AnimatedBar({ pct, className, trackClassName, delay = 0 }: AnimatedBarProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -29,8 +33,8 @@ export function AnimatedBar({ pct, className, trackClassName, delay = 0 }: Anima
   }, [pct, delay]);
 
   return (
-    <div className={cn("h-2 flex-1 overflow-hidden rounded-full bg-muted", trackClassName)}>
-      <div ref={ref} className={cn("h-full rounded-full", className)} />
+    <div className={cn("h-1.5 flex-1 overflow-hidden bg-surface-3", trackClassName)}>
+      <div ref={ref} className={cn("h-full", className)} />
     </div>
   );
 }

@@ -62,24 +62,24 @@ function Nav() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="fixed inset-x-0 top-0 z-50 flex justify-center px-6 py-4"
     >
-      <div className="flex w-full max-w-5xl items-center justify-between rounded-full border border-white/[0.08] bg-black/40 px-4 py-2.5 backdrop-blur-xl">
-        <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-brand to-brand/70 text-brand-foreground">
+      <div className="flex w-full max-w-5xl items-center justify-between rounded-sm bg-surface-1/70 px-4 py-3 backdrop-blur-xl" style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}>
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-brand text-brand-foreground">
             <Car className="h-3.5 w-3.5" />
           </div>
-          <span className="text-sm font-semibold tracking-tight">PriceProof</span>
+          <span className="font-mono text-[11px] font-medium tracking-[0.3em] text-label-1">PRICEPROOF</span>
         </div>
-        <nav className="hidden items-center gap-6 text-[13px] text-muted-foreground md:flex">
-          <a href="#proof" className="transition-colors hover:text-foreground">Product</a>
-          <a href="#features" className="transition-colors hover:text-foreground">Features</a>
-          <a href="#how" className="transition-colors hover:text-foreground">How it works</a>
+        <nav className="hidden items-center gap-7 md:flex">
+          <a href="#proof" className="label-mono transition-colors duration-200 hover:text-label-1">Product</a>
+          <a href="#features" className="label-mono transition-colors duration-200 hover:text-label-1">Features</a>
+          <a href="#how" className="label-mono transition-colors duration-200 hover:text-label-1">How it works</a>
         </nav>
         <MagneticButton strength={0.4}>
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-brand to-brand/85 px-4 py-1.5 text-[13px] font-medium text-brand-foreground shadow-[0_1px_1px_oklch(1_0_0/0.3)_inset,0_4px_14px_-4px] shadow-brand/50"
+            className="inline-flex items-center gap-2 rounded-sm bg-brand px-4 py-2 font-mono text-[10px] font-medium tracking-[0.18em] text-brand-foreground uppercase"
           >
-            Enter dashboard <ArrowRight className="h-3.5 w-3.5" />
+            Enter dashboard <ArrowRight className="h-3 w-3" />
           </Link>
         </MagneticButton>
       </div>
@@ -107,12 +107,13 @@ export function Landing() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5 }}
-            className="mb-6 flex items-center gap-2 font-mono text-xs tracking-wider text-muted-foreground"
+            className="mb-7 flex items-center gap-3"
           >
-            <span className="text-brand">// 01</span> MARKET VALUE &amp; LISTINGS INTELLIGENCE PLATFORM
+            <span className="index-numeral">01</span>
+            <span className="label-mono">Market value &amp; listings intelligence platform</span>
           </motion.div>
 
-          <h1 className="text-[clamp(3rem,9vw,7.5rem)] font-bold leading-[0.92] tracking-tighter">
+          <h1 className="display-1 text-label-1">
             <motion.span
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -125,7 +126,7 @@ export function Landing() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.38, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="block text-muted-foreground"
+              className="block text-label-3"
             >
               Priced honestly.
             </motion.span>
@@ -135,7 +136,7 @@ export function Landing() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55, duration: 0.5 }}
-            className="mt-8 max-w-lg text-[15px] leading-relaxed text-muted-foreground"
+            className="mt-8 max-w-lg text-[15px] leading-[1.7] text-label-2"
           >
             PriceProof builds a continuous listings-history record across every portal you track, then
             scores — with a verdict, not a guess — whether an asking price is actually fair.
@@ -150,15 +151,16 @@ export function Landing() {
             <MagneticButton>
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-brand to-brand/85 px-6 py-3 text-sm font-medium text-brand-foreground shadow-[0_1px_1px_oklch(1_0_0/0.3)_inset,0_8px_24px_-6px] shadow-brand/50"
+                className="inline-flex items-center gap-2.5 rounded-sm bg-brand px-6 py-3.5 font-mono text-[11px] font-medium tracking-[0.18em] text-brand-foreground uppercase"
               >
-                Enter dashboard <ArrowRight className="h-4 w-4" />
+                Enter dashboard <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </MagneticButton>
             <MagneticButton strength={0.25}>
               <a
                 href="#how"
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-medium transition-colors hover:bg-white/[0.04]"
+                className="inline-flex items-center gap-2 rounded-sm px-6 py-3.5 font-mono text-[11px] tracking-[0.18em] text-label-2 uppercase transition-colors duration-200 hover:bg-surface-2 hover:text-label-1"
+                style={{ boxShadow: "inset 0 0 0 1px var(--hairline-strong)" }}
               >
                 See a verdict
               </a>
@@ -170,7 +172,7 @@ export function Landing() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2, duration: 0.6 }}
-          className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 font-mono text-[11px] tracking-widest text-muted-foreground"
+          className="label-mono absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2.5"
         >
           SCROLL
           <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
@@ -188,14 +190,14 @@ export function Landing() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto max-w-5xl [perspective:1600px]"
         >
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-elevate-lg">
-            <div className="flex items-center gap-2 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
+          <div className="overflow-hidden rounded-sm bg-surface-1 shadow-elevate-lg" style={{ boxShadow: "inset 0 0 0 1px var(--hairline)" }}>
+            <div className="rule-b flex items-center gap-2 bg-surface-2 px-4 py-3">
               <div className="flex gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-severity-violation/50" />
-                <span className="h-2.5 w-2.5 rounded-full bg-severity-drift/50" />
-                <span className="h-2.5 w-2.5 rounded-full bg-severity-genuine/50" />
+                <span className="h-2 w-2 bg-severity-violation/50" />
+                <span className="h-2 w-2 bg-severity-drift/50" />
+                <span className="h-2 w-2 bg-severity-genuine/50" />
               </div>
-              <div className="mx-auto flex items-center gap-1.5 rounded-md bg-white/[0.04] px-3 py-1 font-mono text-[11px] text-muted-foreground">
+              <div className="label-mono mx-auto flex items-center gap-1.5 rounded-sm bg-surface-3 px-3 py-1.5">
                 priceproof.app
               </div>
             </div>
@@ -206,11 +208,11 @@ export function Landing() {
                 className="h-[125%] w-[125%] origin-top-left scale-[0.8] border-0"
                 loading="lazy"
               />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-1 via-transparent to-transparent" />
             </div>
           </div>
-          <p className="mt-4 text-center font-mono text-[11px] tracking-wider text-muted-foreground">
-            THIS IS THE REAL DASHBOARD, LIVE — NOT A MOCKUP
+          <p className="label-mono mt-5 text-center">
+            This is the real dashboard, live — not a mockup
           </p>
         </motion.div>
       </section>
@@ -218,16 +220,19 @@ export function Landing() {
       {/* PROOF STATEMENT */}
       <section id="proof" className="px-6 py-40">
         <div className="mx-auto max-w-4xl">
-          <div className="mb-8 font-mono text-xs tracking-wider text-brand">// 02 THE PROBLEM</div>
+          <div className="mb-10 flex items-center gap-3">
+            <span className="index-numeral">02</span>
+            <span className="label-mono">The problem</span>
+          </div>
           <ScrollReveal
             text="A single listing can't tell you if ₹4.2L for a 2019 Swift is a good deal — only a market can. Dealers price high and wait it out; individual sellers panic-sell underpriced. Every portal shows you one asking price with no reference point. Until there's a record of the whole market."
-            className="text-[clamp(1.5rem,3.5vw,2.75rem)] font-medium leading-tight tracking-tight text-muted-foreground"
+            className="display-3 text-label-3"
           />
         </div>
       </section>
 
       {/* STATS */}
-      <section id="stats" className="border-y border-white/[0.06] bg-white/[0.02] px-6 py-28">
+      <section id="stats" className="rule-t bg-surface-1/50 px-6 py-28">
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-16 md:grid-cols-3">
           <StatBlock value="5+" label="comparable listings required before any verdict is given" delay={0} />
           <StatBlock value="0" label="guesses — INSUFFICIENT_COMPARABLES is a real answer, not a fallback" delay={0.1} />
@@ -245,13 +250,14 @@ export function Landing() {
             transition={{ duration: 0.5 }}
             className="mb-16 max-w-xl"
           >
-            <div className="mb-4 font-mono text-xs tracking-wider text-brand">// 03 THE PLATFORM</div>
-            <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold tracking-tight">
-              Four ways to prove it.
-            </h2>
+            <div className="mb-6 flex items-center gap-3">
+              <span className="index-numeral">03</span>
+              <span className="label-mono">The platform</span>
+            </div>
+            <h2 className="display-2 text-label-1">Four ways to prove it.</h2>
           </motion.div>
 
-          <div className="divide-y divide-white/[0.06] border-t border-white/[0.06]">
+          <div className="border-t border-[var(--hairline)]">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.n}
@@ -259,13 +265,15 @@ export function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.45, delay: i * 0.05 }}
-                className="group grid grid-cols-1 gap-3 py-8 transition-colors md:grid-cols-[100px_1fr_2fr] md:gap-8"
+                className="group relative grid grid-cols-1 gap-3 py-9 md:grid-cols-[100px_1fr_2fr] md:gap-8"
+                style={{ boxShadow: "inset 0 -1px 0 0 var(--hairline)" }}
               >
-                <div className="font-mono text-sm text-muted-foreground">({f.n})</div>
-                <div className="text-xl font-semibold tracking-tight transition-colors group-hover:text-brand">
+                <div className="index-numeral pt-1.5 transition-colors duration-300 group-hover:text-brand">{f.n}</div>
+                <div className="display-4 text-label-1 transition-colors duration-300 group-hover:text-brand">
                   {f.title}
                 </div>
-                <div className="max-w-lg text-sm leading-relaxed text-muted-foreground">{f.body}</div>
+                <div className="max-w-lg text-[13.5px] leading-[1.7] text-label-2">{f.body}</div>
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-px w-0 bg-brand transition-[width] duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:w-full" />
               </motion.div>
             ))}
           </div>
@@ -281,11 +289,12 @@ export function Landing() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5 }}
           >
-            <div className="mb-4 font-mono text-xs tracking-wider text-brand">// 04 SEE IT WORK</div>
-            <h2 className="mb-3 text-[clamp(2rem,4vw,3rem)] font-bold tracking-tight">
-              This is a real listing's markdown.
-            </h2>
-            <p className="mb-10 max-w-xl text-sm leading-relaxed text-muted-foreground">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="index-numeral">04</span>
+              <span className="label-mono">See it work</span>
+            </div>
+            <h2 className="display-2 mb-5 text-label-1">This is a real listing's markdown.</h2>
+            <p className="mb-12 max-w-xl text-[14px] leading-[1.7] text-label-2">
               Steady asking price for two weeks, then two price cuts over the following month as the
               listing sat without selling — 680,000 down to 590,000, 48 days on market. This exact
               pattern is what PriceProof's Market Activity page tracks automatically, from nothing more
@@ -298,14 +307,14 @@ export function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            className="rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.03] to-transparent p-6 shadow-elevate-lg"
+            className="panel rounded-sm p-6"
           >
-            <div className="mb-4 flex items-center gap-4 text-xs">
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-chart-1" /> Asking price
+            <div className="mb-6 flex items-center gap-6">
+              <span className="label-mono flex items-center gap-2">
+                <span className="h-1.5 w-1.5 bg-chart-1" /> Asking price
               </span>
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-severity-violation" /> Price before cut
+              <span className="label-mono flex items-center gap-2">
+                <span className="h-1.5 w-1.5 bg-severity-violation" /> Price before cut
               </span>
             </div>
             <PriceHistoryChart data={demoData} />
@@ -321,7 +330,7 @@ export function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5 }}
-            className="text-[clamp(2rem,5vw,4rem)] font-bold leading-[0.95] tracking-tighter"
+            className="display-1 text-brand-foreground"
           >
             Ready to see what your
             <br />
@@ -337,19 +346,19 @@ export function Landing() {
             <MagneticButton>
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-medium text-white"
+                className="inline-flex items-center gap-2.5 rounded-sm bg-surface-0 px-7 py-4 font-mono text-[11px] font-medium tracking-[0.18em] text-label-1 uppercase"
               >
-                Enter dashboard <ArrowRight className="h-4 w-4" />
+                Enter dashboard <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </MagneticButton>
           </motion.div>
         </div>
       </section>
 
-      <footer className="border-t border-white/[0.06] px-6 py-10 text-xs text-muted-foreground">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <span>PriceProof — Into the Scrape-Verse · Bright Data</span>
-          <span>Built on Bright Data Scraper Studio</span>
+      <footer className="rule-t px-6 py-12">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4">
+          <span className="label-mono">PriceProof — Into the Scrape-Verse · Bright Data</span>
+          <span className="label-mono-sm">Built on Bright Data Scraper Studio</span>
         </div>
       </footer>
     </div>

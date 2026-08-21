@@ -1,16 +1,24 @@
 /**
- * Motion + design tokens.
+ * Motion tokens — the single source of motion for the whole product.
  *
- * The single source of motion for the whole product — the racing front end
- * and the intelligence dashboard both import from here, so a curve tweaked
- * in one place changes everywhere.
+ * The marketing site, the racing experience and the intelligence dashboard
+ * all import from here, so a curve tweaked in one place changes everywhere.
  *
- * Every timing here was matched against the reference recordings frame by
- * frame: the turntable settles over roughly two thirds of a second, panels
- * expand a touch slower, and the overlay's scrim always leads its content.
+ * The vocabulary is the references' vocabulary: haoqi's slow-start curve for
+ * anything that travels, an expo-out for UI that has to feel instant, and
+ * upvent's staged reveals for scroll. Durations are deliberately few — four
+ * steps, so nothing lands on an arbitrary number.
  */
 
-/** Expo-out. The house curve — used for anything that travels distance. */
+/**
+ * The house curve. haoqi's `cubic-bezier(.66,0,.01,1)`: almost nothing
+ * happens for the first two thirds, then everything does, then it lands flat
+ * without a bounce. Use it for anything that covers distance — panels
+ * opening, indicators sliding, the turntable settling.
+ */
+export const EASE_66 = [0.66, 0, 0.01, 1] as const;
+
+/** Expo-out. For UI that must feel like it responds instantly to a click. */
 export const EASE_EXPO = [0.16, 1, 0.3, 1] as const;
 
 /** A softer quint-out for opacity-only fades, which read harsh on expo. */
@@ -34,21 +42,24 @@ export const SPRING_SNAP = {
 
 export const DUR = {
   /** Hover / press feedback. */
-  micro: 0.18,
+  micro: 0.2,
   /** Standard element entrance. */
   base: 0.42,
-  /** Overlay open + turntable settle. */
+  /** Overlay open, panel expand, turntable settle — the .66 signature. */
   panel: 0.66,
-  /** Full-bleed hero cross-fades. */
-  hero: 1.1,
+  /** Full-bleed hero cross-fades and display-type reveals. */
+  hero: 1.2,
 } as const;
 
 /** Stagger step for grid children revealing in sequence. */
 export const STAGGER = 0.055;
 
+/** Slower stagger for the marketing site's larger, fewer elements. */
+export const STAGGER_WIDE = 0.09;
+
 /**
- * Shared reveal-on-scroll variant. Elements start slightly low and
- * blurred, which hides the sub-pixel jitter of a plain translate.
+ * Shared reveal-on-scroll variant. Elements start slightly low and blurred,
+ * which hides the sub-pixel jitter of a plain translate.
  */
 export const revealVariants = {
   hidden: { opacity: 0, y: 26, filter: "blur(6px)" },
@@ -57,6 +68,32 @@ export const revealVariants = {
     y: 0,
     filter: "blur(0px)",
     transition: { duration: DUR.base, ease: EASE_EXPO },
+  },
+};
+
+/**
+ * The marketing-side reveal: a longer throw on the house curve, for display
+ * type and full-width bands rather than dashboard rows.
+ */
+export const revealDisplayVariants = {
+  hidden: { opacity: 0, y: 44, filter: "blur(10px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: DUR.panel, ease: EASE_66 },
+  },
+};
+
+/**
+ * A hairline rule drawing itself in from the left. The section-divider
+ * motif shared by every one of the references.
+ */
+export const ruleVariants = {
+  hidden: { scaleX: 0 },
+  visible: {
+    scaleX: 1,
+    transition: { duration: DUR.panel, ease: EASE_66 },
   },
 };
 

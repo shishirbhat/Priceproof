@@ -6,10 +6,38 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================================
+   INSTRUMENT — the PriceProof design system
+   ----------------------------------------------------------------------------
+   One system mashed from four references, each contributing the thing it
+   does best rather than a slice of its look:
+
+   - haoqi.design      the substrate. A green-shifted near-black (#0F1111),
+                       an elevated step (#191B1B), and a strict four-rung
+                       label opacity ladder (100 / 60 / 32 / 16) that does
+                       all the hierarchy work so we never need a second
+                       text color. Its signature easing — cubic-bezier(
+                       .66,0,.01,1) — and viewport-relative display type.
+   - upvent.co         monospace as the *structural* face, not decoration:
+                       every label, axis, table header and figure is mono.
+                       Its progress/dash motion vocabulary.
+   - racing.porsche.com  the data-plate discipline. Condensed, tightly
+                       tracked display type, indexed rows, and an electric
+                       blue carrying structure and interaction.
+   - primesec.ai       the acid highlight against high-contrast neutral,
+                       used sparingly enough that it still reads as a
+                       signal rather than a theme.
+
+   The rule that keeps it coherent: color means something. Acid is identity
+   only (logo, nav, CTA, section indices) and is banned from data views.
+   Electric blue is interaction and the primary data series. The severity
+   triad is the only other saturated color and always carries a verdict.
+   ========================================================================== */
+
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-    --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+    --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -70,143 +98,193 @@
     --color-chart-foreground: var(----chart-foreground);
     --color-chart-background: var(----chart-background);
 
-    /* Domain severity states — the only saturated color in the app.
-       Everything else stays neutral grayscale on purpose. */
+    /* Domain severity states — always attached to a verdict, never
+       decorative. */
     --color-severity-violation: var(--severity-violation);
     --color-severity-violation-foreground: var(--severity-violation-foreground);
     --color-severity-genuine: var(--severity-genuine);
     --color-severity-genuine-foreground: var(--severity-genuine-foreground);
     --color-severity-drift: var(--severity-drift);
     --color-severity-drift-foreground: var(--severity-drift-foreground);
+
+    /* Identity. `brand` is the acid; the aliases exist so intent reads at
+       the call site. */
     --color-brand: var(--brand);
     --color-brand-foreground: var(--brand-foreground);
     --color-brand-dim: var(--brand-dim);
+    --color-acid: var(--brand);
+    --color-acid-foreground: var(--brand-foreground);
+
+    /* Interaction + structure. */
+    --color-electric: var(--electric);
+    --color-electric-dim: var(--electric-dim);
+
+    /* The surface ladder — four steps, no more. */
+    --color-surface-0: var(--surface-0);
+    --color-surface-1: var(--surface-1);
+    --color-surface-2: var(--surface-2);
+    --color-surface-3: var(--surface-3);
+
+    /* haoqi's label ladder. Hierarchy comes from opacity, not from
+       inventing more grays. */
+    --color-label-1: var(--label-1);
+    --color-label-2: var(--label-2);
+    --color-label-3: var(--label-3);
+    --color-label-4: var(--label-4);
 }
 
-/* Enterprise data terminal, dark-first by design — this app has no light
-   mode. :root carries the dark palette directly rather than gating it
-   behind a .dark toggle class. */
+/* Enterprise instrument panel, dark-only by design — this app has no light
+   mode, so :root carries the palette directly rather than gating it behind
+   a .dark class. */
 :root {
-    --background: oklch(0.045 0 0);
-    --foreground: oklch(0.93 0 0);
-    --card: oklch(0.075 0 0);
-    --card-foreground: oklch(0.93 0 0);
-    --popover: oklch(0.095 0 0);
-    --popover-foreground: oklch(0.93 0 0);
-    --primary: oklch(0.93 0 0);
-    --primary-foreground: oklch(0.045 0 0);
-    --secondary: oklch(0.135 0 0);
-    --secondary-foreground: oklch(0.93 0 0);
-    --muted: oklch(0.12 0 0);
-    --muted-foreground: oklch(0.62 0 0);
-    --accent: oklch(0.155 0 0);
-    --accent-foreground: oklch(0.93 0 0);
-    --destructive: oklch(0.6 0.21 25);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 14%);
-    --ring: oklch(0.55 0 0);
-    --chart-1: oklch(0.72 0.14 235);
-    --chart-2: oklch(0.72 0.13 165);
-    --chart-3: oklch(0.78 0.15 85);
-    --chart-4: oklch(0.68 0.18 320);
-    --chart-5: oklch(0.65 0.02 260);
-    --radius: 0.58rem;
-    --sidebar: oklch(0.035 0 0);
-    --sidebar-foreground: oklch(0.85 0 0);
-    --sidebar-primary: oklch(0.93 0 0);
-    --sidebar-primary-foreground: oklch(0.08 0 0);
-    --sidebar-accent: oklch(0.115 0 0);
-    --sidebar-accent-foreground: oklch(0.93 0 0);
-    --sidebar-border: oklch(1 0 0 / 8%);
-    --sidebar-ring: oklch(0.55 0 0);
-    --chart-background: oklch(0.075 0 0);
-    --chart-foreground: oklch(0.55 0 0);
-    --chart-foreground-muted: oklch(0.42 0 0);
+    /* --- substrate (haoqi) --------------------------------------------- */
+    --surface-0: #08090a;   /* page plane, below everything */
+    --surface-1: #0f1111;   /* default panel */
+    --surface-2: #161818;   /* raised / hover */
+    --surface-3: #1e2020;   /* input wells, active rows */
+
+    --label: 232, 234, 233;
+    --label-1: rgb(var(--label));
+    --label-2: rgb(var(--label) / 0.60);
+    --label-3: rgb(var(--label) / 0.32);
+    --label-4: rgb(var(--label) / 0.16);
+
+    /* Hairlines, not borders — a 1px inset ring never shifts layout when a
+       panel highlights. */
+    --hairline: rgb(var(--label) / 0.09);
+    --hairline-strong: rgb(var(--label) / 0.16);
+
+    --background: var(--surface-0);
+    --foreground: var(--label-1);
+    --card: var(--surface-1);
+    --card-foreground: var(--label-1);
+    --popover: var(--surface-2);
+    --popover-foreground: var(--label-1);
+    --primary: var(--label-1);
+    --primary-foreground: var(--surface-0);
+    --secondary: var(--surface-2);
+    --secondary-foreground: var(--label-1);
+    --muted: var(--surface-2);
+    --muted-foreground: var(--label-2);
+    --accent: var(--surface-3);
+    --accent-foreground: var(--label-1);
+    --destructive: #ff4d3d;
+    --border: var(--hairline);
+    --input: var(--hairline-strong);
+    --ring: var(--electric);
+
+    /* Near-square. The references almost never round a structural panel;
+       radius is reserved for pills and controls. */
+    --radius: 0.25rem;
+
+    --sidebar: var(--surface-0);
+    --sidebar-foreground: var(--label-2);
+    --sidebar-primary: var(--label-1);
+    --sidebar-primary-foreground: var(--surface-0);
+    --sidebar-accent: var(--surface-2);
+    --sidebar-accent-foreground: var(--label-1);
+    --sidebar-border: var(--hairline);
+    --sidebar-ring: var(--electric);
+
+    /* --- identity + interaction ---------------------------------------- */
+    /* Acid, sitting between haoqi's #C0FE04 and primesec's #f9fe2e.
+       Identity only: logo, nav active state, section indices, primary CTA.
+       Never inside a data view, where it would compete with the severity
+       triad's meaning. */
+    --brand: #d4ff32;
+    --brand-foreground: #0a0c05;
+    --brand-dim: rgb(212 255 50 / 0.14);
+
+    /* Porsche's structural blue. Interaction, focus rings, and the primary
+       data series — the one saturated color allowed in both worlds,
+       because it never carries a verdict. */
+    --electric: #4d6bff;
+    --electric-dim: rgb(77 107 255 / 0.14);
+
+    /* --- data ----------------------------------------------------------- */
+    /* Categorical slots deliberately avoid the severity triad's hues. A
+       teal line in a price chart would read as a "good deal" verdict when it
+       only ever means "this series"; blue and magenta carry no such freight.
+       Slots 1 and 2 are the only ones the product's charts actually use. */
+    --chart-1: var(--electric);   /* asking price */
+    --chart-2: #d45cb0;           /* upvent magenta — segment median */
+    --chart-3: #8b8f8f;
+    --chart-4: #7a8cff;
+    --chart-5: #b8a6d9;
+    --chart-background: var(--surface-1);
+    --chart-foreground: var(--label-2);
+    --chart-foreground-muted: var(--label-3);
     --chart-line-primary: var(--chart-1);
     --chart-line-secondary: var(--chart-2);
-    --chart-crosshair: oklch(0.5 0 0);
-    --chart-grid: oklch(0.2 0 0);
+    --chart-crosshair: rgb(var(--label) / 0.45);
+    --chart-grid: rgb(var(--label) / 0.08);
     --chart-brush-border: var(--chart-grid);
-    --chart-tooltip-background: oklch(0.15 0 0 / 0.95);
-    --chart-tooltip-foreground: oklch(0.93 0 0);
-    --chart-tooltip-muted: oklch(0.6 0 0);
-    --chart-marker-background: oklch(0.2 0 0);
-    --chart-marker-border: oklch(0.35 0 0);
-    --chart-marker-foreground: oklch(0.93 0 0);
-    --chart-label: oklch(0.68 0 0);
-    --chart-scale-01: oklch(0.22 0.03 235);
-    --chart-scale-02: oklch(0.35 0.06 235);
-    --chart-scale-03: oklch(0.48 0.09 235);
-    --chart-scale-04: oklch(0.62 0.12 235);
-    --chart-scale-05: oklch(0.75 0.15 235);
-    --chart-scale-pattern-color: oklch(0.075 0 0);
+    --chart-tooltip-background: rgb(22 24 24 / 0.96);
+    --chart-tooltip-foreground: var(--label-1);
+    --chart-tooltip-muted: var(--label-2);
+    --chart-marker-background: var(--surface-3);
+    --chart-marker-border: rgb(var(--label) / 0.28);
+    --chart-marker-foreground: var(--label-1);
+    --chart-label: var(--label-2);
+    --chart-scale-01: #1b2352;
+    --chart-scale-02: #2b3a86;
+    --chart-scale-03: #3d52bf;
+    --chart-scale-04: #4d6bff;
+    --chart-scale-05: #8fa2ff;
+    --chart-scale-pattern-color: var(--surface-1);
 
-    /* Validated status palette (dataviz skill reference palette) — tested
-       for dark-surface contrast and distinctness from the categorical chart
-       slots, not eyeballed. */
-    --severity-violation: #e0524f;      /* critical, lightened from #d03b3b for AA on card bg */
-    --severity-violation-foreground: oklch(0.98 0 0);
-    --severity-genuine: #23c552;        /* good, lightened from #0ca30c for dark-surface legibility */
-    --severity-genuine-foreground: oklch(0.1 0.03 150);
-    --severity-drift: #fab219;          /* warning */
-    --severity-drift-foreground: oklch(0.15 0.03 80);
+    /* Validated status triad — checked for contrast on --surface-1 and for
+       hue separation from each other, from acid (100°) and from electric.
+       Teal replaces the old green so "good" can never be mistaken for the
+       acid identity color at a glance. */
+    --severity-violation: #ff4d3d;      /* overpriced / critical */
+    --severity-violation-foreground: #ffffff;
+    --severity-genuine: #00c9a7;        /* good deal / healthy */
+    --severity-genuine-foreground: #04211c;
+    --severity-drift: #ffbe0b;          /* warning / insufficient data */
+    --severity-drift-foreground: #241a00;
 
-    /* Signature brand accent — reserved for identity moments (logo, landing
-       page, nav active state), never for generic dashboard actions, so it
-       doesn't compete with the severity colors' meaning inside data views. */
-    --brand: oklch(0.575 0.225 22);
-    --brand-foreground: oklch(0.98 0 0);
-    --brand-dim: oklch(0.575 0.225 22 / 0.16);
+    /* --- motion --------------------------------------------------------- */
+    /* haoqi's signature curve: almost nothing happens, then everything
+       does, then it lands without a bounce. */
+    --ease-66: cubic-bezier(0.66, 0, 0.01, 1);
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* --- type scale ------------------------------------------------------ */
+    /* Viewport-relative display sizes, the way haoqi and upvent set them,
+       clamped so they stay sane on a 4K monitor and legible on a phone. */
+    --display-1: clamp(2.75rem, 7.2svw, 6.5rem);
+    --display-2: clamp(2.1rem, 5.6svw, 4.5rem);
+    --display-3: clamp(1.65rem, 4svw, 3rem);
+    --display-4: clamp(1.35rem, 2.6svw, 2rem);
 }
 
+/* Kept so any `.dark`-scoped third-party component resolves to the same
+   palette instead of falling back to shadcn's defaults. */
 .dark {
-    --background: oklch(0.045 0 0);
-    --foreground: oklch(0.93 0 0);
-    --card: oklch(0.075 0 0);
-    --card-foreground: oklch(0.93 0 0);
-    --popover: oklch(0.095 0 0);
-    --popover-foreground: oklch(0.93 0 0);
-    --primary: oklch(0.93 0 0);
-    --primary-foreground: oklch(0.045 0 0);
-    --secondary: oklch(0.135 0 0);
-    --secondary-foreground: oklch(0.93 0 0);
-    --muted: oklch(0.12 0 0);
-    --muted-foreground: oklch(0.62 0 0);
-    --accent: oklch(0.155 0 0);
-    --accent-foreground: oklch(0.93 0 0);
-    --destructive: oklch(0.6 0.21 25);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 14%);
-    --ring: oklch(0.55 0 0);
-    --chart-1: oklch(0.72 0.14 235);
-    --chart-2: oklch(0.72 0.13 165);
-    --chart-3: oklch(0.78 0.15 85);
-    --chart-4: oklch(0.68 0.18 320);
-    --chart-5: oklch(0.65 0.02 260);
-    --sidebar: oklch(0.035 0 0);
-    --sidebar-foreground: oklch(0.85 0 0);
-    --sidebar-primary: oklch(0.93 0 0);
-    --sidebar-primary-foreground: oklch(0.08 0 0);
-    --sidebar-accent: oklch(0.115 0 0);
-    --sidebar-accent-foreground: oklch(0.93 0 0);
-    --sidebar-border: oklch(1 0 0 / 8%);
-    --sidebar-ring: oklch(0.55 0 0);
-    --chart-background: oklch(0.075 0 0);
-    --chart-foreground: oklch(0.55 0 0);
-    --chart-foreground-muted: oklch(0.42 0 0);
-    --chart-crosshair: oklch(0.5 0 0);
-    --chart-grid: oklch(0.2 0 0);
-    --chart-brush-border: var(--chart-grid);
-    --chart-marker-background: oklch(0.2 0 0);
-    --chart-marker-border: oklch(0.35 0 0);
-    --chart-marker-foreground: oklch(0.93 0 0);
-    --chart-label: oklch(0.68 0 0);
-    --chart-scale-01: oklch(0.22 0.03 235);
-    --chart-scale-02: oklch(0.35 0.06 235);
-    --chart-scale-03: oklch(0.48 0.09 235);
-    --chart-scale-04: oklch(0.62 0.12 235);
-    --chart-scale-05: oklch(0.75 0.15 235);
-    --chart-scale-pattern-color: oklch(0.075 0 0);
+    --background: var(--surface-0);
+    --foreground: var(--label-1);
+    --card: var(--surface-1);
+    --card-foreground: var(--label-1);
+    --popover: var(--surface-2);
+    --popover-foreground: var(--label-1);
+    --primary: var(--label-1);
+    --primary-foreground: var(--surface-0);
+    --secondary: var(--surface-2);
+    --secondary-foreground: var(--label-1);
+    --muted: var(--surface-2);
+    --muted-foreground: var(--label-2);
+    --accent: var(--surface-3);
+    --accent-foreground: var(--label-1);
+    --border: var(--hairline);
+    --input: var(--hairline-strong);
+    --ring: var(--electric);
+    --sidebar: var(--surface-0);
+    --sidebar-foreground: var(--label-2);
+    --sidebar-accent: var(--surface-2);
+    --sidebar-accent-foreground: var(--label-1);
+    --sidebar-border: var(--hairline);
+    --sidebar-ring: var(--electric);
 }
 
 @layer base {
@@ -218,24 +296,143 @@
     }
   html {
     @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
     }
+  /* Display type is set the way the references set it: tight tracking, low
+     weight, short leading. The size does the shouting, not the weight. */
   h1, h2, h3 {
-    letter-spacing: -0.02em;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+  }
+  ::selection {
+    background: var(--brand);
+    color: var(--brand-foreground);
   }
 }
 
-/* Figures get tabular numerals everywhere by default — a price ticking up
-   or down should never reflow its neighbors. */
+/* Figures get tabular numerals everywhere — a price ticking up or down
+   should never reflow its neighbors. */
 .font-mono, [data-numeric] {
   font-variant-numeric: tabular-nums;
 }
 
-/* Depth: a flat #000 background reads as an unfinished template. Three soft
-   radial glows (far below saturation that would compete with the severity
-   colors) plus a hairline-fine grain texture give the page plane the depth
-   a premium dark UI needs. A slow 40s drift on their position keeps the
-   page from feeling static without being distracting — CSS-only, no
-   per-frame JS cost. */
+/* ---------------------------------------------------------------------------
+   Type utilities
+   ------------------------------------------------------------------------ */
+
+/* The single micro-label treatment, used for every eyebrow, table header,
+   axis label and metadata key in the product. Mono + uppercase + wide
+   tracking is upvent's structural voice, and it's what makes a dashboard
+   read as an instrument rather than a web page. */
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+@utility label-mono-sm {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+}
+
+/* Section indices — the 00 / 01 / 02 gutter numerals shared by haoqi's
+   project index and Porsche's data plates. */
+@utility index-numeral {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+/* Default colors for the label utilities live here, at zero specificity, so
+   an explicit text-* utility at a call site always wins. Declared inside the
+   utility they would compete within the same cascade layer and could
+   silently swallow every override. */
+@layer components {
+  :where(.label-mono, .label-mono-sm) {
+    color: var(--label-3);
+  }
+  :where(.index-numeral) {
+    color: var(--brand);
+  }
+}
+
+@utility display-1 { font-size: var(--display-1); line-height: 0.96; letter-spacing: -0.04em; font-weight: 300; }
+@utility display-2 { font-size: var(--display-2); line-height: 1.0; letter-spacing: -0.038em; font-weight: 300; }
+@utility display-3 { font-size: var(--display-3); line-height: 1.05; letter-spacing: -0.032em; font-weight: 300; }
+@utility display-4 { font-size: var(--display-4); line-height: 1.1; letter-spacing: -0.025em; font-weight: 400; }
+
+/* ---------------------------------------------------------------------------
+   Surfaces
+   ------------------------------------------------------------------------ */
+
+/* The single panel treatment across the marketing site and the dashboard: a
+   flat near-black plane held by a hairline inset ring rather than a border,
+   so nothing shifts by a pixel when it highlights. */
+@utility surface {
+  background: var(--surface-1);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+@utility surface-hover {
+  transition: background-color 300ms var(--ease-expo),
+              box-shadow 300ms var(--ease-expo);
+}
+@utility surface-hover-on {
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--hairline-strong);
+}
+
+/* A panel that behaves on its own — the common case, so it shouldn't need
+   three classes at every call site. */
+@utility panel {
+  background: var(--surface-1);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  transition: background-color 300ms var(--ease-expo),
+              box-shadow 300ms var(--ease-expo);
+}
+@utility panel-interactive {
+  background: var(--surface-1);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  transition: background-color 300ms var(--ease-expo),
+              box-shadow 300ms var(--ease-expo);
+  &:hover {
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--hairline-strong);
+  }
+}
+
+/* Hairline rules used to divide list rows and section bands. */
+@utility rule-t { box-shadow: inset 0 1px 0 0 var(--hairline); }
+@utility rule-b { box-shadow: inset 0 -1px 0 0 var(--hairline); }
+
+/* Layered shadow tokens — a single flat box-shadow reads cheap. Real depth
+   is a tight contact shadow plus a soft ambient one. */
+.shadow-elevate {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.5),
+    0 8px 24px -8px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+}
+.shadow-elevate-lg {
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.5),
+    0 16px 40px -12px rgb(0 0 0 / 0.7),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+}
+
+/* ---------------------------------------------------------------------------
+   Page plane
+   ------------------------------------------------------------------------ */
+
+/* Depth: a flat black background reads as an unfinished template. Three
+   soft radial glows — acid, electric, teal, all far below the saturation
+   that would compete with the severity colors — plus a hairline-fine grain
+   give the plane the depth a premium dark UI needs. A slow 40s drift keeps
+   it from feeling static. CSS-only, no per-frame JS cost. */
 @keyframes ambient-drift {
   0%, 100% {
     background-position: 12% -15%, 105% 5%, 45% 115%;
@@ -248,17 +445,11 @@
 body {
   background-color: var(--background);
   background-image:
-    radial-gradient(1200px 700px at 12% -15%, oklch(0.575 0.225 22 / 0.13), transparent 60%),
-    radial-gradient(1000px 600px at 105% 5%, oklch(0.70 0.02 250 / 0.07), transparent 55%),
-    radial-gradient(900px 600px at 45% 115%, oklch(0.65 0.03 20 / 0.06), transparent 60%);
+    radial-gradient(1200px 700px at 12% -15%, rgb(212 255 50 / 0.055), transparent 60%),
+    radial-gradient(1000px 600px at 105% 5%, rgb(77 107 255 / 0.075), transparent 55%),
+    radial-gradient(900px 600px at 45% 115%, rgb(0 201 167 / 0.05), transparent 60%);
   background-attachment: fixed;
   animation: ambient-drift 40s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body {
-    animation: none;
-  }
 }
 
 body::before {
@@ -276,34 +467,61 @@ body::before {
   z-index: 1;
 }
 
-/* Layered shadow tokens — a single flat box-shadow reads cheap. Real depth
-   is a tight contact shadow plus a soft ambient one. */
-.shadow-elevate {
-  box-shadow:
-    0 1px 2px oklch(0 0 0 / 0.4),
-    0 8px 24px -8px oklch(0 0 0 / 0.5),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.04);
+/* ---------------------------------------------------------------------------
+   Motion vocabulary
+   ------------------------------------------------------------------------ */
+
+/* upvent's progress/dash idiom — a hairline that sweeps its container.
+   Used under section headers and on live/collecting states. */
+@keyframes rule-sweep {
+  0%   { transform: scaleX(0); transform-origin: left center; }
+  50%  { transform: scaleX(1); transform-origin: left center; }
+  50.1%{ transform: scaleX(1); transform-origin: right center; }
+  100% { transform: scaleX(0); transform-origin: right center; }
 }
-.shadow-elevate-lg {
-  box-shadow:
-    0 2px 4px oklch(0 0 0 / 0.4),
-    0 16px 40px -12px oklch(0 0 0 / 0.6),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.05);
+@utility rule-sweep {
+  animation: rule-sweep 2.4s var(--ease-66) infinite;
 }
 
+/* A slow scan travelling down a panel — the "instrument is live" cue on
+   collection and health surfaces. */
+@keyframes scan {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+@utility scan-line {
+  animation: scan 3.2s var(--ease-66) infinite;
+}
 
-/* The racing surface: a flat near-black panel held by a hairline inset ring
-   rather than a border, so nothing shifts by a pixel when it highlights.
-   This is the single card treatment across the site and the dashboard. */
-@utility surface {
-  background: #0b0b0d;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+/* Marquee for the status ticker in the marketing header. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
-@utility surface-hover {
-  transition: background-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1);
+@utility marquee {
+  animation: marquee 38s linear infinite;
 }
-@utility surface-hover-on {
-  background: #101013;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.13);
+
+/* Blink for live indicators, borrowed from haoqi's caret. */
+@keyframes soft-blink {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0.25; }
+}
+@utility soft-blink {
+  animation: soft-blink 1.6s var(--ease-66) infinite;
+}
+
+/* One switch turns the whole vocabulary off. Anything that moves on its own
+   must be listed here — motion.dev handles its own reduced-motion, but CSS
+   animations don't. */
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+  .rule-sweep, .scan-line, .marquee, .soft-blink { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

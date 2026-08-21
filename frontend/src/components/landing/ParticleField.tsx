@@ -30,7 +30,13 @@ export function ParticleField({ className }: { className?: string }) {
     let particles: Particle[] = [];
     let raf = 0;
 
-    const brand = getComputedStyle(document.documentElement).getPropertyValue("--brand").trim() || "oklch(0.72 0.19 235)";
+    // Read the identity accent off the token layer so the field always
+    // matches whatever --brand currently is. Canvas can't parse every color
+    // space, so anything non-hex falls back to the acid literal.
+    const token = getComputedStyle(document.documentElement)
+      .getPropertyValue("--brand")
+      .trim();
+    const brand = token.startsWith("#") ? token : "#d4ff32";
 
     function resize() {
       const canvas = canvasRef.current;
@@ -90,9 +96,9 @@ export function ParticleField({ className }: { className?: string }) {
 
         ctx!.beginPath();
         ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx!.fillStyle = brand.includes("oklch") ? "#4db8ff" : brand;
+        ctx!.fillStyle = brand;
         ctx!.globalAlpha = p.baseAlpha;
-        ctx!.shadowColor = "#4db8ff";
+        ctx!.shadowColor = brand;
         ctx!.shadowBlur = 6;
         ctx!.fill();
       }

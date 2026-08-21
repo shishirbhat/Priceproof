@@ -56,12 +56,18 @@ export function Preloader({ onDone }: { onDone: () => void }) {
             transition={{ duration: 0.4 }}
             className="relative flex flex-col items-center gap-3"
           >
-            <span className="font-mono text-[6rem] font-bold leading-none tracking-tighter text-foreground tabular-nums">
+            <span className="font-mono text-[clamp(4rem,14svw,9rem)] leading-none font-light tracking-[-0.05em] text-label-1 tabular-nums">
               {pct}%
             </span>
-            <span className="font-mono text-xs tracking-widest text-muted-foreground">
-              LOADING PRICEPROOF
+            {/* The acid rule fills with the counter — the progress bar and
+                the figure are the same reading, not two. */}
+            <span className="relative mt-2 block h-px w-[min(52svw,26rem)] bg-[var(--hairline-strong)]">
+              <span
+                className="absolute inset-y-0 left-0 bg-brand transition-[width] duration-150 ease-linear"
+                style={{ width: `${pct}%` }}
+              />
             </span>
+            <span className="label-mono mt-4">Loading PriceProof</span>
           </motion.div>
         </motion.div>
       ) : null}

@@ -5,16 +5,14 @@ import { api, type MarketValueRow, type MarketVerdict } from "@/lib/api";
 import { SeverityBadge } from "@/components/domain/SeverityBadge";
 import { SeededBadge } from "@/components/domain/SeededBadge";
 import { PageHeader } from "@/components/domain/PageHeader";
-import { FadeIn } from "@/components/domain/FadeIn";
 import { QueryState, ChartSkeleton, ListRowSkeleton } from "@/components/domain/QueryState";
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
 import { AnimatedNumber } from "@/components/domain/AnimatedNumber";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/format";
+import { motion } from "motion/react";
+import { DUR, EASE_EXPO, REVEAL_VIEWPORT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight, TrendingDown, Minus, TrendingUp, HelpCircle } from "lucide-react";
-
-const currencyFmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
 const FILTERS: Array<{ key: MarketVerdict | "ALL"; label: string }> = [
   { key: "ALL", label: "All" },
@@ -30,25 +28,25 @@ const VERDICT_NOTE: Record<
 > = {
   GOOD_DEAL: {
     icon: TrendingDown,
-    className: "border-severity-genuine/25 bg-severity-genuine/[0.07] text-severity-genuine",
+    className: "bg-severity-genuine/[0.07] text-severity-genuine shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--severity-genuine)_28%,transparent)]",
     text: (r) =>
       `Priced ${Math.abs(r.pct_vs_median!)}% below the median of ${r.segment_size} comparable ${r.make} ${r.model} listings — a genuinely underpriced comparable, not a rounding artifact.`,
   },
   FAIR: {
     icon: Minus,
-    className: "border-white/[0.1] bg-white/[0.03] text-foreground",
+    className: "bg-surface-2 text-label-2 shadow-[inset_0_0_0_1px_var(--hairline-strong)]",
     text: (r) =>
       `Within ${Math.abs(r.pct_vs_median!)}% of the median of ${r.segment_size} comparable ${r.make} ${r.model} listings — priced in line with the market.`,
   },
   OVERPRICED: {
     icon: TrendingUp,
-    className: "border-severity-violation/25 bg-severity-violation/[0.07] text-severity-violation",
+    className: "bg-severity-violation/[0.07] text-severity-violation shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--severity-violation)_28%,transparent)]",
     text: (r) =>
       `Priced ${r.pct_vs_median}% above the median of ${r.segment_size} comparable ${r.make} ${r.model} listings.`,
   },
   INSUFFICIENT_COMPARABLES: {
     icon: HelpCircle,
-    className: "border-severity-drift/25 bg-severity-drift/[0.07] text-severity-drift",
+    className: "bg-severity-drift/[0.07] text-severity-drift shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--severity-drift)_28%,transparent)]",
     text: () =>
       `Fewer than the required comparable listings exist for this make/model (or make/year) — there isn't enough data to score this listing against the market honestly yet.`,
   },
@@ -74,67 +72,81 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
   const NoteIcon = note.icon;
 
   return (
-    <FadeIn delay={delay}>
-      <Card className="gap-5 p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <Link
-                to={`/listings/${row.listing_id}`}
-                className="text-base font-semibold tracking-tight transition-colors hover:text-foreground/80"
-              >
-                {row.title}
-              </Link>
-              <SeverityBadge verdict={row.verdict} />
-              {row.is_seeded && <SeededBadge isSeeded />}
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              {row.portal_name}
-              {row.city && ` · ${row.city}`}
-              {row.odometer_km != null && ` · ${row.odometer_km.toLocaleString("en-IN")} km`}
-            </div>
+    <motion.article
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={REVEAL_VIEWPORT}
+      transition={{ duration: DUR.base, delay, ease: EASE_EXPO }}
+      className="panel rounded-sm"
+    >
+      <header className="relative flex items-start justify-between gap-4 px-6 py-5">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to={`/listings/${row.listing_id}`}
+              className="display-4 text-label-1 transition-colors duration-200 hover:text-brand"
+            >
+              {row.title}
+            </Link>
+            <SeverityBadge verdict={row.verdict} />
+            {row.is_seeded && <SeededBadge isSeeded />}
           </div>
-          <a
-            href={row.listing_url}
-            target="_blank"
-            rel="noreferrer"
-            className="group inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            View live listing
-            <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </a>
-        </div>
-
-        <div className="grid grid-cols-3 divide-x divide-white/[0.06] rounded-lg border border-white/[0.06] bg-black/20">
-          <div className="px-4 py-3">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Asking price
-            </div>
-            <div className="mt-1 text-2xl font-semibold tracking-tight">
-              <AnimatedNumber value={Number(row.current_price)} format={currencyFmt} />
-            </div>
-          </div>
-          <div className="px-4 py-3">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Segment median
-            </div>
-            <div className="mt-1 text-2xl font-semibold tracking-tight">
-              {row.segment_median != null ? (
-                <AnimatedNumber value={Number(row.segment_median)} format={currencyFmt} />
-              ) : (
-                "—"
-              )}
-            </div>
-          </div>
-          <div className="px-4 py-3">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Comparable listings
-            </div>
-            <div className="mt-1 text-2xl font-semibold tracking-tight">{row.segment_size}</div>
+          <div className="label-mono mt-3 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>{row.portal_name}</span>
+            {row.city && <span className="text-label-4">/ {row.city}</span>}
+            {row.odometer_km != null && (
+              <span className="text-label-4">/ {row.odometer_km.toLocaleString("en-IN")} km</span>
+            )}
           </div>
         </div>
+        <a
+          href={row.listing_url}
+          target="_blank"
+          rel="noreferrer"
+          className="group inline-flex shrink-0 items-center gap-1.5"
+        >
+          <span className="label-mono-sm transition-colors duration-200 group-hover:text-label-1">
+            Live listing
+          </span>
+          <ArrowUpRight className="h-3 w-3 text-label-4 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand" />
+        </a>
+        <span className="absolute inset-x-0 bottom-0 h-px bg-[var(--hairline)]" />
+      </header>
 
-        <div className={cn("flex items-start gap-2.5 rounded-lg border px-3.5 py-3 text-[13px] leading-relaxed", note.className)}>
+      {/* The scoring plate: the three figures the verdict is derived from,
+          separated by hairlines so they read as one instrument. */}
+      <div className="grid grid-cols-3 gap-px bg-[var(--hairline)]">
+        <div className="bg-surface-1 px-6 py-4">
+          <div className="label-mono">Asking price</div>
+          <div className="mt-2 text-[1.75rem] leading-none font-light tracking-[-0.04em] tabular-nums text-label-1">
+            <AnimatedNumber value={Number(row.current_price)} format={formatCurrency} />
+          </div>
+        </div>
+        <div className="bg-surface-1 px-6 py-4">
+          <div className="label-mono">Segment median</div>
+          <div className="mt-2 text-[1.75rem] leading-none font-light tracking-[-0.04em] tabular-nums text-label-2">
+            {row.segment_median != null ? (
+              <AnimatedNumber value={Number(row.segment_median)} format={formatCurrency} />
+            ) : (
+              "—"
+            )}
+          </div>
+        </div>
+        <div className="bg-surface-1 px-6 py-4">
+          <div className="label-mono">Comparables</div>
+          <div className="mt-2 text-[1.75rem] leading-none font-light tracking-[-0.04em] tabular-nums text-label-2">
+            {row.segment_size}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-5 px-6 py-5">
+        <div
+          className={cn(
+            "flex items-start gap-3 rounded-sm px-4 py-3.5 text-[13px] leading-[1.6]",
+            note.className,
+          )}
+        >
           <NoteIcon className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{note.text(row)}</span>
         </div>
@@ -149,14 +161,14 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
             chartData.length > 1 ? (
               <PriceHistoryChart data={chartData} />
             ) : (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
-                Not enough snapshots yet to chart.
+              <div className="label-mono rounded-sm border border-dashed border-[var(--hairline-strong)] p-8 text-center">
+                Not enough snapshots yet to chart
               </div>
             )
           }
         </QueryState>
-      </Card>
-    </FadeIn>
+      </div>
+    </motion.article>
   );
 }
 
@@ -171,30 +183,50 @@ export function MarketValue() {
   }, [marketValue.data, filter]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         eyebrow="Pricing intelligence"
+        index="02"
         title="Market Value"
         description="Every active listing scored against the median of comparable listings — same make and model, or make and model-year when a model line is too thin. A verdict is only ever given with enough comparables to back it; otherwise it says so honestly."
       />
 
-      <div className="flex flex-wrap gap-2">
-        {FILTERS.map((f) => (
-          <Button
-            key={f.key}
-            size="sm"
-            variant={filter === f.key ? "default" : "outline"}
-            className="text-xs"
-            onClick={() => setFilter(f.key)}
-          >
-            {f.label}
-            {marketValue.data && f.key !== "ALL" && (
-              <span className="ml-1 opacity-70">
-                {marketValue.data.filter((r) => r.verdict === f.key).length}
-              </span>
-            )}
-          </Button>
-        ))}
+      {/* Verdict filter, as a segmented readout rather than a row of
+          buttons — each segment carries its own count, so the distribution
+          of verdicts is visible without applying a filter. */}
+      <div className="flex flex-wrap gap-px overflow-hidden rounded-sm bg-[var(--hairline)]">
+        {FILTERS.map((f) => {
+          const count =
+            f.key === "ALL"
+              ? marketValue.data?.length
+              : marketValue.data?.filter((r) => r.verdict === f.key).length;
+          const active = filter === f.key;
+          return (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              aria-pressed={active}
+              className={cn(
+                "group relative flex items-baseline gap-2 px-4 py-3 transition-colors duration-200",
+                active
+                  ? "bg-surface-3 text-label-1"
+                  : "bg-surface-1 text-label-3 hover:bg-surface-2 hover:text-label-2",
+              )}
+            >
+              <span className="font-mono text-[10px] tracking-[0.18em] uppercase">{f.label}</span>
+              {count !== undefined && (
+                <span className="font-mono text-[11px] tabular-nums text-label-4">{count}</span>
+              )}
+              {active && (
+                <motion.span
+                  layoutId="verdict-filter-active"
+                  className="absolute inset-x-0 bottom-0 h-px bg-brand"
+                  transition={{ duration: DUR.micro, ease: EASE_EXPO }}
+                />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <QueryState
