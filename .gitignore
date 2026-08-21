@@ -10,6 +10,7 @@ drift-report.json
 # Node
 node_modules/
 dist/
+dist-artifact/
 build/
 *.log
 
