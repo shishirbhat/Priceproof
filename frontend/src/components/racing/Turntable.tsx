@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildCar, renderCar } from "./carRenderer";
 import { FrameSequence } from "./FrameSequence";
 import type { SilhouetteName } from "./carRenderer";
@@ -27,6 +27,11 @@ type Props = {
   poster?: string;
   /** Alt text for the photographic paths. */
   posterAlt?: string;
+  /**
+   * Called when the supplied photograph fails to load, so a caller can drop
+   * any "real photo" affordance it rendered alongside this.
+   */
+  onPosterError?: () => void;
 };
 
 /** Default radians per second while idling. */
@@ -52,7 +57,13 @@ export function Turntable({
   frames,
   poster,
   posterAlt,
+  onPosterError,
 }: Props) {
+  // Scraped listing photos rot: portals expire CDN links and delist cars, so
+  // a URL existing is not the same as a usable photo. When one fails to load
+  // we fall through to the generated geometry rather than leaving the reader
+  // with a broken image and its alt text.
+  const [posterFailed, setPosterFailed] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
@@ -143,7 +154,7 @@ export function Turntable({
       ro.disconnect();
       io.disconnect();
     };
-  }, []);
+  }, [posterFailed]);
 
   // Pointer drag. Captured on the element so a fast flick that leaves the
   // canvas still tracks until release.
@@ -185,14 +196,14 @@ export function Turntable({
       canvas.removeEventListener("pointerup", up);
       canvas.removeEventListener("pointercancel", up);
     };
-  }, []);
+  }, [posterFailed]);
 
   // Supplied photography always wins over generated geometry.
   if (frames && frames.length > 0) {
     return <FrameSequence frames={frames} label={label} paused={paused} />;
   }
 
-  if (poster) {
+  if (poster && !posterFailed) {
     return (
       <div className="absolute inset-0 overflow-hidden bg-[#0b0b0d]">
         <div
@@ -206,6 +217,10 @@ export function Turntable({
           src={poster}
           alt={posterAlt ?? label}
           loading="lazy"
+          onError={() => {
+            setPosterFailed(true);
+            onPosterError?.();
+          }}
           className="absolute inset-0 h-full w-full object-contain"
         />
         <div

@@ -9,10 +9,7 @@ import { FadeIn } from "@/components/domain/FadeIn";
 import { QueryState, ListRowSkeleton, TileGridSkeleton } from "@/components/domain/QueryState";
 import { Card } from "@/components/ui/card";
 import { Car, Globe2, TrendingUp, PackageX, GitCompareArrows, ShieldX } from "lucide-react";
-
-function formatCurrency(v: string | number) {
-  return `₹${Number(v).toLocaleString("en-IN")}`;
-}
+import { formatCurrency } from "@/lib/utils";
 
 function timeAgo(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();

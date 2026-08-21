@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Turntable } from "@/components/racing/Turntable";
 import type { SilhouetteName } from "@/components/racing/carRenderer";
 
@@ -62,10 +62,26 @@ type Props = {
   imageUrl?: string | null;
   /** Pass through when the portal publishes a real body-type field. */
   bodyType?: SilhouetteName;
+  /**
+   * Called when the seller's photograph turns out to be unusable, so the
+   * page can retract any claim it made about showing a real photo.
+   */
+  onPhotoUnavailable?: () => void;
   className?: string;
 };
 
-export function ListingCar({ make, model, title, imageUrl, bodyType, className = "" }: Props) {
+export function ListingCar({
+  make,
+  model,
+  title,
+  imageUrl,
+  bodyType,
+  onPhotoUnavailable,
+  className = "",
+}: Props) {
+  // A photo URL that fails to load leaves us showing generated geometry, so
+  // it has to be labelled as a render just like a listing with no photo.
+  const [photoFailed, setPhotoFailed] = useState(false);
   // Key off make+model so every trim of the same car shares a colour, and
   // fall back to the title when the portal did not break the fields out.
   const seed = `${make ?? ""}|${model ?? ""}` .trim() === "|" ? title : `${make}|${model}`;
@@ -93,8 +109,12 @@ export function ListingCar({ make, model, title, imageUrl, bodyType, className =
         silhouette={silhouette}
         poster={imageUrl ?? undefined}
         posterAlt={`${label} — photograph published by the seller`}
+        onPosterError={() => {
+          setPhotoFailed(true);
+          onPhotoUnavailable?.();
+        }}
       />
-      {!imageUrl && (
+      {(!imageUrl || photoFailed) && (
         <span className="pointer-events-none absolute bottom-3 left-4 text-[9.5px] tracking-[0.18em] text-white/35 uppercase">
           Render · no seller photo
         </span>

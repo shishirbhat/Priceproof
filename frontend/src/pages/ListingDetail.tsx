@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
@@ -11,10 +11,7 @@ import { ListingCar } from "@/components/domain/ListingCar";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { DUR, EASE_EXPO } from "@/lib/motion";
-
-function formatCurrency(v: string | number) {
-  return `₹${Number(v).toLocaleString("en-IN")}`;
-}
+import { formatCurrency } from "@/lib/utils";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -25,6 +22,9 @@ function formatDate(iso: string) {
 }
 
 export function ListingDetail() {
+  // The portal published a photo URL, but it may still fail to load — only
+  // then do we retract the "photograph as published by" credit below.
+  const [photoUnavailable, setPhotoUnavailable] = useState(false);
   const { listingId } = useParams<{ listingId: string }>();
   const id = Number(listingId);
   const detail = useQuery({ queryKey: ["listing", id], queryFn: () => api.listing(id) });
@@ -68,6 +68,7 @@ export function ListingDetail() {
                 model={listing.model}
                 title={listing.title}
                 imageUrl={listing.main_image_url}
+                onPhotoUnavailable={() => setPhotoUnavailable(true)}
                 className="aspect-[16/10] w-full"
               />
 
@@ -113,7 +114,7 @@ export function ListingDetail() {
                   )}
                 </div>
 
-                {listing.main_image_url && (
+                {listing.main_image_url && !photoUnavailable && (
                   <p className="mt-5 text-[10.5px] text-white/40">
                     Photograph as published by {listing.portal_name}.
                   </p>

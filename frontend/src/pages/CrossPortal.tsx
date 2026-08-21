@@ -6,10 +6,7 @@ import { PageHeader } from "@/components/domain/PageHeader";
 import { FadeIn } from "@/components/domain/FadeIn";
 import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
-
-function formatCurrency(v: string | number) {
-  return `₹${Number(v).toLocaleString("en-IN")}`;
-}
+import { formatCurrency } from "@/lib/utils";
 
 export function CrossPortal() {
   const matches = useQuery({ queryKey: ["cross-portal"], queryFn: api.crossPortalMatches });

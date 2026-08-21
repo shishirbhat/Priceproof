@@ -11,10 +11,8 @@ import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
 import { AnimatedNumber } from "@/components/domain/AnimatedNumber";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { ArrowUpRight, TrendingDown, Minus, TrendingUp, HelpCircle } from "lucide-react";
-
-const currencyFmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
 const FILTERS: Array<{ key: MarketVerdict | "ALL"; label: string }> = [
   { key: "ALL", label: "All" },
@@ -111,7 +109,7 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
               Asking price
             </div>
             <div className="mt-1 text-2xl font-semibold tracking-tight">
-              <AnimatedNumber value={Number(row.current_price)} format={currencyFmt} />
+              <AnimatedNumber value={Number(row.current_price)} format={formatCurrency} />
             </div>
           </div>
           <div className="px-4 py-3">
@@ -120,7 +118,7 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
             </div>
             <div className="mt-1 text-2xl font-semibold tracking-tight">
               {row.segment_median != null ? (
-                <AnimatedNumber value={Number(row.segment_median)} format={currencyFmt} />
+                <AnimatedNumber value={Number(row.segment_median)} format={formatCurrency} />
               ) : (
                 "—"
               )}
