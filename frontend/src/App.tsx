@@ -18,7 +18,15 @@ const CatalogManagement = lazy(() =>
   import("@/pages/CatalogManagement").then((m) => ({ default: m.CatalogManagement })),
 );
 const ListingDetail = lazy(() => import("@/pages/ListingDetail").then((m) => ({ default: m.ListingDetail })));
+// The front door. Shares the racing build's design language and motion
+// tokens, applied to what this product actually does.
+const Welcome = lazy(() => import("@/pages/Welcome").then((m) => ({ default: m.Welcome })));
+// The original marketing landing, kept reachable rather than orphaned.
 const Landing = lazy(() => import("@/pages/Landing").then((m) => ({ default: m.Landing })));
+// The racing experience ships its own canvas renderer and full-page motion
+// stack, so it stays behind its own split point rather than loading for
+// every dashboard visitor.
+const RacingHome = lazy(() => import("@/pages/RacingHome").then((m) => ({ default: m.RacingHome })));
 
 function PageFallback() {
   return (
@@ -64,7 +72,9 @@ export default function App() {
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
-        <Route path="/welcome" element={<Landing />} />
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/welcome/classic" element={<Landing />} />
+        <Route path="/racing" element={<RacingHome />} />
         <Route path="/*" element={<DashboardRoutes />} />
       </Routes>
     </Suspense>

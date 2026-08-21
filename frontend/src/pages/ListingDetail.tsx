@@ -7,8 +7,10 @@ import { QueryState } from "@/components/domain/QueryState";
 import { SeededBadge } from "@/components/domain/SeededBadge";
 import { FadeIn } from "@/components/domain/FadeIn";
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
+import { ListingCar } from "@/components/domain/ListingCar";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { DUR, EASE_EXPO } from "@/lib/motion";
 
 function formatCurrency(v: string | number) {
   return `₹${Number(v).toLocaleString("en-IN")}`;
@@ -56,20 +58,27 @@ export function ListingDetail() {
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-start gap-4"
+              transition={{ duration: DUR.panel, ease: EASE_EXPO }}
+              className="grid gap-5 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]"
             >
-              {listing.main_image_url && (
-                <img
-                  src={listing.main_image_url}
-                  alt=""
-                  className="h-20 w-20 rounded-xl border border-white/[0.08] object-cover shadow-elevate"
-                />
-              )}
-              <div>
-                <div className="mb-1 font-mono text-[11px] tracking-widest text-brand">// LISTING DETAIL</div>
-                <h1 className="text-[2.25rem] font-bold leading-[1.05] tracking-tighter">{listing.title}</h1>
-                <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+              {/* Studio render of the car, so every listing presents the
+                  same way regardless of what photo the portal supplied. */}
+              <ListingCar
+                make={listing.make}
+                model={listing.model}
+                title={listing.title}
+                imageUrl={listing.main_image_url}
+                className="aspect-[16/10] w-full"
+              />
+
+              <div className="min-w-0">
+                <div className="mb-3 text-[10px] uppercase tracking-[0.28em] text-brand">
+                  Listing detail
+                </div>
+                <h1 className="text-[2.1rem] font-light leading-[1.06] tracking-tight">
+                  {listing.title}
+                </h1>
+                <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-white/50">
                   <span>{listing.portal_name}</span>
                   {listing.city && <span>· {listing.city}</span>}
                   {listing.registration_prefix && <span>· {listing.registration_prefix}</span>}
@@ -86,7 +95,8 @@ export function ListingDetail() {
                     · view live listing <ArrowUpRight className="h-3 w-3" />
                   </a>
                 </div>
-                <div className="mt-2 flex items-center gap-2">
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
                   {listing.delisted_at ? (
                     <span className="rounded-full border border-severity-violation/25 bg-severity-violation/10 px-2 py-0.5 text-[11px] font-medium text-severity-violation">
                       Delisted {formatDate(listing.delisted_at)}
@@ -102,6 +112,12 @@ export function ListingDetail() {
                     </span>
                   )}
                 </div>
+
+                {listing.main_image_url && (
+                  <p className="mt-5 text-[10.5px] text-white/40">
+                    Photograph as published by {listing.portal_name}.
+                  </p>
+                )}
               </div>
             </motion.div>
 
