@@ -16,6 +16,10 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    {/* The page plane: one fixed, static, composited layer carrying the
+        ambient glow and grain. Sits below #root so nothing above it ever
+        forces it to repaint. */}
+    <div className="page-plane" aria-hidden="true" />
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />

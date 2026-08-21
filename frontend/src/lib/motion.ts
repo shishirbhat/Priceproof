@@ -58,15 +58,19 @@ export const STAGGER = 0.055;
 export const STAGGER_WIDE = 0.09;
 
 /**
- * Shared reveal-on-scroll variant. Elements start slightly low and blurred,
- * which hides the sub-pixel jitter of a plain translate.
+ * Shared reveal-on-scroll variant.
+ *
+ * Opacity and transform only, deliberately. These earlier animated
+ * `filter: blur()` as well, which looks lovely on one element and is a
+ * disaster on forty — an animated blur can't be composited, so every frame
+ * re-rasterises the element at full size. Dozens of scroll-triggered blurs
+ * is what made scrolling feel heavy.
  */
 export const revealVariants = {
-  hidden: { opacity: 0, y: 26, filter: "blur(6px)" },
+  hidden: { opacity: 0, y: 26 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: { duration: DUR.base, ease: EASE_EXPO },
   },
 };
@@ -76,11 +80,10 @@ export const revealVariants = {
  * type and full-width bands rather than dashboard rows.
  */
 export const revealDisplayVariants = {
-  hidden: { opacity: 0, y: 44, filter: "blur(10px)" },
+  hidden: { opacity: 0, y: 44 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: { duration: DUR.panel, ease: EASE_66 },
   },
 };

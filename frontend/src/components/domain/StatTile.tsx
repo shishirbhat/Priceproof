@@ -94,7 +94,7 @@ export function StatTile({
       {/* Accent rule wipes the top edge on hover, on the house curve. */}
       <span
         className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 h-px w-0 transition-[width] duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:w-full",
+          "pointer-events-none absolute inset-x-0 top-0 h-px origin-left scale-x-0 transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100",
           TONE_BAR[tone],
         )}
       />

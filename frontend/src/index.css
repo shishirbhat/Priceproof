@@ -428,36 +428,36 @@
    Page plane
    ------------------------------------------------------------------------ */
 
-/* Depth: a flat black background reads as an unfinished template. Three
-   soft radial glows — acid, electric, teal, all far below the saturation
-   that would compete with the severity colors — plus a hairline-fine grain
-   give the plane the depth a premium dark UI needs. A slow 40s drift keeps
-   it from feeling static. CSS-only, no per-frame JS cost. */
-@keyframes ambient-drift {
-  0%, 100% {
-    background-position: 12% -15%, 105% 5%, 45% 115%;
-  }
-  50% {
-    background-position: 18% -8%, 98% 12%, 52% 108%;
-  }
-}
+/* Depth: a flat black background reads as an unfinished template, so the
+   page plane carries three soft radial glows plus a fine grain.
 
-body {
+   Performance note, learned the hard way: this used to set
+   `background-attachment: fixed` on <body> and animate `background-position`
+   on a 40s loop. Both are repaint traps. Fixed attachment defeats scroll
+   compositing, so every scroll frame repainted the whole viewport — three
+   large radial gradients across a Retina display is several million pixels
+   a frame — and the animation kept repainting even while idle. The drift
+   was imperceptible and cost more than everything else on the page put
+   together. The gradients now sit on one fixed, composited layer that
+   neither repaints nor animates. */
+.page-plane {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-color: var(--background);
   background-image:
     radial-gradient(1200px 700px at 12% -15%, rgb(212 255 50 / 0.055), transparent 60%),
     radial-gradient(1000px 600px at 105% 5%, rgb(77 107 255 / 0.075), transparent 55%),
     radial-gradient(900px 600px at 45% 115%, rgb(0 201 167 / 0.05), transparent 60%);
-  background-attachment: fixed;
-  animation: ambient-drift 40s ease-in-out infinite;
 }
 
-body::before {
+/* Grain rides the same static layer rather than being a second
+   always-composited fixed element stacked over scrolling content. */
+.page-plane::after {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 0;
-  pointer-events: none;
   opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -517,7 +517,6 @@ body::before {
    must be listed here — motion.dev handles its own reduced-motion, but CSS
    animations don't. */
 @media (prefers-reduced-motion: reduce) {
-  body { animation: none; }
   .rule-sweep, .scan-line, .marquee, .soft-blink { animation: none; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

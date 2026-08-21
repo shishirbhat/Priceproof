@@ -73,7 +73,7 @@ export function Welcome() {
         transition={{ duration: DUR.panel, ease: EASE_66 }}
         style={{
           background: scrolled ? "rgb(8 9 10 / 0.9)" : "transparent",
-          backdropFilter: scrolled ? "blur(18px)" : "none",
+          backdropFilter: scrolled ? "blur(10px)" : "none",
           boxShadow: scrolled ? "inset 0 -1px 0 0 var(--hairline)" : "none",
         }}
       >
@@ -140,9 +140,9 @@ export function Welcome() {
           <AnimatePresence mode="wait">
             <motion.div
               key={segment.id}
-              initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -12, filter: "blur(6px)" }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
               transition={{ duration: DUR.panel, ease: EASE_66 }}
             >
               <div className="flex items-center justify-center gap-3">
@@ -161,7 +161,7 @@ export function Welcome() {
             for verdict filters, so the two halves share one control. */}
         <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-8">
           <div
-            className="flex gap-px overflow-x-auto rounded-sm bg-[var(--hairline)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex gap-px overflow-x-auto rounded-sm bg-[var(--hairline)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             role="tablist"
             aria-label="Vehicle segment"
           >
@@ -175,7 +175,7 @@ export function Welcome() {
                 className={`relative shrink-0 px-5 py-3 font-mono text-[10px] tracking-[0.18em] whitespace-nowrap uppercase outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-brand/50 ${
                   i === active
                     ? "bg-surface-3 text-label-1"
-                    : "bg-surface-1/85 text-label-3 hover:bg-surface-2 hover:text-label-2"
+                    : "bg-surface-1/95 text-label-3 hover:bg-surface-2 hover:text-label-2"
                 }`}
               >
                 <span className="relative z-10">{s.name}</span>
@@ -266,7 +266,7 @@ export function Welcome() {
                   </span>
 
                   {/* The acid rule that draws across the row on hover. */}
-                  <span className="pointer-events-none absolute inset-x-0 top-0 h-px w-0 bg-brand transition-[width] duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:w-full" />
+                  <span className="pointer-events-none absolute inset-x-0 top-0 h-px w-full origin-left scale-x-0 bg-brand transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100" />
                 </Link>
               </motion.div>
             ))}

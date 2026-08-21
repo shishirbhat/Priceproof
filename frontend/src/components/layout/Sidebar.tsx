@@ -47,7 +47,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-svh w-[17rem] shrink-0 flex-col bg-surface-0/95 backdrop-blur-xl",
+          "fixed inset-y-0 left-0 z-50 flex h-svh w-[17rem] shrink-0 flex-col bg-surface-0/95",
           "transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)]",
           "lg:sticky lg:top-0 lg:w-64 lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
@@ -65,7 +65,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               <span className="label-mono-sm mt-1.5 block">
                 Market Intelligence
               </span>
-              <span className="mt-3 block h-px w-8 bg-brand transition-[width] duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:w-full" />
+              <span className="mt-3 block h-px w-full origin-left scale-x-[0.18] bg-brand transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100" />
             </Link>
             <button
               onClick={onClose}

@@ -273,7 +273,7 @@ export function Landing() {
                   {f.title}
                 </div>
                 <div className="max-w-lg text-[13.5px] leading-[1.7] text-label-2">{f.body}</div>
-                <span className="pointer-events-none absolute inset-x-0 top-0 h-px w-0 bg-brand transition-[width] duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:w-full" />
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-px w-full origin-left scale-x-0 bg-brand transition-transform duration-[660ms] ease-[cubic-bezier(0.66,0,0.01,1)] group-hover:scale-x-100" />
               </motion.div>
             ))}
           </div>

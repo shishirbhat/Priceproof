@@ -20,9 +20,13 @@ export function AnimatedBar({ pct, className, trackClassName, delay = 0 }: Anima
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.style.width = "0%";
+    // scaleX rather than width: a width animation runs layout on every
+    // frame for every bar on the page, a transform is composited.
+    const target = Math.max(0, Math.min(100, pct)) / 100;
+    el.style.transformOrigin = "left center";
+    el.style.transform = "scaleX(0)";
     const animation = animate(el, {
-      width: `${Math.max(0, Math.min(100, pct))}%`,
+      scaleX: target,
       duration: 900,
       delay,
       ease: "outExpo",
@@ -34,7 +38,7 @@ export function AnimatedBar({ pct, className, trackClassName, delay = 0 }: Anima
 
   return (
     <div className={cn("h-1.5 flex-1 overflow-hidden bg-surface-3", trackClassName)}>
-      <div ref={ref} className={cn("h-full", className)} />
+      <div ref={ref} className={cn("h-full w-full", className)} />
     </div>
   );
 }
