@@ -1,0 +1,13 @@
+{
+  "name": "scrape-verse-project",
+  "private": true,
+  "description": "Root entry point. The app lives in frontend/ — these scripts delegate there so it does not matter which directory you run from.",
+  "scripts": {
+    "preinstall": "node scripts/check-node.mjs",
+    "setup": "node scripts/check-node.mjs && npm --prefix frontend install",
+    "dev": "node scripts/check-node.mjs && npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview",
+    "lint": "npm --prefix frontend run lint"
+  }
+}
