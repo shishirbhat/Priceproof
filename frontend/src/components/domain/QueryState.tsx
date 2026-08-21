@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function LoadingState({ label = "Loading" }: { label?: string }) {
   return (
-    <div className="panel relative flex items-center gap-3 overflow-hidden rounded-sm p-8">
+    <div className="panel relative flex items-center gap-3 overflow-hidden rounded-sm px-4 py-3.5">
       <Loader2 className="h-3.5 w-3.5 animate-spin text-label-3" />
       <span className="label-mono text-label-2">{label}</span>
       <span className="rule-sweep absolute inset-x-0 bottom-0 h-px bg-electric/50" />
@@ -24,16 +24,12 @@ export function LoadingState({ label = "Loading" }: { label?: string }) {
 export function ErrorState({ message }: { message: string }) {
   return (
     <div
-      className="flex items-start gap-3 rounded-sm bg-severity-violation/[0.07] p-8"
+      className="flex items-center gap-3 rounded-sm bg-severity-violation/[0.07] px-4 py-3"
       style={{ boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--severity-violation) 30%, transparent)" }}
     >
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-severity-violation" />
-      <div>
-        <div className="label-mono text-severity-violation">Request failed</div>
-        <div className="mt-2 font-mono text-[12px] leading-relaxed break-all text-label-2">
-          {message}
-        </div>
-      </div>
+      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-severity-violation" />
+      <span className="label-mono text-severity-violation">Failed</span>
+      <span className="min-w-0 truncate font-mono text-[11.5px] text-label-2">{message}</span>
     </div>
   );
 }
@@ -41,7 +37,7 @@ export function ErrorState({ message }: { message: string }) {
 export function EmptyState({ title, description }: { title: string; description?: string }) {
   return (
     <div
-      className="flex flex-col items-center gap-3 rounded-sm border border-dashed border-[var(--hairline-strong)] p-12 text-center"
+      className="flex flex-col items-center gap-2.5 rounded-sm border border-dashed border-[var(--hairline-strong)] px-6 py-8 text-center"
     >
       <Inbox className="h-4 w-4 text-label-4" />
       <div className="label-mono text-label-2">{title}</div>

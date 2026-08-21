@@ -128,7 +128,7 @@ export function Welcome() {
 
       {/* ---------------------------------------------------------------- */}
       {/* Hero — the studio, cycling the segments the platform scores. */}
-      <section id="segments" className="relative h-[100svh] min-h-[620px] w-full overflow-hidden">
+      <section id="segments" className="relative h-[92svh] min-h-[560px] w-full overflow-hidden">
         <Turntable
           paint={segment.paint}
           label={`${segment.name} segment`}
@@ -136,7 +136,7 @@ export function Welcome() {
           frames={framesFor(segment.id)}
         />
 
-        <div className="pointer-events-none absolute inset-x-0 top-[21%] flex flex-col items-center px-6 text-center">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 pb-28 text-center">
           <AnimatePresence mode="wait">
             <motion.div
               key={segment.id}
