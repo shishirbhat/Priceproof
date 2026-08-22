@@ -388,20 +388,15 @@
   border: 1px solid var(--rim);
   box-shadow:
     inset 0 1px 0 0 rgb(255 255 255 / 0.05),
-    0 2px 4px rgb(0 0 0 / 0.35),
-    0 12px 28px -12px rgb(0 0 0 / 0.55);
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 4px 10px -6px rgb(0 0 0 / 0.45);
 }
 @utility surface-hover {
-  transition: border-color 300ms var(--ease-expo),
-              box-shadow 300ms var(--ease-expo),
-              transform 300ms var(--ease-expo);
+  transition: transform 220ms var(--ease-expo),
+              border-color 220ms var(--ease-expo);
 }
 @utility surface-hover-on {
   border-color: var(--hairline-strong);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.07),
-    0 4px 8px rgb(0 0 0 / 0.4),
-    0 20px 40px -16px rgb(0 0 0 / 0.6);
 }
 
 @utility panel {
@@ -410,8 +405,8 @@
   border-radius: var(--radius);
   box-shadow:
     inset 0 1px 0 0 rgb(255 255 255 / 0.05),
-    0 2px 4px rgb(0 0 0 / 0.35),
-    0 12px 28px -12px rgb(0 0 0 / 0.55);
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 4px 10px -6px rgb(0 0 0 / 0.45);
 }
 
 @utility panel-interactive {
@@ -420,18 +415,16 @@
   border-radius: var(--radius);
   box-shadow:
     inset 0 1px 0 0 rgb(255 255 255 / 0.05),
-    0 2px 4px rgb(0 0 0 / 0.35),
-    0 12px 28px -12px rgb(0 0 0 / 0.55);
-  transition: border-color 300ms var(--ease-expo),
-              box-shadow 300ms var(--ease-expo),
-              transform 300ms var(--ease-expo);
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 4px 10px -6px rgb(0 0 0 / 0.45);
+  /* transform and border-color only: both are cheap. box-shadow is not
+     compositable, so transitioning it here meant every hover repainted the
+     card and its shadow area. */
+  transition: transform 220ms var(--ease-expo),
+              border-color 220ms var(--ease-expo);
   &:hover {
     border-color: var(--hairline-strong);
     transform: translateY(-2px);
-    box-shadow:
-      inset 0 1px 0 0 rgb(255 255 255 / 0.07),
-      0 4px 8px rgb(0 0 0 / 0.4),
-      0 22px 44px -16px rgb(0 0 0 / 0.62);
   }
 }
 
@@ -445,8 +438,8 @@
   border-radius: var(--radius);
   box-shadow:
     inset 0 1px 0 0 rgb(255 255 255 / 0.06),
-    0 2px 4px rgb(0 0 0 / 0.35),
-    0 18px 40px -18px rgb(255 107 26 / 0.28);
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 6px 16px -8px rgb(255 107 26 / 0.3);
 }
 
 @utility rule-t { border-top: 1px solid var(--hairline); }
@@ -454,14 +447,14 @@
 
 .shadow-elevate {
   box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.5),
-    0 8px 24px -8px rgb(0 0 0 / 0.6),
+    0 1px 2px rgb(0 0 0 / 0.45),
+    0 4px 12px -6px rgb(0 0 0 / 0.5),
     inset 0 1px 0 0 rgb(255 255 255 / 0.05);
 }
 .shadow-elevate-lg {
   box-shadow:
-    0 2px 4px rgb(0 0 0 / 0.5),
-    0 16px 40px -12px rgb(0 0 0 / 0.7),
+    0 2px 4px rgb(0 0 0 / 0.45),
+    0 8px 20px -8px rgb(0 0 0 / 0.55),
     inset 0 1px 0 0 rgb(255 255 255 / 0.06);
 }
 

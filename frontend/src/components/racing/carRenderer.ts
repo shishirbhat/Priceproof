@@ -471,6 +471,54 @@ function shade(hex: string, diffuse: number, specular: number): string {
   return out;
 }
 
+/**
+ * Cached studio backdrop.
+ *
+ * Keyed on the canvas size: the gradients only change when the element is
+ * resized, which is rare, so everything else reuses the same bitmap.
+ */
+let backdropCache: { key: string; canvas: HTMLCanvasElement } | null = null;
+
+function backdropFor(
+  width: number,
+  height: number,
+  cx: number,
+  cy: number,
+  S: number,
+  D: number,
+): HTMLCanvasElement {
+  const key = `${Math.round(width)}x${Math.round(height)}`;
+  if (backdropCache && backdropCache.key === key) return backdropCache.canvas;
+
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(width));
+  c.height = Math.max(1, Math.round(height));
+  const g = c.getContext("2d")!;
+
+  const bg = g.createRadialGradient(cx, cy - S * 0.16, S * 0.02, cx, cy, D * 1.02);
+  bg.addColorStop(0, "#8b9099");
+  bg.addColorStop(0.30, "#4a4e55");
+  bg.addColorStop(0.62, "#212429");
+  bg.addColorStop(1, "#08090a");
+  g.fillStyle = bg;
+  g.fillRect(0, 0, width, height);
+
+  const pool = g.createRadialGradient(cx, cy, S * 0.01, cx, cy, S * 0.62);
+  pool.addColorStop(0, "rgba(226,230,236,0.34)");
+  pool.addColorStop(0.5, "rgba(140,148,160,0.13)");
+  pool.addColorStop(1, "rgba(0,0,0,0)");
+  g.save();
+  g.translate(cx, cy);
+  g.scale(1, 0.26);
+  g.translate(-cx, -cy);
+  g.fillStyle = pool;
+  g.fillRect(0, cy - S * 0.7, width, S * 1.4);
+  g.restore();
+
+  backdropCache = { key, canvas: c };
+  return c;
+}
+
 export function renderCar(
   ctx: CanvasRenderingContext2D,
   mesh: CarMesh,
@@ -492,29 +540,14 @@ export function renderCar(
   const cosY = Math.cos(yaw);
   const sinY = Math.sin(yaw);
 
-  // Studio cyclorama.
-  const bg = ctx.createRadialGradient(cx, cy - S * 0.16, S * 0.02, cx, cy, D * 1.02);
-  bg.addColorStop(0, "#8b9099");
-  bg.addColorStop(0.30, "#4a4e55");
-  bg.addColorStop(0.62, "#212429");
-  bg.addColorStop(1, "#08090a");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, width, height);
-
   const floorY = cy;
 
-  // Floor pool.
-  const pool = ctx.createRadialGradient(cx, floorY, S * 0.01, cx, floorY, S * 0.62);
-  pool.addColorStop(0, "rgba(226,230,236,0.34)");
-  pool.addColorStop(0.5, "rgba(140,148,160,0.13)");
-  pool.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.save();
-  ctx.translate(cx, floorY);
-  ctx.scale(1, 0.26);
-  ctx.translate(-cx, -floorY);
-  ctx.fillStyle = pool;
-  ctx.fillRect(0, floorY - S * 0.7, width, S * 1.4);
-  ctx.restore();
+  // The cyclorama and the floor pool do not depend on yaw, so they are
+  // rendered once into an offscreen canvas and blitted from then on.
+  // Building two radial gradients and filling the full canvas twice on every
+  // frame — 60 times a second, at up to 2x device pixel ratio — was the
+  // single most expensive thing this hero did.
+  ctx.drawImage(backdropFor(width, height, cx, cy, S, D), 0, 0, width, height);
 
   // Contact shadows: one soft pool under each wheel. Without these the car
   // floats, which is most of what made the old render look like a viewport.
