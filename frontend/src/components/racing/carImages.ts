@@ -1,14 +1,33 @@
 /**
  * Car imagery, resolved from the filesystem at build time.
  *
- * Everything under `src/assets/cars/<id>/` is discovered by Vite's glob
- * import, hashed, and emitted as a normal build asset. Adding photography
- * is therefore a matter of dropping files into the right folder — there is
- * no manifest to keep in sync, and folders that stay empty simply resolve
- * to nothing, which is what makes the generated fallback kick in.
+ * Two sources, merged:
  *
- * See `src/assets/cars/README.md` for the folder convention.
+ * 1. Explicit imports of the segment hero photos below. These are bundled
+ *    unconditionally, so the welcome hero always has real photography even if
+ *    the glob scan below resolves nothing (a stale dev server that never
+ *    re-scanned after the files were added, an environment where the glob
+ *    misses, etc.). This is the guarantee.
+ * 2. Vite's glob import of everything else under `src/assets/cars/<id>/`, so
+ *    dropping additional per-car or per-segment folders still Just Works with
+ *    no manifest to maintain. See `src/assets/cars/README.md`.
+ *
+ * Explicit entries win, so a segment listed here is never doubled up by the
+ * glob also finding the same file.
  */
+
+import hatchbackHero from "@/assets/cars/hatchback/maruti-swift.jpg";
+import sedanHero from "@/assets/cars/sedan/honda-city.jpg";
+import suvHero from "@/assets/cars/suv/hyundai-creta.jpg";
+import luxuryHero from "@/assets/cars/luxury/mercedes-e-class.jpg";
+
+/** Guaranteed segment photography, bundled by explicit import. */
+const EXPLICIT: Record<string, string[]> = {
+  hatchback: [hatchbackHero],
+  sedan: [sedanHero],
+  suv: [suvHero],
+  luxury: [luxuryHero],
+};
 
 const MODULES = import.meta.glob<string>(
   "/src/assets/cars/*/*.{jpg,jpeg,png,webp,avif}",
@@ -25,6 +44,10 @@ for (const path of Object.keys(MODULES).sort()) {
   if (!id) continue;
   (BY_ID[id] ??= []).push(MODULES[path]);
 }
+
+// Explicit segment heroes take precedence, so the hero is guaranteed real
+// photography regardless of what the glob did (or didn't) resolve.
+Object.assign(BY_ID, EXPLICIT);
 
 /**
  * Frames for a car or segment id.
