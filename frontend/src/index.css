@@ -251,10 +251,14 @@
     --ease-66: cubic-bezier(0.66, 0, 0.01, 1);
     --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-    /* --- type scale -------------------------------------------------------- */
-    --display-1: clamp(2.6rem, 6.4svw, 5.4rem);
-    --display-2: clamp(2rem, 4.6svw, 3.6rem);
-    --display-3: clamp(1.6rem, 3.2svw, 2.5rem);
+    /* --- type scale --------------------------------------------------------
+       Sized up toward the references' actual hero scale — upvent.co runs its
+       headline at 10vw and racing.porsche.com fills the frame. Big, confident
+       display type is most of what makes those pages read as "premium" rather
+       than "admin panel". */
+    --display-1: clamp(3rem, 9svw, 8rem);
+    --display-2: clamp(2.4rem, 6svw, 5rem);
+    --display-3: clamp(1.7rem, 3.4svw, 2.7rem);
     --display-4: clamp(1.25rem, 2svw, 1.65rem);
 }
 
@@ -387,6 +391,32 @@
   :where(.label-mono, .label-mono-sm) { color: var(--label-3); }
   :where(.index-numeral) { color: var(--hot); }
   :where(.readout-unit) { color: var(--label-3); }
+}
+
+/* ---------------------------------------------------------------------------
+   Accent POP — the reference "hero" treatment
+   ---------------------------------------------------------------------------
+   upvent.co's signature headline is an orange gradient clipped to the text
+   with a two-tone glow behind it. Both effects paint exactly once (a static
+   gradient fill and a static drop-shadow), so they carry the "pop" the brief
+   keeps asking for without ever touching the per-frame raster path that the
+   profiling pass cleared. Reserve them for the pieces that should read first:
+   a hero figure, an eyebrow, one headline word.
+   ------------------------------------------------------------------------ */
+@utility text-hot-gradient {
+  background: linear-gradient(96deg, var(--hot-bright) 0%, var(--hot) 46%, var(--hot-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+/* Glow for gradient-clipped text: the fill is transparent, so text-shadow is
+   invisible — drop-shadow on the element itself is what shows. Static. */
+@utility hot-glow {
+  filter: drop-shadow(0 0 24px rgb(255 107 26 / 0.32));
+}
+@utility hot-glow-sm {
+  filter: drop-shadow(0 0 12px rgb(255 107 26 / 0.30));
 }
 
 /* ---------------------------------------------------------------------------

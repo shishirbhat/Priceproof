@@ -39,7 +39,9 @@ export function PageHeader({
               className="mb-4 flex items-center gap-3"
             >
               {index ? <span className="index-numeral">{index}</span> : null}
-              <span className="label-mono text-hot">{eyebrow}</span>
+              <span className="label-mono text-hot-gradient hot-glow-sm font-semibold">
+                {eyebrow}
+              </span>
             </motion.div>
           ) : null}
           <h1 className="display-2 text-foreground">{title}</h1>

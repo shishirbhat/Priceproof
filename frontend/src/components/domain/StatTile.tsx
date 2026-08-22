@@ -90,10 +90,17 @@ export function StatTile({
       </div>
 
       <div className="flex items-baseline gap-1.5">
-        <span className={cn("readout", isHot ? "text-hot" : "text-label-1")}>
+        <span
+          className={cn(
+            "readout",
+            isHot ? "text-hot-gradient hot-glow font-normal" : "text-label-1",
+          )}
+        >
           {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
         </span>
-        {unit ? <span className="readout-unit">{unit}</span> : null}
+        {unit ? (
+          <span className={cn("readout-unit", isHot && "text-hot")}>{unit}</span>
+        ) : null}
       </div>
 
       {hint ? (

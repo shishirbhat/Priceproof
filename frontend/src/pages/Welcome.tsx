@@ -164,13 +164,15 @@ export function Welcome() {
             {/* Keyed so switching segment remounts the copy. The headline is
                 the one thing on this page that must never depend on an
                 animation completing, so it carries none. */}
-            <div key={segment.id} className="max-w-xl">
+            <div key={segment.id} className="max-w-2xl">
                 <div className="flex items-center gap-3">
                   <span className="index-numeral">{String(active + 1).padStart(2, "0")}</span>
-                  <span className="label-mono text-label-2">{segment.name} segment</span>
+                  <span className="label-mono text-hot-gradient hot-glow-sm font-semibold">
+                    {segment.name} segment
+                  </span>
                 </div>
-                <h1 className="display-2 mt-5 text-label-1">{segment.headline}</h1>
-                <p className="mt-5 max-w-md text-[13.5px] leading-[1.65] text-label-2">
+                <h1 className="display-1 mt-5 text-hot-gradient hot-glow">{segment.headline}</h1>
+                <p className="mt-6 max-w-md text-[14px] leading-[1.65] text-label-2">
                   {segment.note}
                 </p>
             </div>
