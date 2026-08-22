@@ -78,7 +78,6 @@ export function ScraperHealth() {
         </motion.div>
 
         <StatTile
-          index="01"
           label="Collections run"
           value={collections.data?.length ?? "—"}
           icon={<Layers className="h-3.5 w-3.5" />}
@@ -86,7 +85,6 @@ export function ScraperHealth() {
           delay={0.05}
         />
         <StatTile
-          index="02"
           label="Fields tracked"
           value={latestCoverageByField.length || "—"}
           icon={<ListTree className="h-3.5 w-3.5" />}
