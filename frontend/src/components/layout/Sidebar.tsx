@@ -104,7 +104,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                     <motion.span
                       layoutId="sidebar-active-bar"
                       className="absolute top-1/2 left-0 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-hot"
-                      style={{ boxShadow: "0 0 14px 1px var(--hot-glow)" }}
+                      
                       transition={SPRING_SNAP}
                     />
                   )}

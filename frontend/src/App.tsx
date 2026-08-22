@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Layout } from "@/components/layout/Layout";
 import { ErrorBoundary } from "@/components/domain/ErrorBoundary";
 import { LoadingState } from "@/components/domain/QueryState";
+import { FpsBadge } from "@/components/domain/FpsBadge";
 
 // Route-level code splitting — the chart stack (bklit/visx) and the
 // landing page's canvas/anime.js hero are each only downloaded once their
@@ -70,13 +71,17 @@ function DashboardRoutes() {
 
 export default function App() {
   return (
-    <Suspense fallback={<PageFallback />}>
-      <Routes>
-        <Route path="/welcome" element={<Welcome />} />
-        <Route path="/welcome/classic" element={<Landing />} />
-        <Route path="/racing" element={<RacingHome />} />
-        <Route path="/*" element={<DashboardRoutes />} />
-      </Routes>
-    </Suspense>
+    <>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/welcome/classic" element={<Landing />} />
+          <Route path="/racing" element={<RacingHome />} />
+          <Route path="/*" element={<DashboardRoutes />} />
+        </Routes>
+      </Suspense>
+      {/* Compiled out of production by the import.meta.env.DEV guard. */}
+      <FpsBadge />
+    </>
   );
 }

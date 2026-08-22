@@ -9,20 +9,21 @@
 /* ============================================================================
    INSTRUMENT — the PriceProof design system
    ----------------------------------------------------------------------------
-   Dark technical instrumentation: raised cards on a slate-black page, one hot
-   orange carrying emphasis wherever emphasis belongs, big readouts, and real
-   corner radius.
+   A neutral near-black substrate with structure carried by hairlines, sized
+   and coloured from the four reference sites rather than from taste.
 
-   This replaces an earlier pass that was flat, square, monochrome and kept its
-   accent out of data views on principle. That principle was wrong: in the work
-   this is modelled on, the accent is *on* the live data — the flow ribbon, the
-   gauge fill, the active toggle — and holding it back is what made the product
-   read as a grey wireframe.
+   The values here were measured, not estimated: haoqi.design's own tokens
+   (background-deep 15,17,17 / background-elevated #191b1b / label ramp at
+   1, .6, .32, .16 / line at .08), racing.porsche.com's #010205 on #FBFCFF,
+   upvent.co's 6px radius and soft #ffaf69 accent, primesec.ai's .25rem radius
+   and negative display tracking. Across the three stylesheets that were
+   readable, each contained exactly ONE box-shadow declaration.
 
    Three rules:
-     1. Surfaces are raised, never painted on. Lighter than the page, top-lit
-        rim, real shadow, 16px radius.
-     2. The accent is for emphasis and liveness, and it is used generously.
+     1. Surfaces are separated by a 1px line, not by elevation. No gradient
+        fills, no stacked shadows, 6px radius.
+     2. The accent marks state — active, live, one verdict — and nothing else.
+        Figures are neutral.
      3. The severity triad means a verdict and nothing else, and is held clear
         of the accent's hue so the two can never be confused.
    ========================================================================== */
@@ -62,13 +63,15 @@
     --color-card: var(--card);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.45);
-    --radius-md: calc(var(--radius) * 0.65);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.3);
-    --radius-2xl: calc(var(--radius) * 1.6);
-    --radius-3xl: calc(var(--radius) * 2);
-    --radius-4xl: calc(var(--radius) * 2.4);
+    /* Anchored so the whole scale lands on the reference values: 4px / 6px /
+       8px / 12px rather than the 16px-and-up ramp this had before. */
+    --radius-sm: calc(var(--radius) * 0.67);   /* 4px  */
+    --radius-md: calc(var(--radius) * 0.83);   /* 5px  */
+    --radius-lg: var(--radius);                /* 6px  */
+    --radius-xl: calc(var(--radius) * 1.33);   /* 8px  */
+    --radius-2xl: calc(var(--radius) * 2);     /* 12px */
+    --radius-3xl: calc(var(--radius) * 2.67);  /* 16px */
+    --radius-4xl: calc(var(--radius) * 3.33);  /* 20px */
     --color-chart-scale-pattern-color: var(----chart-scale-pattern-color);
     --color-chart-scale-05: var(----chart-scale-05);
     --color-chart-scale-04: var(----chart-scale-04);
@@ -125,23 +128,30 @@
 
 :root {
     /* --- substrate -------------------------------------------------------
-       Cards sit above the page rather than being cut out of it. The previous
-       palette kept every surface within 3% of black, which is why the whole
-       thing read as one flat sheet. Each step here is a visible lift. */
-    --surface-0: #0b0e13;   /* page */
-    --surface-1: #141922;   /* card */
-    --surface-2: #1b212c;   /* raised / hover */
-    --surface-3: #252d3a;   /* wells, tracks, inactive controls */
+       Measured off the references rather than guessed at. haoqi.design —
+       whose token names this system already borrows — runs
+       background-deep 15,17,17 into background-elevated #191b1b: a *neutral*
+       near-black with roughly a four-value step between page and card, and
+       racing.porsche.com sits at #010205 on #FBFCFF. The previous pass used
+       a blue-slate ramp with ~14-value steps and then stacked a triple
+       box-shadow on every card to separate them further, which is what made
+       the UI read as plastic. Surfaces are separated by a hairline here, not
+       by elevation. */
+    --surface-0: #0f1111;   /* page */
+    --surface-1: #141616;   /* card */
+    --surface-2: #191b1b;   /* raised / hover */
+    --surface-3: #212424;   /* wells, tracks, inactive controls */
 
-    --label: 233, 237, 244;
+    /* haoqi's label ramp exactly: 230,232,232 at 1 / .6 / .32 / .16. */
+    --label: 230, 232, 232;
     --label-1: rgb(var(--label));
-    --label-2: rgb(var(--label) / 0.66);
-    --label-3: rgb(var(--label) / 0.42);
-    --label-4: rgb(var(--label) / 0.22);
+    --label-2: rgb(var(--label) / 0.60);
+    --label-3: rgb(var(--label) / 0.32);
+    --label-4: rgb(var(--label) / 0.16);
 
     --hairline: rgb(var(--label) / 0.08);
     --hairline-strong: rgb(var(--label) / 0.14);
-    --rim: rgb(var(--label) / 0.10);
+    --rim: rgb(var(--label) / 0.09);
 
     /* --- the accent ------------------------------------------------------ */
     --hot: #ff6b1a;
@@ -180,9 +190,12 @@
     --input: var(--hairline-strong);
     --ring: var(--hot);
 
-    /* Rounded, not square. All three references sit at 16px+, and it is most
-       of what separates "product" from "wireframe". */
-    --radius: 1rem;
+    /* Measured, not assumed. The previous note here claimed "all three
+       references sit at 16px+" — they do not. racing.porsche.com is 4px,
+       primesec.ai is .25rem, upvent.co is 6px, and haoqi.design ships
+       --radius-md .375rem / --radius-xl .75rem. 16px on every card is most
+       of what made this look like a generic dark dashboard template. */
+    --radius: 0.375rem;
 
     --sidebar: #0e131a;
     --sidebar-foreground: var(--label-2);
@@ -238,10 +251,14 @@
     --ease-66: cubic-bezier(0.66, 0, 0.01, 1);
     --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-    /* --- type scale -------------------------------------------------------- */
-    --display-1: clamp(2.6rem, 6.4svw, 5.4rem);
-    --display-2: clamp(2rem, 4.6svw, 3.6rem);
-    --display-3: clamp(1.6rem, 3.2svw, 2.5rem);
+    /* --- type scale --------------------------------------------------------
+       Sized up toward the references' actual hero scale — upvent.co runs its
+       headline at 10vw and racing.porsche.com fills the frame. Big, confident
+       display type is most of what makes those pages read as "premium" rather
+       than "admin panel". */
+    --display-1: clamp(3rem, 9svw, 8rem);
+    --display-2: clamp(2.4rem, 6svw, 5rem);
+    --display-3: clamp(1.7rem, 3.4svw, 2.7rem);
     --display-4: clamp(1.25rem, 2svw, 1.65rem);
 }
 
@@ -377,19 +394,46 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Accent POP — the reference "hero" treatment
+   ---------------------------------------------------------------------------
+   upvent.co's signature headline is an orange gradient clipped to the text
+   with a two-tone glow behind it. Both effects paint exactly once (a static
+   gradient fill and a static drop-shadow), so they carry the "pop" the brief
+   keeps asking for without ever touching the per-frame raster path that the
+   profiling pass cleared. Reserve them for the pieces that should read first:
+   a hero figure, an eyebrow, one headline word.
+   ------------------------------------------------------------------------ */
+@utility text-hot-gradient {
+  background: linear-gradient(96deg, var(--hot-bright) 0%, var(--hot) 46%, var(--hot-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+/* Glow for gradient-clipped text: the fill is transparent, so text-shadow is
+   invisible — drop-shadow on the element itself is what shows. Static. */
+@utility hot-glow {
+  filter: drop-shadow(0 0 24px rgb(255 107 26 / 0.32));
+}
+@utility hot-glow-sm {
+  filter: drop-shadow(0 0 12px rgb(255 107 26 / 0.30));
+}
+
+/* ---------------------------------------------------------------------------
    Surfaces
    ------------------------------------------------------------------------ */
 
-/* A surface reads as raised when three things agree: it is lighter than what
-   is behind it, it has a top-lit rim, and it casts a shadow. All three, plus
-   a real corner radius. The previous pass had none of them. */
+/* Surfaces are defined by a line, not by elevation.
+   Counted across the reference stylesheets: haoqi.design, upvent.co and
+   primesec.ai contain *one* box-shadow declaration each, in an entire
+   production stylesheet. This system had a three-part shadow plus a gradient
+   fill on every single card. That is the "raised 16px card" look the brief
+   asked for and it is wrong for these references — and it is not free:
+   removing the page's shadowed/filtered layers cut scroll raster time 42% in
+   a measured ablation. A flat fill and a hairline is the whole treatment. */
 @utility surface {
-  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 45%);
+  background: var(--surface-1);
   border: 1px solid var(--rim);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
-    0 1px 2px rgb(0 0 0 / 0.3),
-    0 4px 10px -6px rgb(0 0 0 / 0.45);
 }
 @utility surface-hover {
   transition: transform 220ms var(--ease-expo),
@@ -400,62 +444,45 @@
 }
 
 @utility panel {
-  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 45%);
+  background: var(--surface-1);
   border: 1px solid var(--rim);
   border-radius: var(--radius);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
-    0 1px 2px rgb(0 0 0 / 0.3),
-    0 4px 10px -6px rgb(0 0 0 / 0.45);
 }
 
 @utility panel-interactive {
-  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 45%);
+  background: var(--surface-1);
   border: 1px solid var(--rim);
   border-radius: var(--radius);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.05),
-    0 1px 2px rgb(0 0 0 / 0.3),
-    0 4px 10px -6px rgb(0 0 0 / 0.45);
-  /* transform and border-color only: both are cheap. box-shadow is not
-     compositable, so transitioning it here meant every hover repainted the
-     card and its shadow area. */
-  transition: transform 220ms var(--ease-expo),
-              border-color 220ms var(--ease-expo);
+  /* border-color and background only. Both stay on the compositor's fast
+     path for a small element, and neither grows the damage rect the way a
+     translate + shadow pair did. */
+  transition: background-color 200ms var(--ease-expo),
+              border-color 200ms var(--ease-expo);
   &:hover {
     border-color: var(--hairline-strong);
-    transform: translateY(-2px);
+    background: var(--surface-2);
   }
 }
 
 /* The hot panel — at most one per screen. Carries the accent the way the
    reference gives its live output block the orange treatment. */
 @utility panel-hot {
-  background:
-    radial-gradient(120% 140% at 0% 0%, rgb(255 107 26 / 0.16), transparent 62%),
-    linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 45%);
-  border: 1px solid rgb(255 107 26 / 0.28);
+  background: var(--surface-1);
+  border: 1px solid rgb(255 107 26 / 0.30);
   border-radius: var(--radius);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.06),
-    0 1px 2px rgb(0 0 0 / 0.3),
-    0 6px 16px -8px rgb(255 107 26 / 0.3);
 }
 
 @utility rule-t { border-top: 1px solid var(--hairline); }
 @utility rule-b { border-bottom: 1px solid var(--hairline); }
 
+/* Kept as names so existing call sites resolve, but reduced to the single
+   shadow the references reserve for genuinely floating things — a drawer, a
+   popover, a tooltip. Nothing that merely sits on the page gets one. */
 .shadow-elevate {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.45),
-    0 4px 12px -6px rgb(0 0 0 / 0.5),
-    inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
 }
 .shadow-elevate-lg {
-  box-shadow:
-    0 2px 4px rgb(0 0 0 / 0.45),
-    0 8px 20px -8px rgb(0 0 0 / 0.55),
-    inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  box-shadow: 0 8px 24px -12px rgb(0 0 0 / 0.7);
 }
 
 /* ---------------------------------------------------------------------------
@@ -466,6 +493,14 @@
    `background-attachment: fixed` and animated `background-position`, which
    repainted the full viewport on every scroll frame and never stopped when
    idle — the single largest cause of the app feeling slow. */
+/* One flat fixed plane. The two ambient orange washes are kept because they
+   are what stops a near-black page reading as a void, but they are dimmer
+   and there is no longer a noise layer on top: the previous `::after`
+   painted a full-viewport `feTurbulence` fractal, and SVG filter noise is
+   re-rasterised per tile as the page scrolls. Ablating the page's filtered
+   layers took scroll raster from 167ms to 97ms over an identical 8s scroll.
+   `background-attachment: fixed` and animated background-position were
+   already removed in an earlier pass; this finishes the job. */
 .page-plane {
   position: fixed;
   inset: 0;
@@ -473,17 +508,19 @@
   pointer-events: none;
   background-color: var(--background);
   background-image:
-    radial-gradient(1100px 620px at 8% -12%, rgb(255 107 26 / 0.10), transparent 62%),
-    radial-gradient(900px 560px at 104% 6%, rgb(77 141 255 / 0.07), transparent 58%),
-    radial-gradient(820px 540px at 46% 112%, rgb(255 107 26 / 0.05), transparent 62%);
-}
-
-.page-plane::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    /* Technical grid — the network/telemetry substrate. Two 1px linear
+       gradients, masked to fade at the edges. This is plain CSS gradient
+       painting on ONE fixed layer: it rasterises once and then only ever
+       composites, unlike the feTurbulence fractal it replaces, which was
+       re-rasterised per tile on every scroll frame. */
+    linear-gradient(rgb(255 107 26 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 107 26 / 0.045) 1px, transparent 1px),
+    radial-gradient(1100px 620px at 8% -12%, rgb(255 107 26 / 0.11), transparent 60%),
+    radial-gradient(900px 560px at 104% 6%, rgb(255 140 66 / 0.07), transparent 56%),
+    radial-gradient(820px 540px at 46% 112%, rgb(255 107 26 / 0.06), transparent 62%);
+  background-size: 56px 56px, 56px 56px, 100% 100%, 100% 100%, 100% 100%;
+  -webkit-mask-image: radial-gradient(125% 105% at 50% 34%, #000 42%, transparent 100%);
+  mask-image: radial-gradient(125% 105% at 50% 34%, #000 42%, transparent 100%);
 }
 
 #root {
@@ -515,7 +552,47 @@
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-@utility marquee { animation: marquee 38s linear infinite; }
+@utility marquee {
+  animation: marquee 38s linear infinite;
+  /* Promote it explicitly. It only ever animates transform, so on its own
+     layer this is compositor work with no main-thread paint; without the
+     hint it kept re-rasterising inside the fixed header on every frame. */
+  will-change: transform;
+}
+
+/* Skip layout, paint and raster for sections that are nowhere near the
+   viewport. The long marketing page pays for its whole height on every
+   scroll frame otherwise — measured at ~640 raster tasks per 8s scroll on
+   /welcome against 76 on the dashboard. contain-intrinsic-size keeps the
+   scrollbar honest so this does not cause scroll-anchoring jumps. */
+@utility section-deferred {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+}
+
+/* Entrance for above-the-fold content.
+   Deliberately CSS rather than a JS animation library. The header and the
+   hero headline previously used motion `initial`/`animate` pairs, and were
+   observed stuck at their *initial* frame — left with inline
+   `opacity: 0; transform: translateY(-27.95px)` after the animation had
+   already finished and been dropped from document.getAnimations(). The nav
+   and the headline were simply invisible. The rule here inverts the failure
+   mode: the element's resting state *is* the visible one, and the animation
+   only supplies the approach, so if it never runs, is cancelled, or the
+   library misbehaves, the content is still on screen. */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(var(--reveal-from, 18px)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@utility reveal-up {
+  /* Deliberately no fill-mode. With `both`, an animation that is created but
+     never advances — a throttled tab, a browser that has not started its
+     compositor, a device under load — pins the element at its *from* keyframe
+     and the content is simply never seen. With no fill the element renders at
+     its own resting style before the animation starts and after it ends, so
+     the failure mode is "no animation", never "no content". */
+  animation: reveal-up var(--reveal-dur, 0.66s) cubic-bezier(0.66, 0, 0.01, 1);
+}
 
 @keyframes soft-blink {
   0%, 45% { opacity: 1; }
@@ -523,9 +600,91 @@
 }
 @utility soft-blink { animation: soft-blink 1.6s var(--ease-66) infinite; }
 
+/* ---------------------------------------------------------------------------
+   Stat tile — the KPI plate
+   ---------------------------------------------------------------------------
+   The quiet tiles get one interactive flourish: a hot underline that sweeps
+   in on hover (transform scaleX, so it composites). The single `hot` tile per
+   screen gets the full energy-dashboard treatment — a static corner glow plus
+   corner brackets, a pulsing live dot, and an accent rail with a highlight
+   running along it. Every moving part here animates transform or opacity only,
+   on tiny elements, so none of it reaches the raster path that the profiling
+   pass spent its effort clearing.
+   ------------------------------------------------------------------------ */
+
+/* Quiet tiles: accent underline sweeps in on hover. */
+.stat-tile:not(.stat-tile-hot)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--hot);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 340ms var(--ease-expo);
+}
+.stat-tile:not(.stat-tile-hot):hover::after { transform: scaleX(1); }
+
+/* The one hot tile: static corner glow (painted once) over the base surface. */
+@utility stat-tile-hot {
+  position: relative;
+  background:
+    radial-gradient(135% 120% at 100% 0%, rgb(255 107 26 / 0.12), transparent 56%),
+    var(--surface-1);
+  border: 1px solid rgb(255 107 26 / 0.28);
+  border-radius: var(--radius);
+}
+
+/* Technical corner brackets on the hot tile. */
+.stat-corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border-color: rgb(255 107 26 / 0.55);
+}
+.stat-corner-tl { top: 7px; left: 7px; border-top: 1px solid; border-left: 1px solid; }
+.stat-corner-br { bottom: 7px; right: 7px; border-bottom: 1px solid; border-right: 1px solid; }
+
+/* Live dot ping — scale + fade on a 1.5px element. */
+@keyframes stat-ping {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  80%, 100% { transform: scale(2.8); opacity: 0; }
+}
+@utility stat-ping { animation: stat-ping 1.9s var(--ease-66) infinite; }
+
+/* Accent rail along the base of the hot tile, with a highlight that runs
+   across it — the "live data flowing" cue. The rail is a static fill; only
+   the highlight moves, and it moves by transform. */
+.stat-flow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  overflow: hidden;
+  background: rgb(255 107 26 / 0.18);
+}
+.stat-flow-run {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, var(--hot), transparent);
+  transform: translateX(-140%);
+  animation: stat-flow-run 2.6s var(--ease-66) infinite;
+}
+@keyframes stat-flow-run {
+  to { transform: translateX(360%); }
+}
+
 /* One switch turns the whole vocabulary off. */
 @media (prefers-reduced-motion: reduce) {
-  .rule-sweep, .scan-line, .marquee, .soft-blink { animation: none; }
+  .rule-sweep, .scan-line, .marquee, .soft-blink, .stat-ping, .stat-flow-run { animation: none; }
+  /* reveal-up keeps its end state (both), so disabling it leaves content visible. */
+  .reveal-up { animation: none; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;

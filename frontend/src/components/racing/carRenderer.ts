@@ -149,8 +149,12 @@ export const SILHOUETTES: Record<SilhouetteName, Silhouette> = {
  * at that density flat shading shows every facet. Density plus a specular
  * term is what turns the same geometry into something that looks rendered.
  */
-const RING = 30;
-const LONG_SAMPLES = 46;
+// The hero renders once and then sits idle (idleSpeed 0), so mesh density
+// costs a single frame rather than a per-frame budget. At 30x46 the body
+// showed visible quad faceting across the roof and a stair-stepped
+// glasshouse edge, which is most of what made the car read as a grey blob.
+const RING = 42;
+const LONG_SAMPLES = 60;
 
 /** Superellipse exponent. Higher is boxier; 3.2 reads as a car body. */
 const SECTION_N = 3.2;
@@ -406,7 +410,10 @@ export function buildCar(
       const j = (i + 1) % RING;
       if (rings[s][i][1] < spec.glassAbove * 1.06) continue;
       const pts = [rings[s][i], rings[s][j], rings[s + 1][j], rings[s + 1][i]];
-      polys.push({ pts, n: polyNormal(pts), color: "#0a0d12", gloss: 0.8 });
+      // Was #0a0d12 — so dark the greenhouse read as a hole punched through
+      // the car rather than as glass. Still the darkest panel, but now it
+      // takes a highlight.
+      polys.push({ pts, n: polyNormal(pts), color: "#151b26", gloss: 0.8 });
     }
   }
 

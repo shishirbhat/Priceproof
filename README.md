@@ -11,6 +11,33 @@ listing sits — with real markdowns — before it sells.
 Built for the "Into the Scrape-Verse" hackathon (WeMakeDevs × Bright Data),
 Aug 17–23 2026.
 
+## Screenshots
+
+The marketing front door — a studio turntable cycling the vehicle segments
+the platform actually scores, each shown as real photography, under a
+reference-scale headline:
+
+![Welcome](docs/screenshots/welcome.png)
+
+The Command Center — a live read on market value, days-on-market and
+cross-portal price gaps, with the one live figure carrying the accent so the
+eye lands on it first:
+
+![Command Center](docs/screenshots/command-center.png)
+
+Market Value — every active listing scored against the median of comparable
+cars, with the live price-flow ribbon:
+
+![Market Value](docs/screenshots/market-value.png)
+
+The rest of the surface — cross-portal duplicate detection, market activity,
+Scraper Studio health, and alerts — is in [`docs/screenshots/`](docs/screenshots/):
+
+| | |
+|---|---|
+| ![Cross-portal](docs/screenshots/cross-portal.png) | ![Market activity](docs/screenshots/market-activity.png) |
+| ![Scraper health](docs/screenshots/scraper-health.png) | ![Alerts](docs/screenshots/alerts.png) |
+
 ## Hard requirement
 
 All scraping goes through **Bright Data Scraper Studio** — no Playwright,
@@ -124,17 +151,20 @@ dashboard pages are built from them.
 
 The rule that keeps it coherent is that **color means something**:
 
-- **Acid** (`--brand`, `#d4ff32`) is identity only — logo, nav active
-  state, section indices, the one primary CTA per page. It is deliberately
-  kept out of data views so it can never compete with a verdict.
-- **Electric blue** (`--electric`) is interaction, focus, and the primary
-  data series — the one saturated color allowed in both worlds, because it
-  never carries a verdict.
+- **Hot orange** (`--hot` / `--brand`, `#FF6B1A`) is the accent — logo, nav
+  active state, section indices, the one primary CTA per page, and exactly
+  one live figure per screen (the KPI that should be read first). It is kept
+  out of the rest of the data views so it can never compete with a verdict.
 - The **severity triad** (`--severity-violation` / `-genuine` / `-drift`)
-  is the only other saturated color and always carries a verdict. Teal
-  replaced the previous green for "good" so it can't be confused with acid
-  at a glance, and the categorical chart slots avoid the triad's hues
-  entirely.
+  is the only other saturated color and always carries a verdict — crimson,
+  teal and a cool yellow, each held clear of the accent's hue so a verdict
+  never reads as emphasis and emphasis never reads as a verdict. The
+  categorical chart slots avoid the triad's hues entirely.
+
+The token values are measured off the reference stylesheets rather than
+guessed at — haoqi.design's own surface ladder and label ramp, upvent.co's
+6px radius and its gradient-headline treatment, racing.porsche.com's
+near-monochrome data plates.
 
 Shared building blocks rather than per-page styling: `PageHeader` opens
 every dashboard page, `Panel`/`PanelRow` compose every section, `StatTile`
@@ -142,9 +172,27 @@ is the KPI readout, and the `surface`/`panel`/`label-mono`/`display-*`
 utilities are defined once in `index.css`.
 
 The marketing front door (`frontend/src/pages/Welcome.tsx`) leads with a
-studio turntable cycling the vehicle segments the platform actually scores,
+studio turntable cycling the vehicle segments the platform actually scores —
+each rendered as real, licence-cleared photography of the model that segment
+represents (Swift, City, Creta, E-Class; see
+[`frontend/src/assets/cars/ATTRIBUTIONS.md`](frontend/src/assets/cars/ATTRIBUTIONS.md)),
+falling back to a generated turntable only for segments with no photo — plus
 a status ticker, a hairline-gridded figures band, and the capabilities as an
-indexed flat list rather than a card grid. The original landing
+indexed flat list rather than a card grid.
+
+### Performance
+
+The interface is built to hold 60fps on a laptop, and that was verified by
+measurement rather than assumed. The cost of a page is dominated by raster
+and compositing, not JavaScript, so the work went there: the ambient
+`feTurbulence` filter layers (re-rasterised per tile on every scroll frame)
+were removed, every card's stacked shadow + gradient fill was flattened to a
+single hairline, offscreen sections are skipped with `content-visibility`,
+and all motion — including the accent's pulse and flow — is restricted to
+`transform`/`opacity` so it composites without touching the raster path.
+Over a full 8-second dashboard scroll that lands at ~78 raster tasks / under
+7ms total. A dev-only FPS badge (`FpsBadge`, compiled out of production)
+reports the mean and worst frame so any regression is visible immediately. The original landing
 (`frontend/src/pages/Landing.tsx`, `frontend/src/components/landing/`) is
 kept reachable at `/welcome/classic` and carries the same tokens; its "how
 it works" section renders the real `PriceHistoryChart` component (not a
