@@ -31,7 +31,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <motion.div
           className="sticky top-0 z-30 flex items-center gap-3 px-4 py-3 transition-colors duration-300 sm:px-6 lg:px-10"
           style={{
-            background: scrolled ? "rgb(11 14 19)" : "transparent",
+            background: scrolled ? "var(--surface-0)" : "transparent",
             boxShadow: scrolled ? "inset 0 -1px 0 0 var(--hairline)" : "none",
           }}
           initial={{ y: -14, opacity: 0 }}

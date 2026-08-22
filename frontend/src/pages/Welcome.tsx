@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { Turntable } from "@/components/racing/Turntable";
 import { ArtTile } from "@/components/racing/ArtTile";
@@ -66,13 +66,17 @@ export function Welcome() {
       {/* ---------------------------------------------------------------- */}
       {/* Navigation — a flat bar that gains a hairline and a plane on
           scroll, rather than a floating pill. */}
-      <motion.header
+      {/* No entrance animation. This was a motion.header animating
+          opacity 0 -> 1 and y -28 -> 0, and it was observed sitting at that
+          initial frame — nav invisible — whenever the animation had been
+          created but not yet advanced. Above-the-fold chrome should not be
+          gated on an animation completing: there is no state in which a
+          visitor benefits from the primary navigation fading in, and every
+          failure mode of doing so costs them the navigation entirely. */}
+      <header
         className="fixed inset-x-0 top-0 z-40 transition-colors duration-300"
-        initial={{ y: -28, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: DUR.panel, ease: EASE_66 }}
         style={{
-          background: scrolled ? "rgb(11 14 19)" : "transparent",
+          background: scrolled ? "var(--surface-0)" : "transparent",
           boxShadow: scrolled ? "inset 0 -1px 0 0 var(--hairline)" : "none",
         }}
       >
@@ -99,7 +103,7 @@ export function Welcome() {
 
           <Link
             to="/"
-            className="group flex items-center gap-2 rounded-full bg-hot px-5 py-2.5 text-hot-foreground shadow-[0_6px_20px_-6px_var(--hot-glow)] transition-all duration-300 ease-[cubic-bezier(0.66,0,0.01,1)] hover:bg-hot-bright hover:shadow-[0_10px_28px_-6px_var(--hot-glow)]"
+            className="group flex items-center gap-2 rounded-sm bg-hot px-5 py-2.5 text-hot-foreground transition-colors duration-200 hover:bg-hot-bright"
           >
             <span className="font-mono text-[10px] font-medium tracking-[0.18em] uppercase">
               Open dashboard
@@ -123,7 +127,7 @@ export function Welcome() {
             ))}
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* ---------------------------------------------------------------- */}
       {/* Hero — the studio, cycling the segments the platform scores. */}
@@ -141,32 +145,44 @@ export function Welcome() {
           idleSpeed={0}
         />
 
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 pt-24 pb-28 text-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={segment.id}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: DUR.panel, ease: EASE_66 }}
-            >
-              <div className="flex items-center justify-center gap-3">
-                <span className="index-numeral">{String(active + 1).padStart(2, "0")}</span>
-                <span className="label-mono text-label-2">{segment.name} segment</span>
-              </div>
-              <h1 className="display-2 mx-auto mt-5 max-w-4xl text-label-1">{segment.headline}</h1>
-              <p className="mx-auto mt-6 max-w-md text-[13px] leading-[1.65] text-label-2">
-                {segment.note}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+        {/* A scrim that darkens the left third only, so the headline has
+            something to sit on and the car stays legible on the right. The
+            previous pass centred the type directly over the middle of the
+            car — the two fought each other and both lost. racing.porsche.com
+            and upvent.co both anchor their type low and to one side, in the
+            frame's negative space, and never across the subject. */}
+        <div
+          className="pointer-events-none absolute inset-0 z-10"
+          style={{
+            background:
+              "linear-gradient(100deg, rgb(15 17 17 / 0.92) 0%, rgb(15 17 17 / 0.72) 26%, rgb(15 17 17 / 0) 56%)",
+          }}
+        />
+
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-end px-4 pb-28 sm:px-6 lg:px-10 lg:pb-32">
+          <div className="mx-auto flex w-full max-w-[1600px]">
+            {/* Keyed so switching segment remounts the copy. The headline is
+                the one thing on this page that must never depend on an
+                animation completing, so it carries none. */}
+            <div key={segment.id} className="max-w-xl">
+                <div className="flex items-center gap-3">
+                  <span className="index-numeral">{String(active + 1).padStart(2, "0")}</span>
+                  <span className="label-mono text-label-2">{segment.name} segment</span>
+                </div>
+                <h1 className="display-2 mt-5 text-label-1">{segment.headline}</h1>
+                <p className="mt-5 max-w-md text-[13.5px] leading-[1.65] text-label-2">
+                  {segment.note}
+                </p>
+            </div>
+          </div>
         </div>
 
         {/* Segment switcher — the same segmented readout the dashboard uses
             for verdict filters, so the two halves share one control. */}
-        <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-8">
+        {/* Bottom-right, opposite the headline, so the two never collide. */}
+        <div className="absolute inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-8 sm:px-6 lg:justify-end lg:px-10">
           <div
-            className="panel flex gap-1 overflow-x-auto rounded-full p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="panel flex gap-1 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             role="tablist"
             aria-label="Vehicle segment"
           >
@@ -177,7 +193,7 @@ export function Welcome() {
                 role="tab"
                 aria-selected={i === active}
                 onClick={() => setActive(i)}
-                className={`relative shrink-0 rounded-full px-5 py-2.5 text-[12px] font-medium tracking-[0.06em] whitespace-nowrap uppercase outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-hot/50 ${
+                className={`relative shrink-0 rounded-sm px-5 py-2.5 text-[12px] font-medium tracking-[0.06em] whitespace-nowrap uppercase outline-none transition-colors duration-200 focus-visible:ring-1 focus-visible:ring-hot/50 ${
                   i === active ? "text-hot-foreground" : "text-label-3 hover:text-label-1"
                 }`}
               >
@@ -185,7 +201,7 @@ export function Welcome() {
                 {i === active && (
                   <motion.span
                     layoutId="segment-pill"
-                    className="absolute inset-0 -z-10 rounded-full bg-hot"
+                    className="absolute inset-0 -z-10 rounded-sm bg-hot"
                     transition={{ duration: DUR.micro, ease: EASE_EXPO }}
                   />
                 )}
@@ -197,7 +213,7 @@ export function Welcome() {
 
       {/* ---------------------------------------------------------------- */}
       {/* Figures band — four numbers, hairline-gridded. */}
-      <section className="px-4 sm:px-6 lg:px-10">
+      <section className="section-deferred px-4 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-[1600px]">
           <motion.div
             initial="hidden"
@@ -219,7 +235,7 @@ export function Welcome() {
       {/* ---------------------------------------------------------------- */}
       {/* Capabilities — an index, not a card grid. Each row is a full-width
           rule that lights up and pushes its arrow on hover. */}
-      <section id="capabilities" className="px-4 py-24 sm:px-6 lg:px-10 lg:py-36">
+      <section id="capabilities" className="section-deferred px-4 py-24 sm:px-6 lg:px-10 lg:py-36">
         <div className="mx-auto max-w-[1600px]">
           <motion.div
             initial="hidden"
@@ -280,7 +296,7 @@ export function Welcome() {
       {/* Method — the statement section, with the line-by-line word reveal. */}
       <section
         id="method"
-        className="relative isolate overflow-hidden px-4 py-28 sm:px-6 lg:px-10 lg:py-40"
+        className="section-deferred relative isolate overflow-hidden px-4 py-28 sm:px-6 lg:px-10 lg:py-40"
       >
         <div className="absolute inset-0 -z-10 opacity-30">
           <ArtTile id="method-band" tone={["#0f1111", "#1b2352"]} />
@@ -340,7 +356,7 @@ export function Welcome() {
           >
             <Link
               to="/"
-              className="group inline-flex items-center gap-3 rounded-full bg-hot px-7 py-4 text-hot-foreground shadow-[0_8px_28px_-6px_var(--hot-glow)] transition-all duration-300 ease-[cubic-bezier(0.66,0,0.01,1)] hover:bg-hot-bright hover:shadow-[0_14px_36px_-6px_var(--hot-glow)]"
+              className="group inline-flex items-center gap-3 rounded-sm bg-hot px-7 py-4 text-hot-foreground transition-colors duration-200 hover:bg-hot-bright"
             >
               <span className="font-mono text-[11px] font-medium tracking-[0.18em] uppercase">
                 Open the dashboard
@@ -352,7 +368,7 @@ export function Welcome() {
       </section>
 
       {/* ---------------------------------------------------------------- */}
-      <footer className="rule-t px-4 py-14 sm:px-6 lg:px-10">
+      <footer className="section-deferred rule-t px-4 py-14 sm:px-6 lg:px-10">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-end justify-between gap-8">
           <div>
             <span className="block font-mono text-[13px] font-medium tracking-[0.34em] text-label-1">

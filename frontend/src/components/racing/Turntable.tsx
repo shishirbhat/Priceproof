@@ -88,6 +88,7 @@ export function Turntable({
 
     const resize = () => {
       const r = wrap.getBoundingClientRect();
+      if (r.width === width && r.height === height) return;
       width = r.width;
       height = r.height;
       canvas.width = Math.round(width * dpr);
@@ -95,6 +96,12 @@ export function Turntable({
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Assigning canvas.width wipes the bitmap, so a resize is always
+      // followed by a repaint. Without this the hero goes black the moment
+      // anything resizes it — including ResizeObserver's own initial
+      // callback, which lands *after* the first paint below and left an
+      // idle (idleSpeed 0) turntable with nothing on screen ever again.
+      renderCar(ctx, meshRef.current, width, height, yaw.current, accentRef.current);
     };
     resize();
 
@@ -204,6 +211,20 @@ export function Turntable({
       canvas.removeEventListener("pointercancel", up);
     };
   }, []);
+
+  // Repaint when the car itself changes. An idle turntable never re-renders
+  // from the rAF loop by design, so switching segment would otherwise swap
+  // the mesh behind a canvas that is never drawn again.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const wrap = wrapRef.current;
+    if (!canvas || !wrap) return;
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return;
+    const r = wrap.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) return;
+    renderCar(ctx, mesh, r.width, r.height, yaw.current, paint.accent);
+  }, [mesh, paint.accent]);
 
   // Supplied photography always wins over generated geometry.
   if (frames && frames.length > 0) {

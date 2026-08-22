@@ -199,7 +199,7 @@ export function CommandCenter() {
               {rows.slice(0, 8).map((r) => (
                 <PanelRow key={r.listing_id}>
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="h-1.5 w-1.5 shrink-0 bg-severity-drift shadow-[0_0_8px_1px] shadow-severity-drift/50" />
+                    <span className="h-1.5 w-1.5 shrink-0 bg-severity-drift" />
                     <span className="truncate text-[13.5px] tracking-[-0.01em] text-label-1">
                       {r.title}
                     </span>
