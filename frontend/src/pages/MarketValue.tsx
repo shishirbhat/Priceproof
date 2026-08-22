@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, type MarketValueRow, type MarketVerdict } from "@/lib/api";
@@ -9,7 +9,7 @@ import { QueryState, ChartSkeleton, ListRowSkeleton } from "@/components/domain/
 import { PriceHistoryChart } from "@/components/domain/PriceHistoryChart";
 import { AnimatedNumber } from "@/components/domain/AnimatedNumber";
 import { formatCurrency } from "@/lib/format";
-import { motion } from "motion/react";
+import { motion, useInView } from "motion/react";
 import { DUR, EASE_EXPO, REVEAL_VIEWPORT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight, TrendingDown, Minus, TrendingUp, HelpCircle } from "lucide-react";
@@ -53,9 +53,22 @@ const VERDICT_NOTE: Record<
 };
 
 function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number }) {
+  const cardRef = useRef<HTMLElement>(null);
+
+  // This page renders one card per scored listing, and every card used to
+  // mount a full animated chart and fire its own history request the moment
+  // the page loaded. With the seeded catalogue that is 17 simultaneous
+  // requests and 17 visx charts, each with its own animation hooks — enough
+  // to bog down a laptop on a page where most cards are below the fold. Both
+  // the fetch and the chart now wait until the card is actually near the
+  // viewport, and `once` keeps it mounted after that so scrolling back up
+  // does not re-fetch.
+  const inView = useInView(cardRef, { once: true, margin: "300px 0px" });
+
   const history = useQuery({
     queryKey: ["market-value-history", row.listing_id],
     queryFn: () => api.marketValueHistory(row.listing_id),
+    enabled: inView,
   });
 
   const chartData = useMemo(() => {
@@ -77,6 +90,7 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
       whileInView={{ opacity: 1, y: 0 }}
       viewport={REVEAL_VIEWPORT}
       transition={{ duration: DUR.base, delay, ease: EASE_EXPO }}
+      ref={cardRef}
       className="panel rounded-lg"
     >
       <header className="relative flex items-start justify-between gap-4 px-6 py-5">
@@ -151,6 +165,9 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
           <span>{note.text(row)}</span>
         </div>
 
+        {!inView ? (
+          <ChartSkeleton />
+        ) : (
         <QueryState
           isLoading={history.isLoading}
           error={history.error}
@@ -167,6 +184,7 @@ function MarketValueDetail({ row, delay }: { row: MarketValueRow; delay: number 
             )
           }
         </QueryState>
+        )}
       </div>
     </motion.article>
   );
